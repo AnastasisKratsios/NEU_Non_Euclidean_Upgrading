@@ -9,6 +9,19 @@
 # In[ ]:
 
 
+# Grid-Search and CV
+from sklearn.model_selection import RandomizedSearchCV, KFold
+from keras.wrappers.scikit_learn import KerasRegressor
+from sklearn.pipeline import Pipeline
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+import os
+from pathlib import Path
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV, RepeatedStratifiedKFold
+
+
 # Data Structuring
 import numpy as np
 import pandas as pd
@@ -28,6 +41,7 @@ from scipy import linalg as scila
 
 # Tensorflow
 import tensorflow as tf
+from keras.utils.layer_utils import count_params
 import keras as K
 import keras.backend as Kb
 from keras.layers import *
@@ -42,6 +56,8 @@ from tensorflow.keras.optimizers import Adam
 # Operating-System Related
 import os
 from pathlib import Path
+import pickle
+from sklearn.externals import joblib
 
 # Visualization
 from matplotlib.pyplot import figure
@@ -49,6 +65,7 @@ from matplotlib.pyplot import figure
 # z_Misc
 import time
 import math
+
 
 
 
