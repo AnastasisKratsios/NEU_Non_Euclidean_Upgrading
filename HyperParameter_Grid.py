@@ -90,22 +90,22 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     param_grid_Vanilla_Nets = {'batch_size': [16],
-                               'epochs': [200],
+                               'epochs': [400],
                                'learning_rate': [0.0014],
-                               'height': [40],
-                               'depth': [2],
+                               'height': [200],
+                               'depth': [4],
                                'input_dim':[d],
                                'output_dim':[D]}
 
     param_grid_NEU_Nets = {'batch_size': [16],
-                           'epochs': [200],
+                           'epochs': [400],
                            'learning_rate': [0.0014],
-                           'height': [40],
-                           'depth': [1],
+                           'height': [200],
+                           'depth': [4],
                            'input_dim':[d],
                            'output_dim':[D],
-                           'feature_map_depth': [4],
-                           'readout_map_depth': [3]}
+                           'feature_map_depth': [10],
+                           'readout_map_depth': [1]}
                        
     # Random Forest Grid
     #--------------------#
