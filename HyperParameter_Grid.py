@@ -14,7 +14,7 @@ D = 1 # Dimension of Y
 # Training/Optimization Parameter(s) #
 #------------------------------------#
 # Robustness Parameter
-robustness_parameter = .005
+robustness_parameter = .05
 
 
 #---------------------------#
@@ -59,7 +59,7 @@ def unknown_f(x):
 # In[ ]:
 
 
-trial_run = True
+trial_run = False
 # This one is with larger height
 
 # This file contains the hyper-parameter grids used to train the imprinted-tree nets.
@@ -81,7 +81,7 @@ if trial_run == True:
     # Number of Jobs (Cores to use)
     n_jobs = 4
     # Number of Random CV Draws
-    n_iter = 1
+    n_iter = 5
     n_iter_trees = 1#20
     # Number of CV Folds
     CV_folds = 4
@@ -90,7 +90,7 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     param_grid_Vanilla_Nets = {'batch_size': [16],
-                               'epochs': [400],
+                               'epochs': [40],
                                'learning_rate': [0.0014],
                                'height': [200],
                                'depth': [4],
@@ -98,7 +98,7 @@ if trial_run == True:
                                'output_dim':[D]}
 
     param_grid_NEU_Nets = {'batch_size': [16],
-                           'epochs': [400],
+                           'epochs': [40],
                            'learning_rate': [0.0014],
                            'height': [200],
                            'depth': [4],
@@ -120,9 +120,9 @@ else:
     # Training Parameters
     #----------------------#
     # Number of Jobs (Cores to use)
-    n_jobs = 70
+    n_jobs = 3
     # Number of Random CV Draws
-    n_iter = 50
+    n_iter = 4
     n_iter_trees = 50
     # Number of CV Folds
     CV_folds = 4
@@ -130,21 +130,23 @@ else:
     
     # Model Parameters
     #------------------#
-    param_grid_Vanilla_Nets = {'batch_size': [16,32,64],
-                        'epochs': [200, 400, 800, 1000, 1200, 1400],
-                          'learning_rate': [0.0001,0.0005,0.005],
-                          'height': [100,200, 400, 600, 800],
-                           'depth': [1,2],
-                          'input_dim':[d],
-                           'output_dim':[D]}
+    param_grid_Vanilla_Nets = {'batch_size': [8,16,32],
+                               'epochs': [50,100,150,200],
+                               'learning_rate': [0.0014],
+                               'height': [200,400,800],
+                               'depth': [1,2,3,4],
+                               'input_dim':[d],
+                               'output_dim':[D]}
 
-    param_grid_Deep_Classifier = {'batch_size': [16,32,64],
-                        'epochs': [200, 400, 800, 1000, 1200, 1400],
-                        'learning_rate': [0.0001,0.0005,0.005, 0.01],
-                        'height': [100,200, 400, 500,600],
-                        'depth': [1,2,3,4],
-                        'input_dim':[d],
-                        'output_dim':[D]}
+    param_grid_NEU_Nets = {'batch_size': [8,16,32],
+                           'epochs': [50,100,150,200],
+                           'learning_rate': [0.0014],
+                           'height': [200,400,800],
+                           'depth': [1,2,3,4],
+                           'input_dim':[d],
+                           'output_dim':[D],
+                           'feature_map_depth': [1,5,10,15,20],
+                           'readout_map_depth': [1,2,5]}
                            
     # Random Forest Grid
     #--------------------#
