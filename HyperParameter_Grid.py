@@ -122,7 +122,7 @@ else:
     # Number of Jobs (Cores to use)
     n_jobs = 3
     # Number of Random CV Draws
-    n_iter = 4
+    n_iter = 8
     n_iter_trees = 50
     # Number of CV Folds
     CV_folds = 4
@@ -146,7 +146,7 @@ else:
                            'input_dim':[d],
                            'output_dim':[D],
                            'feature_map_depth': [1,5,10,15,20],
-                           'readout_map_depth': [1,2,5]}
+                           'readout_map_depth': [1]}
                            
     # Random Forest Grid
     #--------------------#
