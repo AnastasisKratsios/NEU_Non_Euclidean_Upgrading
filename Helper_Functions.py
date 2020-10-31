@@ -66,7 +66,7 @@ def Robust_MSE_ES(p):
 
 # #### The Tensorflow Version
 
-# In[3]:
+# In[1]:
 
 
 # Tensorflow Version (Formulation with same arg-minima)
@@ -88,24 +88,26 @@ def Entropic_Risk(y_true, y_pred):
 
 #     # Return Value
 #     return loss_out
-def Robust_MSE(y_true, y_pred):
-    # Initialize Loss
-    absolute_errors_eval = tf.math.abs((y_true - y_pred))
+def Robust_MSE(robustness_parameter=0.05):
+    def loss(y_true, y_pred):
+        # Initialize Loss
+        absolute_errors_eval = tf.math.abs((y_true - y_pred))
 
-    # Compute Exponential        
-    loss_out_expweights = tf.math.exp(robustness_parameter*absolute_errors_eval)
-    loss_out_expweights_totals = tf.math.reduce_sum(loss_out_expweights)
-    loss_out_weighted = loss_out_expweights/tf.math.reduce_sum(loss_out_expweights)
-    loss_out_weighted = loss_out_weighted*absolute_errors_eval
-    loss_out_weighted = tf.math.reduce_sum(loss_out_weighted)
+        # Compute Exponential        
+        loss_out_expweights = tf.math.exp(robustness_parameter*absolute_errors_eval)
+        loss_out_expweights_totals = tf.math.reduce_sum(loss_out_expweights)
+        loss_out_weighted = loss_out_expweights/tf.math.reduce_sum(loss_out_expweights)
+        loss_out_weighted = loss_out_weighted*absolute_errors_eval
+        loss_out_weighted = tf.math.reduce_sum(loss_out_weighted)
 
-    # Compute Average Loss
-    #loss_average = tf.math.reduce_mean(absolute_errors_eval)
+        # Compute Average Loss
+        #loss_average = tf.math.reduce_mean(absolute_errors_eval)
 
-    # Return Value
-    loss_out = loss_out_weighted# - loss_average
+        # Return Value
+        loss_out = loss_out_weighted# - loss_average
 
-    return loss_out
+        return loss_out
+    return loss
 
 
 # #### The Numpy Version
@@ -1730,7 +1732,7 @@ print('Deep Feature Builder - Ready')
 # In[ ]:
 
 
-def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth):
+def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, robustness_parameter):
     #--------------------------------------------------#
     # Build Regular Arch.
     #--------------------------------------------------#
@@ -1791,7 +1793,7 @@ def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_ma
     # Define Optimizer & Compile Archs.
     #----------------------------------#
     opt = Adam(lr=learning_rate)
-    trainable_layers_model.compile(optimizer=opt, loss=Robust_MSE, metrics=["mse", "mae", "mape"])
+    trainable_layers_model.compile(optimizer=opt, loss=Robust_MSE(0.05), metrics=["mse", "mae", "mape"])
 
     return trainable_layers_model
 

@@ -43,7 +43,7 @@ Height_per_reconfig = 20
 Train_step_proportion = .75 # (i.e.: ratio of train to test-set sizes)
 Extrapolation_size = .01 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
-N_data = 10**3 # (i.e.: N)
+N_data = 10**4 # (i.e.: N)
 # Noise Parameters
 noise_level = .5 # (i.e.: ε_i)
 Distortion = .1 # (i.e.: δ_i)
@@ -59,7 +59,7 @@ def unknown_f(x):
 # In[ ]:
 
 
-trial_run = False
+trial_run = True
 # This one is with larger height
 
 # This file contains the hyper-parameter grids used to train the imprinted-tree nets.
@@ -98,14 +98,15 @@ if trial_run == True:
                                'output_dim':[D]}
 
     param_grid_NEU_Nets = {'batch_size': [16],
-                           'epochs': [40],
+                           'epochs': [10],
                            'learning_rate': [0.0014],
-                           'height': [200],
-                           'depth': [4],
+                           'height': [20],
+                           'depth': [2],
                            'input_dim':[d],
                            'output_dim':[D],
-                           'feature_map_depth': [10],
-                           'readout_map_depth': [1]}
+                           'feature_map_depth': [2],
+                           'readout_map_depth': [1],
+                           'robustness_parameter': [0.05]}
                        
     # Random Forest Grid
     #--------------------#
@@ -146,7 +147,8 @@ else:
                            'input_dim':[d],
                            'output_dim':[D],
                            'feature_map_depth': [1,5,10,15,20],
-                           'readout_map_depth': [1]}
+                           'readout_map_depth': [1],
+                           'robustness_parameter': [100,50,10,1,0.5,0.1,0.005,0.0005,0.0001]}
                            
     # Random Forest Grid
     #--------------------#
