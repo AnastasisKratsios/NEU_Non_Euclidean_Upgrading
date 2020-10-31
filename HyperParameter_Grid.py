@@ -98,15 +98,15 @@ if trial_run == True:
                                'output_dim':[D]}
 
     param_grid_NEU_Nets = {'batch_size': [16],
-                           'epochs': [10],
+                           'epochs': [40],
                            'learning_rate': [0.0014],
-                           'height': [20],
+                           'height': [200],
                            'depth': [2],
                            'input_dim':[d],
                            'output_dim':[D],
                            'feature_map_depth': [2],
                            'readout_map_depth': [1],
-                           'robustness_parameter': [0.05]}
+                           'robustness_parameter': [100,0.05,0.0001,0]}
                        
     # Random Forest Grid
     #--------------------#

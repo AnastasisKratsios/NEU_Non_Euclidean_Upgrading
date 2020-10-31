@@ -1793,7 +1793,10 @@ def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_ma
     # Define Optimizer & Compile Archs.
     #----------------------------------#
     opt = Adam(lr=learning_rate)
-    trainable_layers_model.compile(optimizer=opt, loss=Robust_MSE(0.05), metrics=["mse", "mae", "mape"])
+    if robustness_parameter == 0:
+        trainable_layers_model.compile(optimizer=opt, loss='mae', metrics=["mse", "mae", "mape"])
+    else:
+        trainable_layers_model.compile(optimizer=opt, loss=Robust_MSE(robustness_parameter), metrics=["mse", "mae", "mape"])
 
     return trainable_layers_model
 
