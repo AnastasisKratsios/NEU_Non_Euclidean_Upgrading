@@ -104,9 +104,9 @@ if trial_run == True:
                            'depth': [2],
                            'input_dim':[d],
                            'output_dim':[D],
-                           'feature_map_depth': [2],
+                           'feature_map_depth': [3],
                            'readout_map_depth': [1],
-                           'robustness_parameter': [100,0.05,0.0001,0]}
+                           'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
                        
     # Random Forest Grid
     #--------------------#
