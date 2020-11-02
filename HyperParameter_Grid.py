@@ -14,7 +14,7 @@ D = 1 # Dimension of Y
 # Training/Optimization Parameter(s) #
 #------------------------------------#
 # Robustness Parameter
-robustness_parameter = .05
+# robustness_parameter = .05
 
 
 #---------------------------#
@@ -47,9 +47,6 @@ N_data = 10**4 # (i.e.: N)
 # Noise Parameters
 noise_level = .5 # (i.e.: ε_i)
 Distortion = .1 # (i.e.: δ_i)
-# Unknown Function:
-def unknown_f(x):
-    return -.1*x*np.sin(x) + .1*(x**2)*np.cos(x) + .9*x*np.exp(-np.abs(x)) + .5*np.sin(4*x + 3*x**2) + .8*np.cos(7*(x**2))+ (x % .5)
 
 
 
@@ -90,18 +87,18 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     param_grid_Vanilla_Nets = {'batch_size': [16],
-                               'epochs': [40],
+                               'epochs': [10],
                                'learning_rate': [0.0014],
-                               'height': [200],
+                               'height': [20],
                                'depth': [4],
                                'input_dim':[d],
                                'output_dim':[D]}
 
     param_grid_NEU_Nets = {'batch_size': [16],
-                           'epochs': [40],
+                           'epochs': [10],
                            'learning_rate': [0.0014],
-                           'height': [200],
-                           'depth': [2],
+                           'height': [10],
+                           'depth': [4],
                            'input_dim':[d],
                            'output_dim':[D],
                            'feature_map_depth': [3],

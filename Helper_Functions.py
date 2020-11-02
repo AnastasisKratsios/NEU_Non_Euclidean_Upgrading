@@ -469,219 +469,40 @@ class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
 # - Readout map version
 # - Constrained parametereized swish with $\beta \in \left[-\frac1{2},\frac1{2}\right]$.
 
+# #### Reconfiguration Feature-Version
+
+# *Lie Version:* $$
+# x \mapsto \exp\left(
+# %\psi(a\|x\|+b)
+# \operatorname{Skew}_d\left(
+#     F(\|x\|)
+# \right)
+# \right) x.
+# $$
+# 
+# *Cayley version:*
+# $$
+# \begin{aligned}
+# \operatorname{Cayley}(A(x)):\,x \mapsto & \left[(I_d + A(x))(I_d- A(x))^{-1}\right]x
+# \\
+# A(x)\triangleq &%\psi(a\|x\|+b)
+# \operatorname{Skew}_d\left(
+#     F(\|x\|)\right).
+# \end{aligned}
+# $$
+# 
+# Note that the inverse of the Cayley transform of $A(x)$ is:
+# $$
+# \begin{aligned}
+# \operatorname{Cayley}^{-1}(A(x)):\,x \mapsto & \left[(I_d - A(x))(I_d+ A(x))^{-1}\right]x
+# .
+# \end{aligned}
+# $$
+
 # In[35]:
 
 
 class Reconfiguration_unit_Feature(tf.keras.layers.Layer):
-    
-    def __init__(self, units=16, input_dim=32):
-        super(Reconfiguration_unit_Feature, self).__init__()
-        self.units = units
-    
-    def build(self, input_shape):
-        #------------------------------------------------------------------------------------#
-        # Center
-        #------------------------------------------------------------------------------------#
-        self.location = self.add_weight(name='location',
-                                    shape=(input_shape[-1],),
-                                    initializer='random_normal',
-                                    trainable=True)
-        
-        
-        #------------------------------------------------------------------------------------#
-        #====================================================================================#
-        #------------------------------------------------------------------------------------#
-        #====================================================================================#
-        #                                  Decay Rates                                       #
-        #====================================================================================#
-        #------------------------------------------------------------------------------------#
-        #====================================================================================#
-        #------------------------------------------------------------------------------------#
-        
-        
-        #------------------------------------------------------------------------------------#
-        # Bump Function
-        #------------------------------------------------------------------------------------#
-        self.sigma = self.add_weight(name='bump_threshfold',
-                                        shape=[1],
-                                        initializer=RandomUniform(minval=.5, maxval=1),
-                                        trainable=True,
-                                        constraint=tf.keras.constraints.NonNeg())
-        self.a = self.add_weight(name='bump_scale',
-                                        shape=[1],
-                                        initializer='ones',
-                                        trainable=True)
-        self.b = self.add_weight(name='bump_location',
-                                        shape=[1],
-                                        initializer='zeros',
-                                        trainable=True)
-        
-        #------------------------------------------------------------------------------------#
-        # Exponential Decay
-        #------------------------------------------------------------------------------------#
-        self.exponential_decay = self.add_weight(name='exponential_decay_rate',
-                                                 shape=[1],
-                                                 initializer=RandomUniform(minval=.5, maxval=1),
-                                                 trainable=True,
-                                                 constraint=tf.keras.constraints.NonNeg())
-        
-        #------------------------------------------------------------------------------------#
-        # Mixture
-        #------------------------------------------------------------------------------------#
-        self.m_w2 = self.add_weight(name='weight_exponential',
-                                         shape=[1],
-                                         initializer='zeros',
-                                         trainable=True,
-                                         constraint=tf.keras.constraints.NonNeg())
-        self.m_w3 = self.add_weight(name='bump',
-                                     shape=[1],
-                                     initializer=RandomUniform(minval=.5, maxval=1),
-                                     trainable=True,
-                                     constraint=tf.keras.constraints.NonNeg())
-        
-        #------------------------------------------------------------------------------------#
-        # Tangential Map
-        #------------------------------------------------------------------------------------#
-        self.Id = self.add_weight(name='Identity_Matrix',
-                                   shape=(input_shape[-1],input_shape[-1]),
-                                   initializer='identity',
-                                   trainable=False)
-
-        # Exponential Decay (Semi-Local)  
-        self.Tw2_b = self.add_weight(name='Tangential_Weights_2_b',
-                                   shape=((d**2),self.units),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        # Bump (Localizer)  
-        self.Tw2_c = self.add_weight(name='Tangential_Weights_2_c',
-                                   shape=((d**2),self.units),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        
-        
-        # Numerical Stability Parameter(s)
-        #----------------------------------#
-        self.num_stab_param = self.add_weight(name='weight_exponential',
-                                         shape=[1],
-                                         initializer='ones',
-                                         trainable=False,
-                                         constraint=tf.keras.constraints.NonNeg())
-        
-        # Wrap things up!
-        super().build(input_shape)
-
-    def bump_function(self, x):
-        return tf.math.exp(-self.sigma / (self.sigma - x))
-
-        
-    def call(self, input):
-        #------------------------------------------------------------------------------------#
-        # Initializations
-        #------------------------------------------------------------------------------------#
-        norm_inputs = tf.norm(input) #WLOG if norm is squared!
-        
-        #------------------------------------------------------------------------------------#
-        # Decay Rate Functions
-        #------------------------------------------------------------------------------------#
-        # Bump Function (Local Behaviour)
-        bump_input = self.a*norm_inputs + self.b
-        greater = tf.math.greater(bump_input, -self.sigma)
-        less = tf.math.less(bump_input, self.sigma)
-        condition = tf.logical_and(greater, less)
-
-        bump_decay = tf.where(
-            condition, 
-            self.bump_function(bump_input),
-            0.0)
-        
-        # Exponential Decay
-        exp_decay = tf.math.exp(-self.exponential_decay*norm_inputs)
-        
-        
-        
-        
-        #------------------------------------------------------------------------------------#
-        # Tangential Map
-        #------------------------------------------------------------------------------------#
-        # Build Radial, Tangent-Space Valued Function, i.e.: C(R^d,so_d) st. f(x)=f(y) if |x|=|y|
-        
-        
-        # Build Tangential Feed-Forward Network (Bonus)
-        #-----------------------------------------------#
-        # Exponential Decay
-        tangential_ffNN_b = norm_inputs*exp_decay*self.Id
-        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[(d**2),1])
-        tangential_ffNN_b = tf.linalg.matmul(self.Tw2_b,tangential_ffNN_b)
-        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[d,d])
-        
-        # Bump (Local Aspect)
-        tangential_ffNN_c = bump_decay*norm_inputs*self.Id
-        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[(d**2),1])
-        tangential_ffNN_c = tf.linalg.matmul(self.Tw2_c,tangential_ffNN_c)
-        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[d,d])
-    
-        # Map to Rotation-Matrix-Valued Function #
-        #----------------------------------------#
-        # No Decay
-        tangential_ffNN = (tf.transpose(tangential_ffNN) - tangential_ffNN) 
-        tangential_ffNN_b = (tf.transpose(tangential_ffNN_b) - tangential_ffNN_b) 
-        tangential_ffNN_c = (tf.transpose(tangential_ffNN_c) - tangential_ffNN_c) 
-        # Decay
-        tangential_ffNN = (self.m_w2*tangential_ffNN_b) + (self.m_w3*tangential_ffNN_c) 
-        
-        
-        # Map Infinitesimal Transformation to Matrix #
-        # ------------------------------------------ #
-        ## Initiality Numerical Stability
-        numerical_stabilizer = tf.eye(d)*(self.num_stab_param*10**(-4))
-        tangential_ffNN = tangential_ffNN + numerical_stabilizer
-#         rescaler = tf.norm(tangential_ffNN)
-#         tangential_ffNN = tangential_ffNN /rescaler
-        ## Map to Matrix
-        # Cayley Transformation (Stable):
-        tangential_ffNN = tf.linalg.matmul((self.Id + tangential_ffNN),tf.linalg.inv(self.Id - tangential_ffNN)) 
-        # Lie Parameterization (Numerically Unstable):  
-#         tangential_ffNN = tf.linalg.expm(tangential_ffNN)
-#         tangential_ffNN = tangential_ffNN * tf.math.log(rescaler)
-        
-        # Exponentiation and Action
-        #----------------------------#
-        x_out = tf.linalg.matvec(tangential_ffNN,input)
-        # Apply affine shift
-        x_out = x_out + self.location
-        
-        # Return Output
-        return x_out
-
-
-# In[ ]:
-
-
-class fullyConnected_Reconfiguration_Unit(tf.keras.layers.Layer):
-
-    def __init__(self, units=16, input_dim=32):
-        super(fullyConnected_Dense_Invertible, self).__init__()
-        self.units = units
-
-    def build(self, input_shape):
-        self.w = self.add_weight(name='Weights_ffNN',
-                                 shape=(input_shape[-1], input_shape[-1]),
-                                 initializer='zeros',
-                                 trainable=True)
-        self.b = self.add_weight(name='bias_ffNN',
-                                 shape=(self.units,),
-                                 initializer='zeros',
-                                 trainable=True)
-
-    def call(self, inputs):
-        expw = tf.linalg.expm(self.w)
-        return tf.matmul(inputs, expw) + self.b
-
-
-# In[36]:
-
-
-class Reconfiguration_unit_Readout(tf.keras.layers.Layer):
     
     def __init__(self, units=16, input_dim=32):
         super(Reconfiguration_unit_Feature, self).__init__()
@@ -757,22 +578,58 @@ class Reconfiguration_unit_Readout(tf.keras.layers.Layer):
         # Tangential Map
         #------------------------------------------------------------------------------------#
         self.Id = self.add_weight(name='Identity_Matrix',
-                                   shape=(input_shape[-1],input_shape[-1]),
+                                   shape=(d,d),
                                    initializer='identity',
                                    trainable=False)
-        # No Decay (Global)
+        # No Decay
+        self.Tw1 = self.add_weight(name='Tangential_Weights_1',
+                                   shape=(self.units,(d**2)),
+                                   initializer='GlorotUniform',
+                                   trainable=True)        
         self.Tw2 = self.add_weight(name='Tangential_Weights_2',
-                                   shape=(((D)**2),self.units),
+                                   shape=((d**2),self.units),
                                    initializer='GlorotUniform',
                                    trainable=True)
-        # Exponential Decay (Semi-Local)  
+        self.Tb1 = self.add_weight(name='Tangential_basies_1',
+                                   shape=((d**2),1),
+                                   initializer='GlorotUniform',
+                                   trainable=True)
+        self.Tb2 = self.add_weight(name='Tangential_basies_1',
+                                   shape=(d,d),
+                                   initializer='GlorotUniform',
+                                   trainable=True)
+        # Exponential Decay
+        self.Tw1_b = self.add_weight(name='Tangential_Weights_1_b',
+                           shape=(self.units,(d**2)),
+                           initializer='GlorotUniform',
+                           trainable=True)        
         self.Tw2_b = self.add_weight(name='Tangential_Weights_2_b',
-                                   shape=(((D)**2),self.units),
+                                   shape=((d**2),self.units),
                                    initializer='GlorotUniform',
                                    trainable=True)
-        # Bump (Localizer)  
+        self.Tb1_b = self.add_weight(name='Tangential_basies_1_b',
+                                   shape=((d**2),1),
+                                   initializer='GlorotUniform',
+                                   trainable=True)
+        self.Tb2_b = self.add_weight(name='Tangential_basies_1_b',
+                                   shape=(d,d),
+                                   initializer='GlorotUniform',
+                                   trainable=True)
+        # Bump
+        self.Tw1_c = self.add_weight(name='Tangential_Weights_1_c',
+                           shape=(self.units,(d**2)),
+                           initializer='GlorotUniform',
+                           trainable=True)        
         self.Tw2_c = self.add_weight(name='Tangential_Weights_2_c',
-                                   shape=(((D)**2),self.units),
+                                   shape=((d**2),self.units),
+                                   initializer='GlorotUniform',
+                                   trainable=True)
+        self.Tb1_c = self.add_weight(name='Tangential_basies_1_c',
+                                   shape=(((input_shape[-1])**2),1),
+                                   initializer='GlorotUniform',
+                                   trainable=True)
+        self.Tb2_c = self.add_weight(name='Tangential_basies_1_c',
+                                   shape=(d,d),
                                    initializer='GlorotUniform',
                                    trainable=True)
         
@@ -825,18 +682,39 @@ class Reconfiguration_unit_Readout(tf.keras.layers.Layer):
         
         
         # Build Tangential Feed-Forward Network (Bonus)
-        #-----------------------------------------------#        
+        #-----------------------------------------------#
+        # No Decay
+        tangential_ffNN = norm_inputs*self.Id
+        tangential_ffNN = tf.reshape(tangential_ffNN,[(d**2),1])
+        tangential_ffNN = tangential_ffNN + self.Tb1
+        
+        tangential_ffNN = tf.linalg.matmul(self.Tw1,tangential_ffNN)         
+        tangential_ffNN = tf.nn.relu(tangential_ffNN)
+        tangential_ffNN = tf.linalg.matmul(self.Tw2,tangential_ffNN)
+        tangential_ffNN = tf.reshape(tangential_ffNN,[d,d])
+        tangential_ffNN = tangential_ffNN + self.Tb2
+        
         # Exponential Decay
         tangential_ffNN_b = norm_inputs*exp_decay*self.Id
-        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[((D)**2),1])
+        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[(d**2),1])
+        tangential_ffNN_b = tangential_ffNN_b + self.Tb1_b
+        
+        tangential_ffNN_b = tf.linalg.matmul(self.Tw1_b,tangential_ffNN_b)         
+        tangential_ffNN_b = tf.nn.relu(tangential_ffNN_b)
         tangential_ffNN_b = tf.linalg.matmul(self.Tw2_b,tangential_ffNN_b)
-        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[(D),(D)])
+        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[d,d])
+        tangential_ffNN_b = tangential_ffNN_b + self.Tb2_b
         
         # Bump (Local Aspect)
         tangential_ffNN_c = bump_decay*norm_inputs*self.Id
-        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[((D)**2),1])
+        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[(d**2),1])
+        tangential_ffNN_c = tangential_ffNN_c + self.Tb1_c
+        
+        tangential_ffNN_c = tf.linalg.matmul(self.Tw1_c,tangential_ffNN_c)         
+        tangential_ffNN_c = tf.nn.relu(tangential_ffNN_c)
         tangential_ffNN_c = tf.linalg.matmul(self.Tw2_c,tangential_ffNN_c)
-        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[(D),(D)])
+        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[d,d])
+        tangential_ffNN_c = tangential_ffNN_c + self.Tb2_c
     
         # Map to Rotation-Matrix-Valued Function #
         #----------------------------------------#
@@ -846,157 +724,27 @@ class Reconfiguration_unit_Readout(tf.keras.layers.Layer):
         tangential_ffNN_c = (tf.transpose(tangential_ffNN_c) - tangential_ffNN_c) 
         # Decay
         tangential_ffNN = (self.m_w1*tangential_ffNN) + (self.m_w2*tangential_ffNN_b) + (self.m_w3*tangential_ffNN_c) 
-        
-        
-        # Map Infinitesimal Transformation to Matrix #
-        # ------------------------------------------ #
-        ## Initiality Numerical Stability
-        numerical_stabilizer = tf.eye(D)*(self.num_stab_param*10**(-4))
-        tangential_ffNN = tangential_ffNN + numerical_stabilizer
-#         rescaler = tf.norm(tangential_ffNN)
-#         tangential_ffNN = tangential_ffNN /rescaler
-        ## Map to Matrix
+            
+            
+        # NUMERICAL STABILIZER
+        tangential_ffNN = tangential_ffNN + tf.eye(d) *(self.num_stab_param*10**(-3))
         # Cayley Transformation (Stable):
-        tangential_ffNN = tf.linalg.matmul((self.Id + tangential_ffNN),tf.linalg.inv(self.Id - tangential_ffNN)) 
+#         tangential_ffNN = tf.linalg.matmul((self.Id + tangential_ffNN),tf.linalg.pinv(self.Id - tangential_ffNN)) 
         # Lie Parameterization (Numerically Unstable):  
-#         tangential_ffNN = tf.linalg.expm(tangential_ffNN)
+        tangential_ffNN = tf.linalg.expm(tangential_ffNN)
         
         # Exponentiation and Action
         #----------------------------#
-        x_out = tf.linalg.matvec(tangential_ffNN,input)
-        # Apply affine shift
-        x_out = x_out + self.location
+        x_out = tf.linalg.matvec(tangential_ffNN,input) + self.location
+#         x_out = tf.linalg.matvec(tangential_ffNN,input)
         
         # Return Output
         return x_out
 
 
-# $\sigma_{\operatorname{rescaled-swish-trainable}}:x\mapsto 2 \frac{x}{1+ \exp(-\beta x)};\qquad \beta \in [0,\infty)$.
+# #### Reconfiguration Readout-Version
 
-# In[ ]:
-
-
-class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
-
-    def __init__(self, units=16, input_dim=32):
-        super(fullyConnected_Dense_Invertible, self).__init__()
-        self.units = units
-
-    def build(self, input_shape):
-        self.Id = self.add_weight(name='Identity_Matrix',
-                                   shape=(input_shape[-1],input_shape[-1]),
-                                   initializer='identity',
-                                   trainable=False)
-        self.w = self.add_weight(name='Weights_ffNN',
-                                 shape=(input_shape[-1], input_shape[-1]),
-                                 initializer='zeros',
-                                 trainable=True)
-        self.b = self.add_weight(name='bias_ffNN',
-                                 shape=(self.units,),
-                                 initializer='zeros',
-                                 trainable=True)
-        # Numerical Stability Parameter(s)
-        #----------------------------------#
-        self.num_stab_param = self.add_weight(name='weight_exponential',
-                                         shape=[1],
-                                         initializer='ones',
-                                         trainable=False,
-                                         constraint=tf.keras.constraints.NonNeg())
-
-    def call(self, inputs):
-        ## Initiality Numerical Stability
-        numerical_stabilizer = tf.eye(D)*(self.num_stab_param*10**(-3))
-        expw_log = self.w + numerical_stabilizer
-#         rescaler = tf.norm(expw_log)
-        # Cayley Transform
-#         expw = tf.linalg.matmul((self.Id + self.w),tf.linalg.inv(self.Id - self.w)) 
-        # Lie Version
-#         expw_log = expw_log /rescaler
-        expw = tf.linalg.expm(expw_log)
-        return tf.matmul(inputs, expw) + self.b
-
-
-# In[ ]:
-
-
-class rescaled_swish_trainable(tf.keras.layers.Layer):
-    
-    def __init__(self, units=16, input_dim=32):
-        super(rescaled_swish_trainable, self).__init__()
-        self.units = units
-        
-    def build(self, input_shape):
-        self.relulevel = self.add_weight(name='relu_level',
-                                 shape=[1],
-                                 initializer='ones',
-                                 trainable=True,
-                                 constraint=tf.keras.constraints.MinMaxNorm(min_value=-0.5, max_value=0.5))
-    def call(self,inputs):
-        swish_numerator_rescaled = 2*inputs
-        parameter = self.relulevel
-        swish_denominator_trainable = tf.math.sigmoid(parameter*inputs)
-        swish_trainable_out = tf.math.multiply(swish_numerator_rescaled,swish_denominator_trainable)
-        return swish_trainable_out
-
-
-# #### Projection Layers
-# This layer maps $(x,y)\mapsto y$.
-
-# In[12]:
-
-
-projection_layer = tf.keras.layers.Lambda(lambda x: x[:, -D:])
-
-
-# ### Reconfiguration Unit
-# *Lie Version:* $$
-# x \mapsto \exp\left(
-# %\psi(a\|x\|+b)
-# \operatorname{Skew}_d\left(
-#     F(\|x\|)
-# \right)
-# \right) x.
-# $$
-# 
-# *Cayley version:*
-# $$
-# \begin{aligned}
-# \operatorname{Cayley}(A(x)):\,x \mapsto & \left[(I_d + A(x))(I_d- A(x))^{-1}\right]x
-# \\
-# A(x)\triangleq &%\psi(a\|x\|+b)
-# \operatorname{Skew}_d\left(
-#     F(\|x\|)\right).
-# \end{aligned}
-# $$
-# 
-# Note that the inverse of the Cayley transform of $A(x)$ is:
-# $$
-# \begin{aligned}
-# \operatorname{Cayley}^{-1}(A(x)):\,x \mapsto & \left[(I_d - A(x))(I_d+ A(x))^{-1}\right]x
-# .
-# \end{aligned}
-# $$
-
-# ---
-# ---
-# ---
-# ---
-# ---
-# ---
-# ---
-# ---
-# ---
-# ---
-
-# ### Archictecture Builders
-# This next snippet builds a (Vanilla) feed-forward network.
-# - **Inputs**: *Height, Depth, Learning Rate + Input/Output Dimension Specifications.*
-# 
-# #### Compiles Feed-forward network with usual MAE.
-
-# ### Readout Map Version
-
-# In[23]:
+# In[36]:
 
 
 class Reconfiguration_unit_Readout(tf.keras.layers.Layer):
@@ -1226,7 +974,7 @@ class Reconfiguration_unit_Readout(tf.keras.layers.Layer):
         # NUMERICAL STABILIZER
         tangential_ffNN = tangential_ffNN + tf.eye(D) *(self.num_stab_param*10**(-3))
         # Cayley Transformation (Stable):
-#         tangential_ffNN = tf.linalg.matmul((self.Id + tangential_ffNN),tf.linalg.inv(self.Id - tangential_ffNN)) 
+#         tangential_ffNN = tf.linalg.matmul((self.Id + tangential_ffNN),tf.linalg.pinv(self.Id - tangential_ffNN)) 
         # Lie Parameterization (Numerically Unstable):  
         tangential_ffNN = tf.linalg.expm(tangential_ffNN)
         
@@ -1239,143 +987,30 @@ class Reconfiguration_unit_Readout(tf.keras.layers.Layer):
         return x_out
 
 
-# ### Feature Map Version
+# #### Fully-connected Feed-forward layer with $GL_{d}$-connections
 
-# In[11]:
+# In[ ]:
 
 
-class Reconfiguration_unit_Feature(tf.keras.layers.Layer):
-    
+class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
+
     def __init__(self, units=16, input_dim=32):
-        super(Reconfiguration_unit_Feature, self).__init__()
+        super(fullyConnected_Dense_Invertible, self).__init__()
         self.units = units
-    
+
     def build(self, input_shape):
-        #------------------------------------------------------------------------------------#
-        # Center
-        #------------------------------------------------------------------------------------#
-        self.location = self.add_weight(name='location',
-                                    shape=(input_shape[-1],),
-                                    initializer='random_normal',
-                                    trainable=True)
-        
-        
-        #------------------------------------------------------------------------------------#
-        #====================================================================================#
-        #------------------------------------------------------------------------------------#
-        #====================================================================================#
-        #                                  Decay Rates                                       #
-        #====================================================================================#
-        #------------------------------------------------------------------------------------#
-        #====================================================================================#
-        #------------------------------------------------------------------------------------#
-        
-        
-        #------------------------------------------------------------------------------------#
-        # Bump Function
-        #------------------------------------------------------------------------------------#
-        self.sigma = self.add_weight(name='bump_threshfold',
-                                        shape=[1],
-                                        initializer=RandomUniform(minval=.5, maxval=1),
-                                        trainable=True,
-                                        constraint=tf.keras.constraints.NonNeg())
-        self.a = self.add_weight(name='bump_scale',
-                                        shape=[1],
-                                        initializer='ones',
-                                        trainable=True)
-        self.b = self.add_weight(name='bump_location',
-                                        shape=[1],
-                                        initializer='zeros',
-                                        trainable=True)
-        
-        #------------------------------------------------------------------------------------#
-        # Exponential Decay
-        #------------------------------------------------------------------------------------#
-        self.exponential_decay = self.add_weight(name='exponential_decay_rate',
-                                                 shape=[1],
-                                                 initializer=RandomUniform(minval=.5, maxval=1),
-                                                 trainable=True,
-                                                 constraint=tf.keras.constraints.NonNeg())
-        
-        #------------------------------------------------------------------------------------#
-        # Mixture
-        #------------------------------------------------------------------------------------#
-        self.m_w1 = self.add_weight(name='no_decay',
-                                         shape=[1],
-                                         initializer='zeros',
-                                         trainable=True,
-                                         constraint=tf.keras.constraints.NonNeg())
-        self.m_w2 = self.add_weight(name='weight_exponential',
-                                         shape=[1],
-                                         initializer='zeros',
-                                         trainable=True,
-                                         constraint=tf.keras.constraints.NonNeg())
-        self.m_w3 = self.add_weight(name='bump',
-                                     shape=[1],
-                                     initializer=RandomUniform(minval=.5, maxval=1),
-                                     trainable=True,
-                                     constraint=tf.keras.constraints.NonNeg())
-        
-        #------------------------------------------------------------------------------------#
-        # Tangential Map
-        #------------------------------------------------------------------------------------#
         self.Id = self.add_weight(name='Identity_Matrix',
-                                   shape=(d,d),
+                                   shape=(input_shape[-1],input_shape[-1]),
                                    initializer='identity',
                                    trainable=False)
-        # No Decay
-        self.Tw1 = self.add_weight(name='Tangential_Weights_1',
-                                   shape=(self.units,(d**2)),
-                                   initializer='GlorotUniform',
-                                   trainable=True)        
-        self.Tw2 = self.add_weight(name='Tangential_Weights_2',
-                                   shape=((d**2),self.units),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        self.Tb1 = self.add_weight(name='Tangential_basies_1',
-                                   shape=((d**2),1),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        self.Tb2 = self.add_weight(name='Tangential_basies_1',
-                                   shape=(d,d),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        # Exponential Decay
-        self.Tw1_b = self.add_weight(name='Tangential_Weights_1_b',
-                           shape=(self.units,(d**2)),
-                           initializer='GlorotUniform',
-                           trainable=True)        
-        self.Tw2_b = self.add_weight(name='Tangential_Weights_2_b',
-                                   shape=((d**2),self.units),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        self.Tb1_b = self.add_weight(name='Tangential_basies_1_b',
-                                   shape=((d**2),1),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        self.Tb2_b = self.add_weight(name='Tangential_basies_1_b',
-                                   shape=(d,d),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        # Bump
-        self.Tw1_c = self.add_weight(name='Tangential_Weights_1_c',
-                           shape=(self.units,(d**2)),
-                           initializer='GlorotUniform',
-                           trainable=True)        
-        self.Tw2_c = self.add_weight(name='Tangential_Weights_2_c',
-                                   shape=((d**2),self.units),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        self.Tb1_c = self.add_weight(name='Tangential_basies_1_c',
-                                   shape=((d**2),1),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        self.Tb2_c = self.add_weight(name='Tangential_basies_1_c',
-                                   shape=(d,d),
-                                   initializer='GlorotUniform',
-                                   trainable=True)
-        
-        
+        self.w = self.add_weight(name='Weights_ffNN',
+                                 shape=(input_shape[-1], input_shape[-1]),
+                                 initializer='zeros',
+                                 trainable=True)
+        self.b = self.add_weight(name='bias_ffNN',
+                                 shape=(self.units,),
+                                 initializer='zeros',
+                                 trainable=True)
         # Numerical Stability Parameter(s)
         #----------------------------------#
         self.num_stab_param = self.add_weight(name='weight_exponential',
@@ -1383,141 +1018,73 @@ class Reconfiguration_unit_Feature(tf.keras.layers.Layer):
                                          initializer='ones',
                                          trainable=False,
                                          constraint=tf.keras.constraints.NonNeg())
-        
-        # Wrap things up!
-        super().build(input_shape)
 
-    def bump_function(self, x):
-        return tf.math.exp(-self.sigma / (self.sigma - x))
+    def call(self, inputs):
+        ## Initiality Numerical Stability
+        numerical_stabilizer = tf.eye(D)*(self.num_stab_param*10**(-3))
+        expw_log = self.w + numerical_stabilizer
+#         rescaler = tf.norm(expw_log)
+        # Cayley Transform
+#         expw = tf.linalg.matmul((self.Id + self.w),tf.linalg.inv(self.Id - self.w)) 
+        # Lie Version
+#         expw_log = expw_log /rescaler
+        expw = tf.linalg.expm(expw_log)
+        return tf.matmul(inputs, expw) + self.b
 
-        
-    def call(self, input):
-        #------------------------------------------------------------------------------------#
-        # Initializations
-        #------------------------------------------------------------------------------------#
-        norm_inputs = tf.norm(input) #WLOG if norm is squared!
-        
-        #------------------------------------------------------------------------------------#
-        # Decay Rate Functions
-        #------------------------------------------------------------------------------------#
-        # Bump Function (Local Behaviour)
-        bump_input = self.a*norm_inputs + self.b
-        greater = tf.math.greater(bump_input, -self.sigma)
-        less = tf.math.less(bump_input, self.sigma)
-        condition = tf.logical_and(greater, less)
 
-        bump_decay = tf.where(
-            condition, 
-            self.bump_function(bump_input),
-            0.0)
-        
-        # Exponential Decay
-        exp_decay = tf.math.exp(-self.exponential_decay*norm_inputs)
-        
-        
-        
-        
-        #------------------------------------------------------------------------------------#
-        # Tangential Map
-        #------------------------------------------------------------------------------------#
-        # Build Radial, Tangent-Space Valued Function, i.e.: C(R^d,so_d) st. f(x)=f(y) if |x|=|y|
-        
-        
-        # Build Tangential Feed-Forward Network (Bonus)
-        #-----------------------------------------------#
-        # No Decay
-        tangential_ffNN = norm_inputs*self.Id
-        tangential_ffNN = tf.reshape(tangential_ffNN,[((d)**2),1])
-        tangential_ffNN = tangential_ffNN + self.Tb1
-        
-        tangential_ffNN = tf.linalg.matmul(self.Tw1,tangential_ffNN)         
-        tangential_ffNN = tf.nn.relu(tangential_ffNN)
-        tangential_ffNN = tf.linalg.matmul(self.Tw2,tangential_ffNN)
-        tangential_ffNN = tf.reshape(tangential_ffNN,[(d),(d)])
-        tangential_ffNN = tangential_ffNN + self.Tb2
-        
-        # Exponential Decay
-        tangential_ffNN_b = norm_inputs*exp_decay*self.Id
-        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[((d)**2),1])
-        tangential_ffNN_b = tangential_ffNN_b + self.Tb1_b
-        
-        tangential_ffNN_b = tf.linalg.matmul(self.Tw1_b,tangential_ffNN_b)         
-        tangential_ffNN_b = tf.nn.relu(tangential_ffNN_b)
-        tangential_ffNN_b = tf.linalg.matmul(self.Tw2_b,tangential_ffNN_b)
-        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[(d),(d)])
-        tangential_ffNN_b = tangential_ffNN_b + self.Tb2_b
-        
-        # Bump (Local Aspect)
-        tangential_ffNN_c = bump_decay*norm_inputs*self.Id
-        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[((d)**2),1])
-        tangential_ffNN_c = tangential_ffNN_c + self.Tb1_c
-        
-        tangential_ffNN_c = tf.linalg.matmul(self.Tw1_c,tangential_ffNN_c)         
-        tangential_ffNN_c = tf.nn.relu(tangential_ffNN_c)
-        tangential_ffNN_c = tf.linalg.matmul(self.Tw2_c,tangential_ffNN_c)
-        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[(d),(d)])
-        tangential_ffNN_c = tangential_ffNN_c + self.Tb2_c
+# $\sigma_{\operatorname{rescaled-swish-trainable}}:x\mapsto 2 \frac{x}{1+ \exp(-\beta x)};\qquad \beta \in [0,\infty)$.
+
+# In[ ]:
+
+
+class rescaled_swish_trainable(tf.keras.layers.Layer):
     
-        # Map to Rotation-Matrix-Valued Function #
-        #----------------------------------------#
-        # No Decay
-        tangential_ffNN = (tf.transpose(tangential_ffNN) - tangential_ffNN) 
-        tangential_ffNN_b = (tf.transpose(tangential_ffNN_b) - tangential_ffNN_b) 
-        tangential_ffNN_c = (tf.transpose(tangential_ffNN_c) - tangential_ffNN_c) 
-        # Decay
-        tangential_ffNN = (self.m_w1*tangential_ffNN) + (self.m_w2*tangential_ffNN_b) + (self.m_w3*tangential_ffNN_c) 
+    def __init__(self, units=16, input_dim=32):
+        super(rescaled_swish_trainable, self).__init__()
+        self.units = units
         
-        # Numerical Stability
-        tangential_ffNN = tangential_ffNN+ tf.eye(d)*(self.num_stab_param*10**(-3))
-            
-        # Cayley Transformation (Stable):
-        tangential_ffNN = tf.linalg.matmul((self.Id + tangential_ffNN),tf.linalg.inv(self.Id - tangential_ffNN)) 
-        # Lie Parameterization (Numerically Unstable):  
-#         tangential_ffNN = tf.linalg.expm(tangential_ffNN)
-        
-        # Exponentiation and Action
-        #----------------------------#
-        x_out = tf.linalg.matvec(tangential_ffNN,input) + self.location
-#         x_out = tf.linalg.matvec(tangential_ffNN,input)
-        
-        # Return Output
-        return x_out
-
-
-# #### Compiles Feed-forward network with Robust MSE.
-
-# In[32]:
-
-
-class Swish(tf.keras.layers.Layer):
-
-    def __init__(self, beta=1.0, trainable=True, **kwargs):
-        super(Swish, self).__init__(**kwargs)
-        self.supports_masking = True
-        self.beta = beta
-        self.trainable = trainable
-
     def build(self, input_shape):
-        self.beta_factor = K.variable(self.beta,
-                                      dtype=K.floatx(),
-                                      name='beta_factor')
-        if self.trainable:
-            self._trainable_weights.append(self.beta_factor)
+        self.relulevel = self.add_weight(name='relu_level',
+                                 shape=[1],
+                                 initializer='ones',
+                                 trainable=True,
+                                 constraint=tf.keras.constraints.MinMaxNorm(min_value=-0.5, max_value=0.5))
+    def call(self,inputs):
+        swish_numerator_rescaled = 2*inputs
+        parameter = self.relulevel
+        swish_denominator_trainable = tf.math.sigmoid(parameter*inputs)
+        swish_trainable_out = tf.math.multiply(swish_numerator_rescaled,swish_denominator_trainable)
+        return swish_trainable_out
 
-        super(Swish, self).build(input_shape)
 
-    def call(self, inputs, mask=None):
-        return swish(inputs, self.beta_factor)
+# #### Projection Layers
+# This layer maps $(x,y)\mapsto y$.
 
-    def get_config(self):
-        config = {'beta': self.get_weights()[0] if self.trainable else self.beta,
-                  'trainable': self.trainable}
-        base_config = super(Swish, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+# In[12]:
 
-    def compute_output_shape(self, input_shape):
-        return input_shape
 
+projection_layer = tf.keras.layers.Lambda(lambda x: x[:, -D:])
+
+
+# ---
+# ---
+# ---
+# ---
+# ---
+# ---
+# ---
+# ---
+# ---
+# ---
+
+# ### Reconfiguration Unit
+# 
+
+# ### Archictecture Builders
+# This next snippet builds a (Vanilla) feed-forward network.
+# - **Inputs**: *Height, Depth, Learning Rate + Input/Output Dimension Specifications.*
+# 
+# #### Compiles Feed-forward network with usual MAE.
 
 # ### Benchmark ffNNs
 
