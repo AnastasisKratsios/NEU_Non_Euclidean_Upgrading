@@ -86,19 +86,19 @@ if trial_run == True:
     
     # Model Parameters
     #------------------#
-    param_grid_Vanilla_Nets = {'batch_size': [16],
-                               'epochs': [100],
+    param_grid_Vanilla_Nets = {'batch_size': [8],
+                               'epochs': [5],
                                'learning_rate': [0.0014],
-                               'height': [100],
-                               'depth': [4],
+                               'height': [10],
+                               'depth': [1],
                                'input_dim':[d],
                                'output_dim':[D]}
 
-    param_grid_NEU_extra_parameters = {'feature_map_depth': [10],
-                                       'readout_map_depth': [5],
-                                       'feature_map_height': [20],
-                                       'readout_map_height': [20],
-                                       'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
+    param_grid_NEU_extra_parameters = {'feature_map_depth': [1],
+                                       'readout_map_depth': [1],
+                                       'feature_map_height': [1],
+                                       'readout_map_height': [1],
+                                       'robustness_parameter': [0.01]}
                        
     # Random Forest Grid
     #--------------------#
