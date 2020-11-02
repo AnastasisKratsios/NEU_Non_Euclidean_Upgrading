@@ -87,23 +87,16 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     param_grid_Vanilla_Nets = {'batch_size': [16],
-                               'epochs': [10],
+                               'epochs': [100],
                                'learning_rate': [0.0014],
-                               'height': [20],
+                               'height': [200],
                                'depth': [4],
                                'input_dim':[d],
                                'output_dim':[D]}
 
-    param_grid_NEU_Nets = {'batch_size': [16],
-                           'epochs': [10],
-                           'learning_rate': [0.0014],
-                           'height': [10],
-                           'depth': [4],
-                           'input_dim':[d],
-                           'output_dim':[D],
-                           'feature_map_depth': [3],
-                           'readout_map_depth': [1],
-                           'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
+    param_grid_NEU_extra_parameters = {'feature_map_depth': [10],
+                                       'readout_map_depth': [5],
+                                       'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
                        
     # Random Forest Grid
     #--------------------#
@@ -136,16 +129,9 @@ else:
                                'input_dim':[d],
                                'output_dim':[D]}
 
-    param_grid_NEU_Nets = {'batch_size': [8,16,32],
-                           'epochs': [50,100,150,200],
-                           'learning_rate': [0.0014],
-                           'height': [200,400,800],
-                           'depth': [1,2,3,4],
-                           'input_dim':[d],
-                           'output_dim':[D],
-                           'feature_map_depth': [1,5,10,15,20],
-                           'readout_map_depth': [1],
-                           'robustness_parameter': [100,50,10,1,0.5,0.1,0.005,0.0005,0.0001]}
+    param_grid_NEU_extra_parameters = {'feature_map_depth': [1,5,10,20,50],
+                                       'readout_map_depth': [1,5,10,25,50],
+                                       'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
                            
     # Random Forest Grid
     #--------------------#
@@ -155,3 +141,6 @@ else:
                        'n_estimators': [5, 10, 25, 50, 100, 200, 250]
                        }
                        
+        
+### Create NEU parameter disctionary by parameters joining model it is upgrading
+param_grid_NEU_extra_parameters = {**param_grid_Vanilla_Nets,**param_grid_NEU_extra_parameters}
