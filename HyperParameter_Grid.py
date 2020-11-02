@@ -41,9 +41,9 @@ Height_per_reconfig = 20
 #-------------------#
 # Test-set meta-parameters
 Train_step_proportion = .75 # (i.e.: ratio of train to test-set sizes)
-Extrapolation_size = .01 # (i.e.: size of test-train set domain (diameter/2))
+Extrapolation_size = .025 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
-N_data = 10**4 # (i.e.: N)
+N_data = 10**3 # (i.e.: N)
 # Noise Parameters
 noise_level = .5 # (i.e.: ε_i)
 Distortion = .1 # (i.e.: δ_i)
@@ -78,7 +78,7 @@ if trial_run == True:
     # Number of Jobs (Cores to use)
     n_jobs = 3
     # Number of Random CV Draws
-    n_iter = 2
+    n_iter = 1
     n_iter_trees = 1#20
     # Number of CV Folds
     CV_folds = 2
@@ -89,17 +89,19 @@ if trial_run == True:
     param_grid_Vanilla_Nets = {'batch_size': [8],
                                'epochs': [5],
                                'learning_rate': [0.0014],
-                               'height': [10],
+                               'height': [5],
                                'depth': [1],
                                'input_dim':[d],
                                'output_dim':[D]}
 
-    param_grid_NEU_extra_parameters = {'feature_map_depth': [1],
-                                       'readout_map_depth': [1],
-                                       'feature_map_height': [1],
-                                       'readout_map_height': [1],
-                                       'robustness_parameter': [0.01]}
-                       
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [1,5,10,25,50],
+                                               'readout_map_height': [1],
+                                               'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
+    
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [1],
+                                               'feature_map_height': [5],
+                                               'robustness_parameter': [0.01]}
+    
     # Random Forest Grid
     #--------------------#
     Rand_Forest_Grid = {'learning_rate': [0.1],
@@ -131,11 +133,13 @@ else:
                                'input_dim':[d],
                                'output_dim':[D]}
 
-    param_grid_NEU_extra_parameters = {'feature_map_depth': [1,5,10,20,50],
-                                       'readout_map_depth': [1,5,10,25,50],
-                                       'feature_map_height': [20],
-                                       'readout_map_height': [20],
-                                       'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [1,5,10,25,50],
+                                               'readout_map_height': [20],
+                                               'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
+    
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [1],
+                                   'feature_map_height': [1],
+                                   'robustness_parameter': [0.01]}
                            
     # Random Forest Grid
     #--------------------#
@@ -147,4 +151,8 @@ else:
                        
         
 ### Create NEU parameter disctionary by parameters joining model it is upgrading
-param_grid_NEU_Nets = {**param_grid_Vanilla_Nets,**param_grid_NEU_extra_parameters}
+param_grid_NEU_Nets = {**param_grid_Vanilla_Nets,
+                       **param_grid_NEU_readout_extra_parameters,
+                       **param_grid_NEU_feature_extra_parameters}
+param_grid_NEU_Feature_Only_Nets = {**param_grid_Vanilla_Nets,
+                                    **param_grid_NEU_feature_extra_parameters}
