@@ -143,4 +143,4 @@ else:
                        
         
 ### Create NEU parameter disctionary by parameters joining model it is upgrading
-param_grid_NEU_extra_parameters = {**param_grid_Vanilla_Nets,**param_grid_NEU_extra_parameters}
+param_grid_NEU_Nets = {**param_grid_Vanilla_Nets,**param_grid_NEU_extra_parameters}
