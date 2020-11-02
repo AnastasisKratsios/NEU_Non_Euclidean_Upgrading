@@ -78,29 +78,32 @@ if trial_run == True:
     # Number of Jobs (Cores to use)
     n_jobs = 3
     # Number of Random CV Draws
-    n_iter = 1
+    n_iter = 3
     n_iter_trees = 1#20
     # Number of CV Folds
-    CV_folds = 2
+    CV_folds = 4
 
     
     # Model Parameters
     #------------------#
-    param_grid_Vanilla_Nets = {'batch_size': [8],
-                               'epochs': [5],
-                               'learning_rate': [0.0014],
-                               'height': [5],
-                               'depth': [1],
+    Training_dictionary = {'batch_size': [16],
+                               'epochs': [200],
+                               'learning_rate': [0.0005],
                                'input_dim':[d],
                                'output_dim':[D]}
-
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [1,5,10,25,50],
-                                               'readout_map_height': [1],
-                                               'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [1],
-                                               'feature_map_height': [5],
-                                               'robustness_parameter': [0.01]}
+    Vanilla_ffNN_dictionary = {'height': [200],
+                               'depth': [4]}
+
+    robustness_dictionary = {'robustness_parameter': [0.01]}
+    
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [10],
+                                               'readout_map_height': [10]}
+    
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [10],
+                                               'feature_map_height': [10]}
+    
+    
     
     # Random Forest Grid
     #--------------------#
@@ -151,8 +154,19 @@ else:
                        
         
 ### Create NEU parameter disctionary by parameters joining model it is upgrading
-param_grid_NEU_Nets = {**param_grid_Vanilla_Nets,
+param_grid_Vanilla_Nets = {**Training_dictionary,
+                       **Vanilla_ffNN_dictionary}
+
+param_grid_NEU_Nets = {**Training_dictionary,
+                       **robustness_dictionary,
+                       **Vanilla_ffNN_dictionary,
                        **param_grid_NEU_readout_extra_parameters,
                        **param_grid_NEU_feature_extra_parameters}
-param_grid_NEU_Feature_Only_Nets = {**param_grid_Vanilla_Nets,
+
+param_grid_NEU_Feature_Only_Nets = {**Training_dictionary,
+                                    **robustness_dictionary,
                                     **param_grid_NEU_feature_extra_parameters}
+
+NEU_Structure_Dictionary = {**Training_dictionary,
+                            **robustness_dictionary,
+                            **param_grid_NEU_readout_extra_parameters}
