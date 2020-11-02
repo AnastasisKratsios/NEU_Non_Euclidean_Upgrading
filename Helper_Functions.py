@@ -833,6 +833,34 @@ projection_layer = tf.keras.layers.Lambda(lambda x: x[:, -D:])
 
 
 # ---
+# # Architecture Building Utilities:
+# ## NEU-Related:
+# ### Feature Extractor:
+# This little function pops the final layer of a tensorflow model and replaces it with the identity.  When we apply it the the NEU-OLS we obtain only the trained linearizing feature map. 
+
+# In[ ]:
+
+
+def extract_trained_feature_map(model):
+
+    # Dissasemble Network
+    layers = [l for l in model.layers]
+
+    # Define new reconfiguration unit to be added
+    output_layer_new  = tf.identity(layers[len(layers)-2].output)
+
+    for i in range(len(layers)-1):
+        layers[i].trainable = False
+
+
+    # build model
+    new_model = tf.keras.Model(inputs=[layers[0].input], outputs=output_layer_new)
+    
+    # Return Output
+    return new_model
+
+
+# ---
 # ---
 # ---
 # ---
