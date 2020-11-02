@@ -76,12 +76,12 @@ if trial_run == True:
     # Training Parameters
     #----------------------#
     # Number of Jobs (Cores to use)
-    n_jobs = 4
+    n_jobs = 3
     # Number of Random CV Draws
-    n_iter = 5
+    n_iter = 2
     n_iter_trees = 1#20
     # Number of CV Folds
-    CV_folds = 4
+    CV_folds = 2
 
     
     # Model Parameters
@@ -89,13 +89,15 @@ if trial_run == True:
     param_grid_Vanilla_Nets = {'batch_size': [16],
                                'epochs': [100],
                                'learning_rate': [0.0014],
-                               'height': [200],
+                               'height': [100],
                                'depth': [4],
                                'input_dim':[d],
                                'output_dim':[D]}
 
     param_grid_NEU_extra_parameters = {'feature_map_depth': [10],
                                        'readout_map_depth': [5],
+                                       'feature_map_height': [20],
+                                       'readout_map_height': [20],
                                        'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
                        
     # Random Forest Grid
@@ -131,6 +133,8 @@ else:
 
     param_grid_NEU_extra_parameters = {'feature_map_depth': [1,5,10,20,50],
                                        'readout_map_depth': [1,5,10,25,50],
+                                       'feature_map_height': [20],
+                                       'readout_map_height': [20],
                                        'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
                            
     # Random Forest Grid

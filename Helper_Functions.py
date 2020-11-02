@@ -1065,7 +1065,7 @@ print('Deep Feature Builder - Ready')
 # In[ ]:
 
 
-def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, robustness_parameter):
+def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter):
     #--------------------------------------------------#
     # Build Regular Arch.
     #--------------------------------------------------#
@@ -1078,12 +1078,12 @@ def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_ma
     #-###############-#
     # NEU Feature Map #
     #-###############-#
-    deep_feature_map  = Reconfiguration_unit(units=height,home_space_dim=d)(input_layer)
+    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=d)(input_layer)
 #     deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(input_layer)
     for i_feature_depth in range(feature_map_depth):
 #        # First Layer
 #         deep_feature_map = Shift_Layers(input_dim)(deep_feature_map)
-        deep_feature_map  = Reconfiguration_unit(units=height,home_space_dim=D)(deep_feature_map)
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=D)(deep_feature_map)
         deep_feature_map = rescaled_swish_trainable()(deep_feature_map)
 #         deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(deep_feature_map)
             
@@ -1113,11 +1113,11 @@ def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_ma
     #-###############-#
     # NEU Readout Map #
     #-###############-#
-    deep_readout_map  = Reconfiguration_unit(units=height,home_space_dim=D)(core_layers)
+    deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=D)(core_layers)
     for i_readout_depth in range(readout_map_depth):
         deep_readout_map = rescaled_swish_trainable()(deep_readout_map)
 #         deep_readout_map = fullyConnected_Dense_Invertible(input_dim)(deep_readout_map)
-        deep_readout_map  = Reconfiguration_unit(units=height,home_space_dim=D)(deep_readout_map)
+        deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=D)(deep_readout_map)
     
     
     # Define Input/Output Relationship (Arch.)
