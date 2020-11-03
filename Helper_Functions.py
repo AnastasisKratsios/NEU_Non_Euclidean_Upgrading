@@ -512,7 +512,7 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
         # Center
         #------------------------------------------------------------------------------------#
         self.location = self.add_weight(name='location',
-                                    shape=(input_shape[-1],),
+                                    shape=(self.home_space_dim,),
                                     initializer='random_normal',
                                     trainable=True)
         
@@ -569,7 +569,7 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
                                          constraint=tf.keras.constraints.NonNeg())
         self.m_w3 = self.add_weight(name='bump',
                                      shape=[1],
-                                     initializer=RandomUniform(minval=.5, maxval=1),
+                                     initializer='zeros',#RandomUniform(minval=.5, maxval=1),
                                      trainable=True,
                                      constraint=tf.keras.constraints.NonNeg())
         
@@ -624,7 +624,7 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
                                    initializer='GlorotUniform',
                                    trainable=True)
         self.Tb1_c = self.add_weight(name='Tangential_basies_1_c',
-                                   shape=(((input_shape[-1])**2),1),
+                                   shape=((self.home_space_dim**2),1),
                                    initializer='GlorotUniform',
                                    trainable=True)
         self.Tb2_c = self.add_weight(name='Tangential_basies_1_c',
@@ -676,7 +676,7 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
             condition, 
             self.bump_function(bump_input),
             0.0)
-        bump_decay = 1
+#         bump_decay = 1
         
         # Exponential Decay
         exp_decay = tf.math.exp(-self.exponential_decay*norm_inputs)
@@ -736,8 +736,10 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
             
             
         # NUMERICAL STABILIZER
+        #----------------------#
 #         tangential_ffNN = tangential_ffNN + tf.eye(self.home_space_dim) *(self.num_stab_param*10**(-3))
         tangential_ffNN = tf.math.maximum(tf.math.minimum(-tangential_ffNN,10**(15)),-(10**(15)))
+    
         # Lie Parameterization:  
         tangential_ffNN = tf.linalg.expm(tangential_ffNN)
         # Cayley Transformation (Stable):
@@ -811,7 +813,7 @@ class rescaled_swish_trainable(tf.keras.layers.Layer):
     def build(self, input_shape):
         self.relulevel = self.add_weight(name='relu_level',
                                  shape=[1],
-                                 initializer='ones',
+                                 initializer='zeros',
                                  trainable=True,
                                  constraint=tf.keras.constraints.NonNeg())
 #                                  constraint=tf.keras.constraints.MinMaxNorm(min_value=-0.5, max_value=0.5))

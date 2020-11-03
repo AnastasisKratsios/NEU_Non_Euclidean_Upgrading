@@ -19,8 +19,8 @@ Extrapolation_size = .025 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
 N_data = 10**3 # (i.e.: N)
 # Noise Parameters
-noise_level = .5 # (i.e.: ε_i)
-Distortion = .1 # (i.e.: δ_i)
+noise_level = .01 # (i.e.: ε_i)
+Distortion = .01 # (i.e.: δ_i)
 
 
 
@@ -72,7 +72,7 @@ if trial_run == True:
     robustness_dictionary = {'robustness_parameter': [0.01]}
     
     param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
-                                               'readout_map_height': [10]}
+                                               'readout_map_height': [100]}
     
     param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [5],
                                                'feature_map_height': [5]}
@@ -112,7 +112,7 @@ else:
 
     param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [1,5,10,25,50],
                                                'readout_map_height': [20],
-                                               'robustness_parameter': [100,10,1,0.1,0.05,0.0001,0.00005,0]}
+                                               'robustness_parameter': [100]}
     
     param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [1],
                                    'feature_map_height': [1],
