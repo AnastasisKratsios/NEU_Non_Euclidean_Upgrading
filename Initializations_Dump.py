@@ -8,6 +8,13 @@
 
 # In[ ]:
 
+# (Semi-)Classical Regressor(s)
+from scipy.interpolate import interp1d
+import statsmodels.api as sm
+import rpy2.robjects as robjects # Work directly from R (since smoothing splines packages is better)
+from sklearn.svm import SVR
+from sklearn.kernel_ridge import KernelRidge
+
 
 # Grid-Search and CV
 from sklearn.model_selection import RandomizedSearchCV, KFold

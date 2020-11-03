@@ -77,6 +77,12 @@ if trial_run == True:
     param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [2],
                                                'feature_map_height': [5]}
     
+    # Kernel Ridge #
+    #--------------#
+    param_grid_kernel_Ridge={"alpha": [1e0, 0.1, 1e-2, 1e-3],
+                              "gamma": np.logspace(-2, 2, 5),
+                        "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
+    
     
     
     # Random Forest Grid
@@ -117,6 +123,12 @@ else:
     param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [1],
                                    'feature_map_height': [1],
                                    'robustness_parameter': [0.01]}
+    
+    # Kernel Ridge #
+    #--------------#
+    param_grid_kernel_Ridge={"alpha": [1e0, 0.1, 1e-2, 1e-3],
+                              "gamma": np.logspace(-2, 2, 5),
+                        "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
                            
     # Random Forest Grid
     #--------------------#
