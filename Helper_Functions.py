@@ -550,7 +550,7 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
         #------------------------------------------------------------------------------------#
         self.exponential_decay = self.add_weight(name='exponential_decay_rate',
                                                  shape=[1],
-                                                 initializer=RandomUniform(minval=.5, maxval=1),
+                                                 initializer=RandomUniform(minval=.5, maxval=10),
                                                  trainable=True,
                                                  constraint=tf.keras.constraints.NonNeg())
         
