@@ -74,8 +74,8 @@ if trial_run == True:
     param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
                                                'readout_map_height': [10]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [10],
-                                               'feature_map_height': [20]}
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [5],
+                                               'feature_map_height': [5]}
     
     
     
