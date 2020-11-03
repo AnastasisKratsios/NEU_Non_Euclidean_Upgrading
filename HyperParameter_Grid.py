@@ -61,18 +61,18 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     Training_dictionary = {'batch_size': [16],
-                               'epochs': [50],
+                               'epochs': [100],
                                'learning_rate': [0.001],
                                'input_dim':[d],
                                'output_dim':[D]}
     
     Vanilla_ffNN_dictionary = {'height': [200],
-                               'depth': [2]}
+                               'depth': [3]}
 
     robustness_dictionary = {'robustness_parameter': [0.01]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
-                                               'readout_map_height': [100]}
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [10],
+                                               'readout_map_height': [10]}
     
     param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [15],
                                                'feature_map_height': [5]}
