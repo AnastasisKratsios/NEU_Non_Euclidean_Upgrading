@@ -10,32 +10,6 @@
 d = 1 # Dimension of X
 D = 1 # Dimension of Y
 
-#------------------------------------#
-# Training/Optimization Parameter(s) #
-#------------------------------------#
-# Robustness Parameter
-# robustness_parameter = .05
-
-
-#---------------------------#
-# Architecture Parameter(s) #
-#---------------------------#
-# 1) Base Model
-#---------------#
-Initial_Depth = 2
-Initial_Height = 50
-# 2) Feature Map
-#---------------#
-Feature_map_depth = 100
-Feature_map_height = 20
-# 3) Readout Map
-#---------------#
-# Reconfiguration Parameters
-N_Reconfigurations = 100
-# Depth & Height Per Reconfiguration
-Depth_per_reconfig = 50
-Height_per_reconfig = 20
-
 #-------------------#
 # Data Parameter(s) #
 #-------------------#
@@ -78,7 +52,7 @@ if trial_run == True:
     # Number of Jobs (Cores to use)
     n_jobs = 3
     # Number of Random CV Draws
-    n_iter = 3
+    n_iter = 1
     n_iter_trees = 1#20
     # Number of CV Folds
     CV_folds = 2
@@ -87,21 +61,21 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     Training_dictionary = {'batch_size': [16],
-                               'epochs': [400],
-                               'learning_rate': [0.0001],
+                               'epochs': [50],
+                               'learning_rate': [0.001],
                                'input_dim':[d],
                                'output_dim':[D]}
     
     Vanilla_ffNN_dictionary = {'height': [200],
-                               'depth': [4]}
+                               'depth': [2]}
 
     robustness_dictionary = {'robustness_parameter': [0.01]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [20],
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
                                                'readout_map_height': [10]}
     
     param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [10],
-                                               'feature_map_height': [10]}
+                                               'feature_map_height': [20]}
     
     
     

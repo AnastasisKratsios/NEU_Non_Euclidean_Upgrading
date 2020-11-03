@@ -469,9 +469,7 @@ class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
 # - Readout map version
 # - Constrained parametereized swish with $\beta \in \left[-\frac1{2},\frac1{2}\right]$.
 
-# #### Reconfiguration Feature-Version
-
-# *Lie Version:* $$
+# **Implemented Version:**: *Lie Version:* $$
 # x \mapsto \exp\left(
 # %\psi(a\|x\|+b)
 # \operatorname{Skew}_d\left(
@@ -480,7 +478,7 @@ class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
 # \right) x.
 # $$
 # 
-# *Cayley version:*
+# **Non-Implemented Variant:**  *Cayley version:*
 # $$
 # \begin{aligned}
 # \operatorname{Cayley}(A(x)):\,x \mapsto & \left[(I_d + A(x))(I_d- A(x))^{-1}\right]x
@@ -653,7 +651,10 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
     # C^1 bump function (numerically stable??) #
     #----------------------------------------------------#
     def bump_function(self, x):
-        return tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
+#         return tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
+        bump_out = tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
+        bump_out = tf.math.pow(bump_out,(1/4))
+        return bump_out
 
         
     def call(self, input):
@@ -737,10 +738,10 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
         # NUMERICAL STABILIZER
 #         tangential_ffNN = tangential_ffNN + tf.eye(self.home_space_dim) *(self.num_stab_param*10**(-3))
         tangential_ffNN = tf.math.maximum(tf.math.minimum(-tangential_ffNN,10**(15)),-(10**(15)))
+        # Lie Parameterization:  
+        tangential_ffNN = tf.linalg.expm(tangential_ffNN)
         # Cayley Transformation (Stable):
 #         tangential_ffNN = tf.linalg.matmul((self.Id + tangential_ffNN),tf.linalg.pinv(self.Id - tangential_ffNN)) 
-        # Lie Parameterization (Numerically Unstable):  
-        tangential_ffNN = tf.linalg.expm(tangential_ffNN)
         
         # Exponentiation and Action
         #----------------------------#
