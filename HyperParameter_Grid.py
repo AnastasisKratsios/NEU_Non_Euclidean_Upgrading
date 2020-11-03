@@ -61,8 +61,8 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     Training_dictionary = {'batch_size': [16],
-                               'epochs': [100],
-                               'learning_rate': [0.001],
+                               'epochs': [10],
+                               'learning_rate': [0.0001],
                                'input_dim':[d],
                                'output_dim':[D]}
     
@@ -71,11 +71,11 @@ if trial_run == True:
 
     robustness_dictionary = {'robustness_parameter': [0.01]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [10],
-                                               'readout_map_height': [10]}
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
+                                               'readout_map_height': [5]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [10],
-                                               'feature_map_height': [10]}
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [2],
+                                               'feature_map_height': [5]}
     
     
     
