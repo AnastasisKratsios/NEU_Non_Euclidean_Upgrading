@@ -81,14 +81,14 @@ if trial_run == True:
     n_iter = 3
     n_iter_trees = 1#20
     # Number of CV Folds
-    CV_folds = 4
+    CV_folds = 2
 
     
     # Model Parameters
     #------------------#
     Training_dictionary = {'batch_size': [16],
-                               'epochs': [200],
-                               'learning_rate': [0.0005],
+                               'epochs': [400],
+                               'learning_rate': [0.0001],
                                'input_dim':[d],
                                'output_dim':[D]}
     
@@ -97,7 +97,7 @@ if trial_run == True:
 
     robustness_dictionary = {'robustness_parameter': [0.01]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [10],
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [20],
                                                'readout_map_height': [10]}
     
     param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [10],
