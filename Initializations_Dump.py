@@ -39,6 +39,10 @@ from scipy.special import expit
 from sklearn.linear_model import LinearRegression
 from scipy import linalg as scila
 
+# Random Forest & Gradient Boosting (Arch. Construction)
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.tree import DecisionTreeRegressor
+
 # Tensorflow
 import tensorflow as tf
 from keras.utils.layer_utils import count_params
