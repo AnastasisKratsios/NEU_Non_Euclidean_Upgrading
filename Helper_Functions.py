@@ -971,7 +971,8 @@ def get_Error_distribution_plots(test_set_data,
     # Save Plot
     plt.savefig('./outputs/plotsANDfigures/'+model_name+'.eps', format='eps')
     # Show Plot
-    plt.show()
+    if is_visuallty_verbose == True:
+        plt.show(block=False)
 
 
 # #### Numerical Summarizers

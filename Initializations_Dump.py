@@ -69,7 +69,7 @@ from tensorflow.keras.optimizers import Adam
 import os
 from pathlib import Path
 import pickle
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
 
 # Visualization
 import matplotlib

@@ -129,7 +129,9 @@ plt.scatter(np.array(data_x_test).reshape(-1,),data_y_test,color='black',label='
 #-------------#
 plt.legend(loc="upper left")
 plt.title("Model Predictions")
-plt.show()
+# Show Plot
+if is_visuallty_verbose == True:
+    plt.show(block=False)
 
 
 # ## Report Simulation Configuration to User:
