@@ -11,12 +11,27 @@
 # In[ ]:
 
 
-# Initialize OLS Model
-lin_reg = LinearRegression()
-lin_reg.fit(data_x,data_y)
-# Generate OLS Predictions
-OLS_y_hat_train = lin_reg.predict(data_x)
-OLS_y_hat_test = lin_reg.predict(data_x_test)
+#====================================#
+# Ordinary Linear Regression Version #
+#====================================#
+# # Initialize OLS Model
+# lin_reg = LinearRegression()
+# lin_reg.fit(data_x,data_y)
+# # Generate OLS Predictions
+# OLS_y_hat_train = lin_reg.predict(data_x)
+# OLS_y_hat_test = lin_reg.predict(data_x_test)
+
+#=====================#
+# Elastic Net Version #
+#=====================#
+# Initialize Elastic Net Regularization Model
+Elastic_Net = ElasticNetCV(cv=5, random_state=0, alphas = np.linspace(0,(10**2),(10**2)),
+                           l1_ratio=np.linspace(0,1,(10**2)))
+# Fit Elastic Net Model
+Elastic_Net.fit(data_x,data_y)
+# Get Prediction(s)
+ENET_OLS_y_hat_train = Elastic_Net.predict(data_x)
+ENET_OLS_y_hat_test = Elastic_Net.predict(data_x_test)
 
 
 # ## LOWESS

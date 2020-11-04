@@ -14,6 +14,7 @@ import statsmodels.api as sm
 import rpy2.robjects as robjects # Work directly from R (since smoothing splines packages is better)
 from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
+from sklearn.linear_model import ElasticNetCV
 
 
 # Grid-Search and CV
