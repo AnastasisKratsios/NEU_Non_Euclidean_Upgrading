@@ -11,6 +11,10 @@
 # In[ ]:
 
 
+# Block warnings that spam when performing coordinate descent (by default) in 1-d.
+import warnings
+warnings.filterwarnings("ignore")
+
 #====================================#
 # Ordinary Linear Regression Version #
 #====================================#
