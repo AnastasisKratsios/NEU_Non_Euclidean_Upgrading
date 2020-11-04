@@ -110,21 +110,22 @@ else:
     
     # Model Parameters
     #------------------#
-    param_grid_Vanilla_Nets = {'batch_size': [8,16,32],
+    Training_dictionary = {'batch_size': [8,16,32],
                                'epochs': [50,100,150,200, 400, 600, 800, 1000],
                                'learning_rate': [0.001,0.0005,0.00001],
-                               'height': [(d+D+1),5*(d+D+1),100, 200],
-                               'depth': [1,2,3,4],
                                'input_dim':[d],
                                'output_dim':[D]}
-
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [10,20,30,40],
-                                               'readout_map_height': [(2*(d+1)),(3*(d+1)),2*(d+D+2), 50],
-                                               'robustness_parameter': [1000,100,25,1,0.01,0.001,0.0001]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [10,20,30,40],
-                                   'feature_map_height': [(2*(d+1)),(3*(d+1)),2*(d+D+2), 50],
-                                   'robustness_parameter': [1000,100,25,1,0.01,0.001,0.0001]}
+    Vanilla_ffNN_dictionary = {'height': [(d+D+1),5*(d+D+1),100, 200],
+                               'depth': [1,2,3,4]}
+
+    robustness_dictionary = {'robustness_parameter': [1000,100,25,1,0.01,0.001,0.0001]}
+    
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [10,20,30,40],
+                                               'readout_map_height': [(2*(d+1)),(3*(d+1)),2*(d+D+2), 50]}
+    
+    param_grid_NEU_feature_extra_parameters={'feature_map_depth': [10,20,30,40],
+                                               'feature_map_height': [(2*(d+1)),(3*(d+1)),2*(d+D+2), 50]}
     
     # Kernel Ridge #
     #--------------#
