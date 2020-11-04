@@ -6,6 +6,19 @@
 # ---
 # This little script implements multiple semi-classical regression model, functionally.  The functions are then ported into the NEU; thus we obtain benchmarks and a simple way to generate the NEU-version of any such model.  
 
+# ## Ordinary Linear Regression
+
+# In[ ]:
+
+
+# Initialize OLS Model
+lin_reg = LinearRegression()
+lin_reg.fit(data_x,data_y)
+# Generate OLS Predictions
+OLS_y_hat_train = lin_reg.predict(data_x)
+OLS_y_hat_test = lin_reg.predict(data_x_test)
+
+
 # ## LOWESS
 
 # Training Function
