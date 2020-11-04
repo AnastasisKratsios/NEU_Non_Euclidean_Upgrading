@@ -13,7 +13,7 @@
 
 # # Generate Training Data
 
-# In[205]:
+# In[1]:
 
 
 # First Round Initializations (Global Level) #
@@ -29,7 +29,7 @@ exec(open('Helper_Functions.py').read())
 exec(open('Architecture_Builder.py').read())
 
 
-# In[206]:
+# In[2]:
 
 
 #------------------------#
@@ -45,7 +45,7 @@ exec(open('Data_Generator.py').read())
 
 # Run univariate regression benchmarks file:
 
-# In[42]:
+# In[3]:
 
 
 # %run Univariate_Regression_Benchmark_Models.ipynb
@@ -56,7 +56,7 @@ exec(open('Univariate_Regression_Benchmark_Models.py').read())
 # - Load Dependancies,
 # - Makes Paths if missing.
 
-# In[173]:
+# In[4]:
 
 
 # Second Round Re-Initializations (Global Level) #
@@ -70,7 +70,7 @@ exec(open('Architecture_Builder.py').read())
 
 # #### Boost input dimension if $d=1$, so that reconfigurations can be universal.
 
-# In[44]:
+# In[5]:
 
 
 if d<= 1:
@@ -94,7 +94,7 @@ else:
 
 # We train NEU's universal linearizing feature map.
 
-# In[45]:
+# In[ ]:
 
 
 tf.random.set_seed(2020)
@@ -133,7 +133,7 @@ data_x_NEU_test_feature_only = data_x_NEU_test[:,:d]
 
 # ### NEU-OLS *(decoupled implementation)*
 
-# In[46]:
+# In[ ]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -142,7 +142,7 @@ NEU_lin_reg = LinearRegression()
 NEU_lin_reg.fit(data_x_featured_train,data_y)
 
 
-# In[47]:
+# In[ ]:
 
 
 # Pre-process Linearized Data #
@@ -174,7 +174,7 @@ NEU_OLS_y_hat_train, NEU_OLS_y_hat_test = build_NEU_Structure(n_folds = CV_folds
 
 # ### NEU-Kernel Ridge Regression *(decoupled implementation)*
 
-# In[48]:
+# In[ ]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -205,12 +205,12 @@ NEU_KReg_y_hat_train, NEU_KReg_y_hat_test = build_NEU_Structure(n_folds = CV_fol
 
 # #### Visual Comaprison between the GBRF and the NEU-GBRF models:
 
-# In[207]:
+# In[ ]:
 
 
 # Initialize Plot #
 #-----------------#
-fig = plt.figure(num=None, figsize=(12, 12), dpi=80, facecolor='w', edgecolor='k')
+plt.figure(num=None, figsize=(12, 12), dpi=80, facecolor='w', edgecolor='k')
 
 # Generate Plots #
 #----------------#
@@ -229,27 +229,17 @@ plt.plot(np.array(data_x_test_raw).reshape(-1,),f_hat_kernel_ridge_test,color='v
 # NEU-Kernel Ridge Regressor
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_KReg_y_hat_test,color='darkviolet',label='NEU-Kernel Ridge')
 
+
 # Format Plot #
 #-------------#
 plt.legend(loc="upper left")
 plt.title("Model Predictions")
-
-# Export #
-#--------#
-# SAVE Figure to .eps
-plt.savefig('./outputs/plotsANDfigures/Kernel_Ridge.eps', format='eps')
 plt.show()
-
-
-# In[208]:
-
-
-get_Error_distribution_plots(data_y_test,f_hat_kernel_ridge_test,NEU_KReg_y_hat_test,"Kernel Ridge")
 
 
 # #### Numerical Comparison between the Kernel Ridge regressor and NEU-Kernel Ridge regressor models:
 
-# In[11]:
+# In[ ]:
 
 
 #-----------------------#
@@ -267,7 +257,7 @@ print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 # ## Tree Model(s):
 # *Naturally, all of these have a decoupled implementation*.
 
-# In[12]:
+# In[ ]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -298,7 +288,7 @@ NEU_GBRF_y_hat_train, NEU_GBRF_y_hat_test = build_NEU_Structure(n_folds = CV_fol
 
 # #### Visual Comaprison between the GBRF and the NEU-GBRF models:
 
-# In[57]:
+# In[ ]:
 
 
 # Initialize Plot #
@@ -327,24 +317,12 @@ plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_GBRF_y_hat_test, color = 'fo
 #-------------#
 plt.legend(loc="upper left")
 plt.title("Model Predictions")
-
-
-# Export #
-#--------#
-# SAVE Figure to .eps
-plt.savefig('./outputs/plotsANDfigures/GBRF.eps', format='eps')
 plt.show()
-
-
-# In[209]:
-
-
-get_Error_distribution_plots(data_y_test,GBRF_y_hat_test,NEU_GBRF_y_hat_test,"GBRF")
 
 
 # #### Numerical Comparison between the GBRF and NEU-GBRF models:
 
-# In[14]:
+# In[ ]:
 
 
 #---------------#
@@ -370,7 +348,7 @@ print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 # 
 # Here we only use reconfiguration networks to learn an appropriate readout map.
 
-# In[15]:
+# In[ ]:
 
 
 tf.random.set_seed(2020)
@@ -386,7 +364,7 @@ NEU_ffNN_y_hat_train, NEU_ffNN_y_hat_test = build_NEU_ffNN(n_folds = CV_folds,
 # #### B) $\pi\circ \rho(\hat{f}\circ \phi(\cdot),\cdot)$
 # Here we use reconfigurations to learn an appropriate structure map. 
 
-# In[16]:
+# In[ ]:
 
 
 tf.random.set_seed(2020)
@@ -401,7 +379,7 @@ NEU_ffNN_y_hat_train_w_proj, NEU_ffNN_y_hat_test_w_proj = build_NEU_ffNN_w_proj(
 
 # #### Decoupled Implementation
 
-# In[17]:
+# In[ ]:
 
 
 tf.random.set_seed(2020)
@@ -449,58 +427,6 @@ print("Phase 3 Complete: Trained NEU-Structure Map")
 print("NEU Statue: Trained")
 
 
-# ## Visualization
-
-# In[61]:
-
-
-# Initialize Plot #
-#-----------------#
-plt.figure(num=None, figsize=(12, 12), dpi=80, facecolor='w', edgecolor='k')
-
-# Generate Plots #
-#----------------#
-
-# Plot Signal
-plt.plot(np.array(data_x_test_raw).reshape(-1,),data_y_test,color='gray',label='f(x)',linestyle='--')
-# Plot Data
-plt.scatter(np.array(data_x_raw).reshape(-1,),data_y,color='gray',label='train', marker = '2')
-plt.scatter(np.array(data_x_test_raw).reshape(-1,),data_y_test,color='black',label='test', marker = '.')
-
-#--------------------#
-# Benchmark Model(s) #
-#--------------------#
-# Plot ffNN
-plt.plot(np.array(data_x_test_raw).reshape(-1,),ffNN_y_hat_test, color = 'lightblue',linestyle="--",  label='DNN')
-
-
-#--------------#
-# NEU-Model(s) #
-#--------------#
-# Plot NEU-ffNN (Training Variants)
-plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test, linestyle=":", color = 'b',label='DNN_NEU_coupled')
-plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_w_proj, color = 'mediumblue',linestyle='-.', label='DNN_NEU_coupled+UAEmbedding')
-plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_Dcpld, color = 'navy',label='DNN_NEU_decoupled')
-
-
-# Format Plot #
-#-------------#
-plt.legend(loc="upper left")
-plt.title("Model Predictions")
-
-# Export #
-#--------#
-# SAVE Figure to .eps
-plt.savefig('./outputs/plotsANDfigures/Neural_Network_Models.eps', format='eps')
-plt.show()
-
-
-# In[210]:
-
-
-get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test_w_proj,"ffNN")
-
-
 # ---
 # ---
 # ---
@@ -509,49 +435,9 @@ get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test_w_p
 # # Result(s)
 # ---
 
-# ## Generate Results Table(s):
-
-# In[174]:
-
-
-#==========#
-# Training #
-#==========#
-train_performance  = pd.DataFrame({"Smoothin Splines": reporter(f_hat_smoothing_splines_train,f_hat_smoothing_splines_test,data_y,data_y_test).iloc[:,0],
-                                   "LOESS": reporter(LOESS_prediction_train,LOESS_prediction_test,data_y,data_y_test).iloc[:,0],
-                                   "NEU-OLS": reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test).iloc[:,0],
-                                   "Kernel": reporter(f_hat_kernel_ridge_train,f_hat_kernel_ridge_test,data_y,data_y_test).iloc[:,0],
-                                   "NEU-KerRidge": reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test).iloc[:,0],
-                                   "GBRF": reporter(GBRF_y_hat_train,GBRF_y_hat_test,data_y,data_y_test).iloc[:,0],
-                                   "NEU-GBRF": reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test).iloc[:,0],
-                                   "ffNN": reporter(ffNN_y_hat_train,ffNN_y_hat_test,data_y,data_y_test).iloc[:,0],
-                                   "NEU-ffNN (Readout-Form)": reporter(NEU_ffNN_y_hat_train,NEU_ffNN_y_hat_test,data_y,data_y_test).iloc[:,0],
-                                   "NEU-ffNN (Coupled)": reporter(NEU_ffNN_y_hat_train_w_proj,NEU_ffNN_y_hat_test_w_proj,data_y,data_y_test).iloc[:,0],
-                                   "NEU-ffNN (Decoupled)": reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_y_test).iloc[:,0]}).transpose()
-
-train_performance.to_latex("./outputs/tables/Train_performance.tex")
-
-#=========#
-# Testing #
-#=========#
-test__performance  = pd.DataFrame({"Smoothin Splines": reporter(f_hat_smoothing_splines_train,f_hat_smoothing_splines_test,data_y,data_y_test).iloc[:,1],
-                                   "LOESS": reporter(LOESS_prediction_train,LOESS_prediction_test,data_y,data_y_test).iloc[:,1],
-                                   "NEU-OLS": reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test).iloc[:,1],
-                                   "Kernel": reporter(f_hat_kernel_ridge_train,f_hat_kernel_ridge_test,data_y,data_y_test).iloc[:,1],
-                                   "NEU-KerRidge": reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test).iloc[:,1],
-                                   "GBRF": reporter(GBRF_y_hat_train,GBRF_y_hat_test,data_y,data_y_test).iloc[:,1],
-                                   "NEU-GBRF": reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test).iloc[:,1],
-                                   "ffNN": reporter(ffNN_y_hat_train,ffNN_y_hat_test,data_y,data_y_test).iloc[:,1],
-                                   "NEU-ffNN (Readout-Form)": reporter(NEU_ffNN_y_hat_train,NEU_ffNN_y_hat_test,data_y,data_y_test).iloc[:,1],
-                                   "NEU-ffNN (Coupled)": reporter(NEU_ffNN_y_hat_train_w_proj,NEU_ffNN_y_hat_test_w_proj,data_y,data_y_test).iloc[:,1],
-                                   "NEU-ffNN (Decoupled)": reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_y_test).iloc[:,1]}).transpose()
-
-test__performance.to_latex("./outputs/tables/Test_performance.tex")
-
-
 # # Visualize Predictions
 
-# In[62]:
+# In[ ]:
 
 
 # Initialize Plot #
@@ -578,7 +464,7 @@ plt.plot(np.array(data_x_test_raw).reshape(-1,),LOESS_prediction_test,color='pur
 # Kernel Ridge Regressor
 plt.plot(np.array(data_x_test_raw).reshape(-1,),f_hat_kernel_ridge_test,color='violet',linestyle="--",label='Kernel Ridge')
 # Plot ffNN
-plt.plot(np.array(data_x_test_raw).reshape(-1,),ffNN_y_hat_test, color = 'lightblue',linestyle="--",  label='DNN')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),ffNN_y_hat_test, color = 'lightblue', label='DNN')
 
 
 #--------------#
@@ -591,8 +477,8 @@ plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_OLS_y_hat_test, color = 'c',
 # NEU-Kernel Ridge Regressor
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_KReg_y_hat_test,color='darkviolet',label='NEU-Kernel Ridge')
 # Plot NEU-ffNN (Training Variants)
-plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test, linestyle=":", color = 'b',label='DNN_NEU_coupled')
-plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_w_proj, color = 'mediumblue',linestyle='-.', label='DNN_NEU_coupled+UAEmbedding')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test, linestyle="--", color = 'b',label='DNN_NEU_coupled')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_w_proj, color = 'mediumblue',label='DNN_NEU_coupled+UAEmbedding')
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_Dcpld, color = 'navy',label='DNN_NEU_decoupled')
 
 
@@ -600,21 +486,14 @@ plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_Dcpld, color
 #-------------#
 plt.legend(loc="upper left")
 plt.title("Model Predictions")
-
-# Export #
-#--------#
-# SAVE Figure to .eps
-plt.savefig('./outputs/plotsANDfigures/Full_Picture.eps', format='eps')
 plt.show()
 
 
 #  ---
 
 # ## Performance Report
-# - First, we print the comparison tables (so it can be viewed from the command-line if it is being run live on a grid/cluster/remotely).
-# - Second, we display the training and testing performances in clean dataframes.
 
-# In[73]:
+# In[ ]:
 
 
 #--------------------#
@@ -629,7 +508,7 @@ print("NEU-OLS-Performance:")
 print(reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test))
 
 
-# In[20]:
+# In[ ]:
 
 
 #-----------------------#
@@ -644,7 +523,7 @@ print("NEU-Kernel Ridge-Performance:")
 print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 
 
-# In[21]:
+# In[ ]:
 
 
 #---------------#
@@ -659,7 +538,7 @@ print("NEU-GBRF-Performance:")
 print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 
 
-# In[22]:
+# In[ ]:
 
 
 #-----------------------------------------------------#
@@ -674,7 +553,7 @@ print("LOESS Performance:")
 print(reporter(LOESS_prediction_train,LOESS_prediction_test,data_y,data_y_test))
 
 
-# In[23]:
+# In[ ]:
 
 
 #--------------#
@@ -691,24 +570,6 @@ print("NEU-ffNN (Coupled+UAEmbedding) Performance:")
 print(reporter(NEU_ffNN_y_hat_train_w_proj,NEU_ffNN_y_hat_test_w_proj,data_y,data_y_test))
 print("NEU-ffNN (Decoupled) Performance:")
 print(reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_y_test))
-
-
-# # Report
-
-# ## Train-Set Performance
-
-# In[175]:
-
-
-train_performance
-
-
-# ## Test-Set Performance
-
-# In[176]:
-
-
-test__performance
 
 
 # #### The END

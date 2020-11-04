@@ -17,7 +17,7 @@ D = 1 # Dimension of Y
 Train_step_proportion = .75 # (i.e.: ratio of train to test-set sizes)
 Extrapolation_size = .025 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
-N_data = 10**3 # (i.e.: N)
+N_data = 10**4 # (i.e.: N)
 # Noise Parameters
 noise_level = .5 # (i.e.: ε_i)
 Distortion = .3 # (i.e.: δ_i)

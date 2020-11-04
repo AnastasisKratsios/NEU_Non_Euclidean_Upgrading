@@ -71,11 +71,14 @@ import pickle
 from sklearn.externals import joblib
 
 # Visualization
+import matplotlib
 from matplotlib.pyplot import figure
+import seaborn as sns
 
 # z_Misc
 import time
 import math
+import warnings
 
 
 
@@ -102,4 +105,5 @@ Path('./outputs/models/NAIVE_NEU/').mkdir(parents=True, exist_ok=True)
 Path('./outputs/models/NEU/').mkdir(parents=True, exist_ok=True)
 Path('./outputs/tables/').mkdir(parents=True, exist_ok=True)
 Path('./outputs/results/').mkdir(parents=True, exist_ok=True)
+Path('./outputs/plotsANDfigures/').mkdir(parents=True, exist_ok=True)
 Path('./inputs/data/').mkdir(parents=True, exist_ok=True)
