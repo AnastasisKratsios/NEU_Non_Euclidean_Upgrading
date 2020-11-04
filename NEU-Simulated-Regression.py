@@ -225,7 +225,9 @@ plt.title("Model Predictions")
 #--------#
 # SAVE Figure to .eps
 plt.savefig('./outputs/plotsANDfigures/OLS.eps', format='eps')
-plt.show(block=False)
+# Show Plot
+if is_visuallty_verbose == True:
+    plt.show(block=False)
 
 
 # In[10]:
@@ -304,7 +306,9 @@ plt.title("Model Predictions")
 #--------#
 # SAVE Figure to .eps
 plt.savefig('./outputs/plotsANDfigures/Kernel_Ridge.eps', format='eps')
-plt.show(block=False)
+# Show Plot
+if is_visuallty_verbose == True:
+    plt.show(block=False)
 
 
 # In[13]:
@@ -399,7 +403,9 @@ plt.title("Model Predictions")
 #--------#
 # SAVE Figure to .eps
 plt.savefig('./outputs/plotsANDfigures/GBRF.eps', format='eps')
-plt.show(block=False)
+# Show Plot
+if is_visuallty_verbose == True:
+    plt.show(block=False)
 
 
 # In[17]:
@@ -558,7 +564,9 @@ plt.title("Model Predictions")
 #--------#
 # SAVE Figure to .eps
 plt.savefig('./outputs/plotsANDfigures/Neural_Network_Models.eps', format='eps')
-plt.show(block=False)
+# Show Plot
+if is_visuallty_verbose == True:
+    plt.show(block=False)
 
 
 # In[23]:
@@ -577,7 +585,7 @@ get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test_w_p
 
 # ## Generate Results Table(s):
 
-# In[25]:
+# In[ ]:
 
 
 #==========#
@@ -621,7 +629,7 @@ test__performance.to_latex("./outputs/tables/Test_performance.tex")
 
 # # Visualize Predictions
 
-# In[26]:
+# In[ ]:
 
 
 # Initialize Plot #
@@ -678,7 +686,9 @@ plt.title("Model Predictions")
 #--------#
 # SAVE Figure to .eps
 plt.savefig('./outputs/plotsANDfigures/Full_Picture.eps', format='eps')
-plt.show(block=False)
+# Show Plot
+if is_visuallty_verbose == True:
+    plt.show(block=False)
 
 
 #  ---
@@ -687,7 +697,7 @@ plt.show(block=False)
 # - First, we print the comparison tables (so it can be viewed from the command-line if it is being run live on a grid/cluster/remotely).
 # - Second, we display the training and testing performances in clean dataframes.
 
-# In[27]:
+# In[ ]:
 
 
 #--------------------#
@@ -702,7 +712,7 @@ print("NEU-OLS-Performance:")
 print(reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test))
 
 
-# In[28]:
+# In[ ]:
 
 
 #-----------------------#
@@ -717,7 +727,7 @@ print("NEU-Kernel Ridge-Performance:")
 print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 
 
-# In[29]:
+# In[ ]:
 
 
 #---------------#
@@ -732,7 +742,7 @@ print("NEU-GBRF-Performance:")
 print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 
 
-# In[30]:
+# In[ ]:
 
 
 #-----------------------------------------------------#
@@ -747,7 +757,7 @@ print("LOESS Performance:")
 print(reporter(LOESS_prediction_train,LOESS_prediction_test,data_y,data_y_test))
 
 
-# In[31]:
+# In[ ]:
 
 
 #--------------#
@@ -770,7 +780,7 @@ print(reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_
 
 # ## Train-Set Performance
 
-# In[32]:
+# In[ ]:
 
 
 train_performance
@@ -778,7 +788,7 @@ train_performance
 
 # ## Test-Set Performance
 
-# In[33]:
+# In[ ]:
 
 
 test__performance
