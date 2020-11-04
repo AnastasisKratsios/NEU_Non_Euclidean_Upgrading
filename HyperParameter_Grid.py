@@ -19,8 +19,8 @@ Extrapolation_size = .025 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
 N_data = 10**4 # (i.e.: N)
 # Noise Parameters
-noise_level = .5 # (i.e.: ε_i)
-Distortion = .3 # (i.e.: δ_i)
+noise_level = .7 # (i.e.: ε_i)
+Distortion = .5 # (i.e.: δ_i)
 
 
 
@@ -61,20 +61,20 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     Training_dictionary = {'batch_size': [16],
-                               'epochs': [10],
+                               'epochs': [100],
                                'learning_rate': [0.0001],
                                'input_dim':[d],
                                'output_dim':[D]}
     
-    Vanilla_ffNN_dictionary = {'height': [2],
+    Vanilla_ffNN_dictionary = {'height': [50],
                                'depth': [3]}
 
     robustness_dictionary = {'robustness_parameter': [0.01]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [20],
                                                'readout_map_height': [5]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [2],
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [20],
                                                'feature_map_height': [5]}
     
     # Kernel Ridge #
@@ -88,9 +88,9 @@ if trial_run == True:
     # Random Forest Grid
     #--------------------#
     Rand_Forest_Grid = {'learning_rate': [0.1],
-                        'max_depth': [2],
-                        'min_samples_leaf': [1],
-                       'n_estimators': [10],
+                        'max_depth': [6],
+                        'min_samples_leaf': [5],
+                       'n_estimators': [400],
                        }
     
 else:
