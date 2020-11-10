@@ -54,7 +54,7 @@ if trial_run == True:
     # Number of Jobs (Cores to use)
     n_jobs = 3
     # Number of Random CV Draws
-    n_iter = 2
+    n_iter = 1
     n_iter_trees = 1#20
     # Number of CV Folds
     CV_folds = 2
@@ -66,7 +66,7 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     Epochs_dictionary = {'epochs': [10]}
-    NEU_Epochs_Feature_dictionary = {'epochs': [2],
+    NEU_Epochs_Feature_dictionary = {'epochs': [50],
                                      'homotopy_parameter': [0]}
     
     NEU_Epochs_dictionary = {'epochs': [5],
@@ -85,8 +85,8 @@ if trial_run == True:
     param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [1],
                                                'readout_map_height': [4]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [1],
-                                               'feature_map_height': [4]}
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [10],
+                                               'feature_map_height': [10]}
                                                
     
     # Kernel Ridge #

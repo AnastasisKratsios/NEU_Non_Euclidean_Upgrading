@@ -684,7 +684,7 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
     def bump_function(self, x):
 #         return tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
         bump_out = tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
-        bump_out = tf.math.pow(bump_out,(1/4))
+        bump_out = tf.math.pow(bump_out,(1/8))
         return bump_out
 
         
@@ -982,8 +982,8 @@ def get_Error_distribution_plots(test_set_data,
     plt.figure(num=None, figsize=(12, 12), dpi=80, facecolor='w', edgecolor='k')
 
     # Initialize Errors
-    Er = data_x_test_raw.reshape(-1,) - model_test_results
-    NEU_Er = data_x_test_raw.reshape(-1,) - NEU_model_test_results
+    Er = model_test_results - data_x_test_raw.reshape(-1,)
+    NEU_Er = NEU_model_test_results - data_x_test_raw.reshape(-1,)
     
     # Internal Computations 
     xbar_init = np.mean(Er)
