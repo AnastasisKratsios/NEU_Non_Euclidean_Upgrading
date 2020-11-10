@@ -84,9 +84,9 @@ if trial_run == True:
     
     # Kernel Ridge #
     #--------------#
-    param_grid_kernel_Ridge={"alpha": [1e0, 0.1, 1e-2, 1e-3],
-                              "gamma": np.logspace(-2, 2, 5),
-                        "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
+    param_grid_kernel_Ridge={"alpha": [1e0, 1e-3],
+                              "gamma": np.logspace(-2, 2, 2),
+                        "kernel": ["rbf", "laplacian"]}
     
     
     
@@ -95,7 +95,7 @@ if trial_run == True:
     Rand_Forest_Grid = {'learning_rate': [0.01],
                         'max_depth': [6],
                         'min_samples_leaf': [8],
-                       'n_estimators': [50],
+                       'n_estimators': [20],
                        }
     
 else:
