@@ -136,18 +136,19 @@ if is_visuallty_verbose == True:
 
 # ## Report Simulation Configuration to User:
 
+# In[3]:
+
+
+the_facts = "We're plotting the function: " +str(Option_Function)+" with "+str(noise_level)+" additive noise, a distortion/model uncertainty level of"+      str(Distortion)+", and an out-of sample window on either side of the input space of:"+str(Extrapolation_size)+".  We train using "+      str(N_data)+" datapoints and have a test set conisting of "+str(Train_step_proportion)+"% percent of the total generated data."
+
+
 # In[ ]:
 
 
 print("Simulation Confiugration Information:")
 print(" ")
 print("=========================================================================================================================================================")
-print("We're plotting the function: " +str(Option_Function)+" with "+
-      str(noise_level)+" additive noise, a distortion/model uncertainty level of"+
-      str(Distortion)+", and an out-of sample window on either side of the input space of:"+
-      str(Extrapolation_size)+".  We train using "+
-      str(N_data)+" datapoints and have a test set conisting of "+
-      str(Train_step_proportion)+"% percent of the total generated data.")
+print(the_facts)
 print("=========================================================================================================================================================")
 print(" ")
 

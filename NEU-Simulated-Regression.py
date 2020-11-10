@@ -585,7 +585,7 @@ get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test_w_p
 
 # ## Generate Results Table(s):
 
-# In[ ]:
+# In[24]:
 
 
 #==========#
@@ -629,7 +629,7 @@ test__performance.to_latex("./outputs/tables/Test_performance.tex")
 
 # # Visualize Predictions
 
-# In[ ]:
+# In[25]:
 
 
 # Initialize Plot #
@@ -697,7 +697,7 @@ if is_visuallty_verbose == True:
 # - First, we print the comparison tables (so it can be viewed from the command-line if it is being run live on a grid/cluster/remotely).
 # - Second, we display the training and testing performances in clean dataframes.
 
-# In[ ]:
+# In[26]:
 
 
 #--------------------#
@@ -712,7 +712,7 @@ print("NEU-OLS-Performance:")
 print(reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test))
 
 
-# In[ ]:
+# In[27]:
 
 
 #-----------------------#
@@ -727,7 +727,7 @@ print("NEU-Kernel Ridge-Performance:")
 print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 
 
-# In[ ]:
+# In[28]:
 
 
 #---------------#
@@ -742,7 +742,7 @@ print("NEU-GBRF-Performance:")
 print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 
 
-# In[ ]:
+# In[29]:
 
 
 #-----------------------------------------------------#
@@ -757,7 +757,7 @@ print("LOESS Performance:")
 print(reporter(LOESS_prediction_train,LOESS_prediction_test,data_y,data_y_test))
 
 
-# In[ ]:
+# In[30]:
 
 
 #--------------#
@@ -778,9 +778,22 @@ print(reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_
 
 # # Report
 
+# ## Re-Summarize Learning Problem for easy recap :)
+
+# In[34]:
+
+
+print("Simulation Confiugration Information:")
+print(" ")
+print("=========================================================================================================================================================")
+print(the_facts)
+print("=========================================================================================================================================================")
+print(" ")
+
+
 # ## Train-Set Performance
 
-# In[ ]:
+# In[31]:
 
 
 train_performance
@@ -788,7 +801,7 @@ train_performance
 
 # ## Test-Set Performance
 
-# In[ ]:
+# In[32]:
 
 
 test__performance
