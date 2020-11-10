@@ -17,7 +17,7 @@ D = 1 # Dimension of Y
 #-------------------#
 # Test-set meta-parameters
 Train_step_proportion = .75 # (i.e.: ratio of train to test-set sizes)
-Extrapolation_size = .1 # (i.e.: size of test-train set domain (diameter/2))
+Extrapolation_size = .01 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
 N_data = 10**4 # (i.e.: N)
 # Noise Parameters
@@ -54,16 +54,23 @@ if trial_run == True:
     # Number of Jobs (Cores to use)
     n_jobs = 3
     # Number of Random CV Draws
-    n_iter = 1
+    n_iter = 2
     n_iter_trees = 1#20
     # Number of CV Folds
     CV_folds = 2
+    
+    # JUST FOR TEST:
+    N_data = 10**3 # (i.e.: N)
 
     
     # Model Parameters
     #------------------#
     Epochs_dictionary = {'epochs': [10]}
-    NEU_Epochs_dictionary = {'epochs': [5]}
+    NEU_Epochs_Feature_dictionary = {'epochs': [2],
+                                     'homotopy_parameter': [0]}
+    
+    NEU_Epochs_dictionary = {'epochs': [5],
+                            'homotopy_parameter': [0]}
     
     Training_dictionary = {'batch_size': [8],
                                'learning_rate': [0.0001],
@@ -73,20 +80,20 @@ if trial_run == True:
     Vanilla_ffNN_dictionary = {'height': [5],
                                'depth': [1]}
 
-    robustness_dictionary = {'robustness_parameter': [0.01]}
+    robustness_dictionary = {'robustness_parameter': [.001]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
-                                               'readout_map_height': [5]}
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [1],
+                                               'readout_map_height': [4]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [2],
-                                               'feature_map_height': [5]}
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [1],
+                                               'feature_map_height': [4]}
                                                
     
     # Kernel Ridge #
     #--------------#
     param_grid_kernel_Ridge={"alpha": [1e0, 1e-3],
-                              "gamma": np.logspace(-2, 2, 2),
-                        "kernel": ["rbf", "laplacian"]}
+                             "gamma": np.logspace(-2, 2, 2),
+                             "kernel": ["rbf", "laplacian"]}
     
     
     
@@ -114,7 +121,11 @@ else:
     # Model Parameters
     #------------------#
     Epochs_dictionary = {'epochs': [50,100,150,200, 400, 600, 800, 1000]}
-    NEU_Epochs_dictionary = {'epochs': [50,100,150,200,300]}
+    NEU_Epochs_Feature_dictionary = {'epochs': [50,100,150,200, 400, 600, 800, 1000],
+                                     'homotopy_parameter': [0,0.00001,0.0001,0.001,0.01,0.05,0.1,0.5]}
+    NEU_Epochs_dictionary = {'epochs': [50,100,150,200,300],
+                            'homotopy_parameter': [0,0.00001,0.0001,0.001,0.01,0.05,0.1,0.5]}
+    
     Training_dictionary = {'batch_size': [8,16,32],
                                'learning_rate': [0.001,0.0005,0.00001],
                                'input_dim':[d],
@@ -157,12 +168,12 @@ param_grid_NEU_Nets = {**Training_dictionary,
                        **Vanilla_ffNN_dictionary,
                        **param_grid_NEU_readout_extra_parameters,
                        **param_grid_NEU_feature_extra_parameters,
-                       **Epochs_dictionary}
+                       **NEU_Epochs_Feature_dictionary}
 
 param_grid_NEU_Feature_Only_Nets = {**Training_dictionary,
                                     **robustness_dictionary,
                                     **param_grid_NEU_feature_extra_parameters,
-                                    **NEU_Epochs_dictionary}
+                                    **NEU_Epochs_Feature_dictionary}
 
 NEU_Structure_Dictionary = {**Training_dictionary,
                             **robustness_dictionary,

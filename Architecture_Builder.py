@@ -22,7 +22,7 @@
 # In[1]:
 
 
-def get_Reconfiguration_Network_Readout(learning_rate, input_dim, output_dim, readout_map_depth,readout_map_height,robustness_parameter):
+def get_Reconfiguration_Network_Readout(learning_rate, input_dim, output_dim, readout_map_depth,readout_map_height,robustness_parameter,homotopy_parameter):
     #--------------------------------------------------#
     # Build Regular Arch.
     #--------------------------------------------------#
@@ -36,10 +36,10 @@ def get_Reconfiguration_Network_Readout(learning_rate, input_dim, output_dim, re
     #-###############-#
     # NEU Readout Map #
     #-###############-#
-    deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(input_dim))(input_layer)
+    deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(input_dim), homotopy_parameter = homotopy_parameter)(input_layer)
     for i_readout_depth in range(readout_map_depth):
-        deep_readout_map = rescaled_swish_trainable()(deep_readout_map)
-        deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(input_dim))(deep_readout_map)
+        deep_readout_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_readout_map)
+        deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(input_dim), homotopy_parameter = homotopy_parameter)(deep_readout_map)
         
     # Projection Layer
 #     output_layer = projection_layer(deep_readout_map)
@@ -129,7 +129,7 @@ print('Complete NEU-Structure Building Procedure!!!')
 # In[ ]:
 
 
-def get_NEU_OLS(learning_rate, input_dim, output_dim, feature_map_depth, feature_map_height,robustness_parameter):
+def get_NEU_OLS(learning_rate, input_dim, output_dim, feature_map_depth, feature_map_height,robustness_parameter, homotopy_parameter):
     #--------------------------------------------------#
     # Build Regular Arch.
     #--------------------------------------------------#
@@ -142,12 +142,12 @@ def get_NEU_OLS(learning_rate, input_dim, output_dim, feature_map_depth, feature
     #-###############-#
     # NEU Feature Map #
     #-###############-#
-    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim)(input_layer)
+    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = 1)(input_layer)
 #     deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(input_layer)
     for i_feature_depth in range(feature_map_depth):
 #        # First Layer
-        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim)(deep_feature_map)
-        deep_feature_map = rescaled_swish_trainable()(deep_feature_map)
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = 1)(deep_feature_map)
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
 #         deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(deep_feature_map)
             
     
@@ -357,7 +357,7 @@ print('Deep Feature Builder - Ready')
 # In[ ]:
 
 
-def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter):
+def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter):
 
     #--------------------------------------------------#
     # Build Regular Arch.
@@ -371,12 +371,12 @@ def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_ma
     #-###############-#
     # NEU Feature Map #
     #-###############-#
-    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim)(input_layer)
+    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = homotopy_parameter)(input_layer)
 #     deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(input_layer)
     for i_feature_depth in range(feature_map_depth):
 #        # First Layer
-        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim)(deep_feature_map)
-        deep_feature_map = rescaled_swish_trainable()(deep_feature_map)
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
             
     
     
@@ -404,10 +404,10 @@ def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_ma
     #-###############-#
     # NEU Readout Map #
     #-###############-#
-    deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=output_dim)(core_layers)
+    deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=output_dim, homotopy_parameter = homotopy_parameter)(core_layers)
     for i_readout_depth in range(readout_map_depth):
-        deep_readout_map = rescaled_swish_trainable()(deep_readout_map)
-        deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=output_dim)(deep_readout_map)
+        deep_readout_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_readout_map)
+        deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=output_dim, homotopy_parameter = homotopy_parameter)(deep_readout_map)
     
     
     # Define Input/Output Relationship (Arch.)
@@ -487,7 +487,7 @@ print('Complete NEU-ffNN Training Procedure!!!')
 # In[ ]:
 
 
-def get_NEU_ffNN_w_proj(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter):
+def get_NEU_ffNN_w_proj(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter):
 
     #--------------------------------------------------#
     # Build Regular Arch.
@@ -501,12 +501,12 @@ def get_NEU_ffNN_w_proj(height, depth, learning_rate, input_dim, output_dim, fea
     #-###############-#
     # NEU Feature Map #
     #-###############-#
-    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim)(input_layer)
+    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = homotopy_parameter)(input_layer)
 #     deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(input_layer)
     for i_feature_depth in range(feature_map_depth):
 #        # First Layer
-        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim)(deep_feature_map)
-        deep_feature_map = rescaled_swish_trainable()(deep_feature_map)
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
             
     
     
@@ -535,10 +535,10 @@ def get_NEU_ffNN_w_proj(height, depth, learning_rate, input_dim, output_dim, fea
     #-###############-#
     # NEU Readout Map #
     #-###############-#
-    deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(output_dim+input_dim))(deep_readout_map)
+    deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(output_dim+input_dim), homotopy_parameter = homotopy_parameter)(deep_readout_map)
     for i_readout_depth in range(readout_map_depth):
-        deep_readout_map = rescaled_swish_trainable()(deep_readout_map)
-        deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(output_dim+input_dim))(deep_readout_map)
+        deep_readout_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_readout_map)
+        deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(output_dim+input_dim), homotopy_parameter = homotopy_parameter)(deep_readout_map)
     
     # Projection Layer
     output_layer = projection_layer(deep_readout_map)

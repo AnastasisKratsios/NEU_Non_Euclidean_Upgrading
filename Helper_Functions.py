@@ -110,6 +110,33 @@ def Robust_MSE(robustness_parameter=0.05):
     return loss
 
 
+# Homotopic Version:
+
+# In[ ]:
+
+
+# def Robust_MSE_homotopic(robustness_parameter=0.05, homotopy_parameter=1, input_tensor):
+#     def loss(y_true, y_pred):
+#         # Initialize Loss
+#         absolute_errors_eval = tf.math.abs((y_true - y_pred))
+
+#         # Compute Exponential        
+#         loss_out_expweights = tf.math.exp(robustness_parameter*absolute_errors_eval)
+#         loss_out_expweights_totals = tf.math.reduce_sum(loss_out_expweights)
+#         loss_out_weighted = loss_out_expweights/tf.math.reduce_sum(loss_out_expweights)
+#         loss_out_weighted = loss_out_weighted*absolute_errors_eval
+#         loss_out_weighted = tf.math.reduce_sum(loss_out_weighted)
+
+#         # Compute Homotopy Penalty
+#         absolute_errors_eval = tf.math.abs((y_true - y_pred))
+
+#         # Return Value
+#         loss_out = loss_out_weighted# - loss_average
+
+#         return loss_out
+#     return loss
+
+
 # #### The Numpy Version
 
 # In[4]:
@@ -339,7 +366,7 @@ class Special_Affine_Layer(tf.keras.layers.Layer):
 # ## Deep GLd Layer:
 # $$
 # \begin{aligned}
-# \operatorname{Deep-GL}_d(x) \triangleq& f^{Depth}\circ \dots f^1(x)\\
+# \operatorname{Deep-GL}_d(x) \triangleq& f^{Depth}\circ \dots \circ f^1(x)\\
 # f^i(x)\triangleq &\exp(A_2) \operatorname{Leaky-ReLU}\left(
 # \exp(A_1)x + b_1
 # \right)+ b_2
@@ -502,10 +529,11 @@ class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
 
 class Reconfiguration_unit(tf.keras.layers.Layer):
     
-    def __init__(self, units=16, input_dim=32, home_space_dim = d):
+    def __init__(self, units=16, input_dim=32, home_space_dim = d, homotopy_parameter = 0):
         super(Reconfiguration_unit, self).__init__()
         self.units = units
         self.home_space_dim = home_space_dim
+        self.homotopy_parameter = homotopy_parameter
     
     def build(self, input_shape):
         #------------------------------------------------------------------------------------#
@@ -558,20 +586,23 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
         # Mixture
         #------------------------------------------------------------------------------------#
         self.m_w1 = self.add_weight(name='no_decay',
-                                         shape=[1],
-                                         initializer='zeros',
-                                         trainable=True,
-                                         constraint=tf.keras.constraints.NonNeg())
+                                    shape=[1],
+                                    initializer='zeros',
+                                    trainable=True,
+                                    constraint=tf.keras.constraints.NonNeg(),
+                                    regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
         self.m_w2 = self.add_weight(name='weight_exponential',
-                                         shape=[1],
-                                         initializer='zeros',
-                                         trainable=True,
-                                         constraint=tf.keras.constraints.NonNeg())
+                                    shape=[1],
+                                    initializer='zeros',
+                                    trainable=True,
+                                    constraint=tf.keras.constraints.NonNeg(),
+                                    regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
         self.m_w3 = self.add_weight(name='bump',
-                                     shape=[1],
-                                     initializer='zeros',#RandomUniform(minval=.5, maxval=1),
-                                     trainable=True,
-                                     constraint=tf.keras.constraints.NonNeg())
+                                    shape=[1],
+                                    initializer='zeros',#RandomUniform(minval=.5, maxval=1),
+                                    trainable=True,
+                                    constraint=tf.keras.constraints.NonNeg(),
+                                    regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
         
         #------------------------------------------------------------------------------------#
         # Tangential Map
@@ -653,7 +684,7 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
     def bump_function(self, x):
 #         return tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
         bump_out = tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
-        bump_out = tf.math.pow(bump_out,(1/8))
+        bump_out = tf.math.pow(bump_out,(1/4))
         return bump_out
 
         
@@ -806,16 +837,18 @@ class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
 
 class rescaled_swish_trainable(tf.keras.layers.Layer):
     
-    def __init__(self, units=16, input_dim=32):
+    def __init__(self, units=16, input_dim=32, homotopy_parameter = 0):
         super(rescaled_swish_trainable, self).__init__()
         self.units = units
+        self.homotopy_parameter = homotopy_parameter
         
     def build(self, input_shape):
         self.relulevel = self.add_weight(name='relu_level',
-                                 shape=[1],
-                                 initializer='zeros',
-                                 trainable=True,
-                                 constraint=tf.keras.constraints.NonNeg())
+                                         shape=[1],
+                                         initializer='zeros',
+                                         trainable=True,
+                                         constraint=tf.keras.constraints.NonNeg(),
+                                         regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
 #                                  constraint=tf.keras.constraints.MinMaxNorm(min_value=-0.5, max_value=0.5))
                                 
     def call(self,inputs):
@@ -961,7 +994,7 @@ def get_Error_distribution_plots(test_set_data,
     # generate 5000 resampled sample means  =>
     means = [np.mean(np.random.choice(Er,size=len(Er),replace=True)) for i in range(5000)]
     NEU_means = [np.mean(np.random.choice(NEU_Er,size=len(NEU_Er),replace=True)) for i in range(5000)]
-    sns.distplot(means, color='r', kde=True, hist_kws=dict(edgecolor="b", linewidth=.675),label=model_name)
+    sns.distplot(means, color='r', kde=True, hist_kws=dict(edgecolor="r", linewidth=.675),label=model_name)
     sns.distplot(NEU_means, color='b', kde=True, hist_kws=dict(edgecolor="b", linewidth=.675),label=NEU_model_name)
     plt.xlabel("Initial Sample Mean: {}".format(xbar_init))
     plt.title("Distribution of Sample Mean")
