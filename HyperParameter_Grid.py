@@ -17,7 +17,7 @@ D = 1 # Dimension of Y
 #-------------------#
 # Test-set meta-parameters
 Train_step_proportion = .75 # (i.e.: ratio of train to test-set sizes)
-Extrapolation_size = .025 # (i.e.: size of test-train set domain (diameter/2))
+Extrapolation_size = .1 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
 N_data = 10**4 # (i.e.: N)
 # Noise Parameters
@@ -62,22 +62,25 @@ if trial_run == True:
     
     # Model Parameters
     #------------------#
-    Training_dictionary = {'batch_size': [16],
-                               'epochs': [200],
+    Epochs_dictionary = {'epochs': [10]}
+    NEU_Epochs_dictionary = {'epochs': [5]}
+    
+    Training_dictionary = {'batch_size': [8],
                                'learning_rate': [0.0001],
                                'input_dim':[d],
                                'output_dim':[D]}
     
-    Vanilla_ffNN_dictionary = {'height': [100],
-                               'depth': [4]}
+    Vanilla_ffNN_dictionary = {'height': [5],
+                               'depth': [1]}
 
     robustness_dictionary = {'robustness_parameter': [0.01]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [10],
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
                                                'readout_map_height': [5]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [10],
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [2],
                                                'feature_map_height': [5]}
+                                               
     
     # Kernel Ridge #
     #--------------#
@@ -110,8 +113,9 @@ else:
     
     # Model Parameters
     #------------------#
+    Epochs_dictionary = {'epochs': [50,100,150,200, 400, 600, 800, 1000]}
+    NEU_Epochs_dictionary = {'epochs': [50,100,150,200,300]}
     Training_dictionary = {'batch_size': [8,16,32],
-                               'epochs': [50,100,150,200, 400, 600, 800, 1000],
                                'learning_rate': [0.001,0.0005,0.00001],
                                'input_dim':[d],
                                'output_dim':[D]}
@@ -145,21 +149,25 @@ else:
 ### Create NEU parameter disctionary by parameters joining model it is upgrading ###
 #==================================================================================#
 param_grid_Vanilla_Nets = {**Training_dictionary,
-                       **Vanilla_ffNN_dictionary}
+                       **Vanilla_ffNN_dictionary,
+                       **Epochs_dictionary}
 
 param_grid_NEU_Nets = {**Training_dictionary,
                        **robustness_dictionary,
                        **Vanilla_ffNN_dictionary,
                        **param_grid_NEU_readout_extra_parameters,
-                       **param_grid_NEU_feature_extra_parameters}
+                       **param_grid_NEU_feature_extra_parameters,
+                       **Epochs_dictionary}
 
 param_grid_NEU_Feature_Only_Nets = {**Training_dictionary,
                                     **robustness_dictionary,
-                                    **param_grid_NEU_feature_extra_parameters}
+                                    **param_grid_NEU_feature_extra_parameters,
+                                    **NEU_Epochs_dictionary}
 
 NEU_Structure_Dictionary = {**Training_dictionary,
                             **robustness_dictionary,
-                            **param_grid_NEU_readout_extra_parameters}
+                            **param_grid_NEU_readout_extra_parameters,
+                            **NEU_Epochs_dictionary}
 
 # Update User #
 #-------------#

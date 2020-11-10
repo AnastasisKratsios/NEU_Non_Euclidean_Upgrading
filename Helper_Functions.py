@@ -653,7 +653,7 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
     def bump_function(self, x):
 #         return tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
         bump_out = tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
-        bump_out = tf.math.pow(bump_out,(1/4))
+        bump_out = tf.math.pow(bump_out,(1/8))
         return bump_out
 
         
@@ -969,7 +969,7 @@ def get_Error_distribution_plots(test_set_data,
     plt.legend(loc="upper left")
     plt.title("Model Predictions")
     # Save Plot
-    plt.savefig('./outputs/plotsANDfigures/'+model_name+'.eps', format='eps')
+    plt.savefig('./outputs/plotsANDfigures/'+model_name+'.pdf', format='pdf')
     # Show Plot
     if is_visuallty_verbose == True:
         plt.show(block=False)
