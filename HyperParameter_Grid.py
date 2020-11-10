@@ -4,7 +4,7 @@
 # In[ ]:
 
 # Verbosity Parameters
-is_visuallty_verbose = False
+is_visuallty_verbose = True
 
 #---------------------------------#
 # General Formatting Parameter(s) #
@@ -32,7 +32,7 @@ Distortion = .1 # (i.e.: δ_i)
 # In[ ]:
 
 
-trial_run = True
+trial_run = False
 # This one is with larger height
 
 # This file contains the hyper-parameter grids used to train the imprinted-tree nets.
@@ -66,8 +66,8 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     Epochs_dictionary = {'epochs': [10]}
-    NEU_Epochs_Feature_dictionary = {'epochs': [50],
-                                     'homotopy_parameter': [0]}
+    NEU_Epochs_Feature_dictionary = {'epochs': [100],
+                                     'homotopy_parameter': [0.1]}
     
     NEU_Epochs_dictionary = {'epochs': [5],
                             'homotopy_parameter': [0]}
@@ -80,12 +80,12 @@ if trial_run == True:
     Vanilla_ffNN_dictionary = {'height': [5],
                                'depth': [1]}
 
-    robustness_dictionary = {'robustness_parameter': [.001]}
+    robustness_dictionary = {'robustness_parameter': [.1]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [1],
-                                               'readout_map_height': [4]}
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [10],
+                                               'readout_map_height': [5]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [10],
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [20],
                                                'feature_map_height': [10]}
                                                
     
@@ -101,8 +101,8 @@ if trial_run == True:
     #--------------------#
     Rand_Forest_Grid = {'learning_rate': [0.01],
                         'max_depth': [6],
-                        'min_samples_leaf': [8],
-                       'n_estimators': [20],
+                        'min_samples_leaf': [3],
+                       'n_estimators': [100],
                        }
     
 else:
@@ -110,12 +110,12 @@ else:
     # Training Parameters
     #----------------------#
     # Number of Jobs (Cores to use)
-    n_jobs = 60
+    n_jobs = 4
     # Number of Random CV Draws
-    n_iter = 20
-    n_iter_trees = 20
+    n_iter = 2
+    n_iter_trees = 2
     # Number of CV Folds
-    CV_folds = 4
+    CV_folds = 2
     
     
     # Model Parameters
