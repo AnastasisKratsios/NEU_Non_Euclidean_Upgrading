@@ -830,7 +830,20 @@ class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
         return tf.matmul(inputs, expw) + self.b
 
 
-# $\sigma_{\operatorname{rescaled-swish-trainable}}:x\mapsto 2 \frac{x}{1+ \exp(-\beta x)};\qquad \beta \in [0,\infty)$.
+# $\sigma_{\operatorname{rescaled-swish-trainable}}:x\mapsto 2 \frac{x}{1+ \exp(-\beta x)}=x\left(1 + \tanh(\frac{\beta}{2} x)\right)
+# ;\qquad \beta \in [0,\infty)$.
+# 
+# Instead, we use the following "corrected" parameterizable swish(-like) activation function
+# $$
+# \sigma_{\beta}:x\mapsto + \tanh(\beta x);\qquad \beta \in [0,\infty).
+# $$
+# The benefit is that it is an isotopty to the identity, and asymptotically, it reproduces the step-like function:
+# $$
+# \lim\limits_{\beta \uparrow \infty} \sigma_{\beta}(x) =\sigma_{identity + step}(x)\triangleq \begin{cases}
+# x +1 & x\geq 0\\
+# x-1 & x<0.
+# \end{cases}
+# $$
 
 # In[ ]:
 
@@ -852,10 +865,15 @@ class rescaled_swish_trainable(tf.keras.layers.Layer):
 #                                  constraint=tf.keras.constraints.MinMaxNorm(min_value=-0.5, max_value=0.5))
                                 
     def call(self,inputs):
-        swish_numerator_rescaled = 2*inputs
+        # Trainable Swish
+#         swish_numerator_rescaled = 2*inputs
+#         parameter = self.relulevel
+#         swish_denominator_trainable = tf.math.sigmoid(parameter*inputs)
+#         swish_trainable_out = tf.math.multiply(swish_numerator_rescaled,swish_denominator_trainable)
+        # Isotopic Activation
         parameter = self.relulevel
-        swish_denominator_trainable = tf.math.sigmoid(parameter*inputs)
-        swish_trainable_out = tf.math.multiply(swish_numerator_rescaled,swish_denominator_trainable)
+        non_linear_component = tf.math.tanh(parameter*inputs)
+        swish_trainable_out = inputs + non_linear_component
         return swish_trainable_out
 
 

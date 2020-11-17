@@ -13,7 +13,7 @@
 
 # # Generate Training Data
 
-# In[98]:
+# In[1]:
 
 
 # First Round Initializations (Global Level) #
@@ -35,7 +35,7 @@ exec(open('Architecture_Builder.py').read())
 # - For evaluating jump-type performance when faced with a discontinuity: "jumpdiscontinuity"
 # - For fun: "the_nightmare"
 
-# In[99]:
+# In[2]:
 
 
 #------------------------#
@@ -63,14 +63,14 @@ exec(open('Data_Generator.py').read())
 # .
 # $$
 
-# In[100]:
+# In[3]:
 
 
 # GET STATISTICAL VARIANCE ESTIMATE
 var_estimate = np.sum(np.diff(data_y)**2)/(((data_y.shape[0])-1))
+var_estimate = np.float(round(var_estimate,3))
 
-
-robustness_dictionary = {'robustness_parameter': [np.float(round(var_estimate,3))]}
+robustness_dictionary = {'robustness_parameter': [var_estimate,var_estimate*2,var_estimate*3]}
 #==================================================================================#        
 ### Create NEU parameter disctionary by parameters joining model it is upgrading ###
 #==================================================================================#
@@ -100,7 +100,7 @@ NEU_Structure_Dictionary = {**Training_dictionary,
 
 # Run univariate regression benchmarks file:
 
-# In[3]:
+# In[4]:
 
 
 # %run Univariate_Regression_Benchmark_Models.ipynb
@@ -111,7 +111,7 @@ exec(open('Univariate_Regression_Benchmark_Models.py').read())
 # - Load Dependancies,
 # - Makes Paths if missing.
 
-# In[101]:
+# In[5]:
 
 
 # Second Round Re-Initializations (Global Level) #
@@ -125,7 +125,7 @@ exec(open('Architecture_Builder.py').read())
 
 # #### Boost input dimension if $d=1$, so that reconfigurations can be universal.
 
-# In[102]:
+# In[6]:
 
 
 if d<= 1:
@@ -149,7 +149,7 @@ else:
 
 # We train NEU's universal linearizing feature map.
 
-# In[49]:
+# In[7]:
 
 
 tf.random.set_seed(2020)
@@ -188,7 +188,7 @@ data_x_NEU_test_feature_only = data_x_NEU_test[:,:d]
 
 # ### NEU-Linear *(decoupled implementation)*
 
-# In[50]:
+# In[8]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -212,7 +212,7 @@ NEU_lin_reg = ElasticNetCV(cv=5, random_state=0, alphas = np.linspace(0,(10**2),
 NEU_lin_reg.fit(data_x_featured_train,data_y)
 
 
-# In[51]:
+# In[9]:
 
 
 # Pre-process Linearized Data #
@@ -240,7 +240,7 @@ NEU_OLS_y_hat_train, NEU_OLS_y_hat_test = build_NEU_Structure(n_folds = CV_folds
 
 # #### Visual Comaprison between the OLS and the NEU-OLS models:
 
-# In[52]:
+# In[10]:
 
 
 # Initialize Plot #
@@ -279,7 +279,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[53]:
+# In[11]:
 
 
 get_Error_distribution_plots(data_y_test,ENET_OLS_y_hat_test,NEU_OLS_y_hat_test,"OLS")
@@ -287,7 +287,7 @@ get_Error_distribution_plots(data_y_test,ENET_OLS_y_hat_test,NEU_OLS_y_hat_test,
 
 # #### Comparison between Elastic-Net and NEU-ENET
 
-# In[54]:
+# In[12]:
 
 
 #-----------------------#
@@ -308,7 +308,7 @@ print(reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test))
 
 # ### NEU-Smoothing Splines
 
-# In[ ]:
+# In[13]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -339,7 +339,7 @@ NEU_Ssplines_y_hat_train, NEU_Ssplines_y_hat_test = build_NEU_Structure(n_folds 
 
 # #### Visual Comaprison between the Smoothing Splines and the NEU-Smoothing Splines models:
 
-# In[ ]:
+# In[14]:
 
 
 # Initialize Plot #
@@ -378,7 +378,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[ ]:
+# In[15]:
 
 
 get_Error_distribution_plots(data_y_test,f_hat_smoothing_splines_test,NEU_Ssplines_y_hat_test,"Splines")
@@ -386,7 +386,7 @@ get_Error_distribution_plots(data_y_test,f_hat_smoothing_splines_test,NEU_Ssplin
 
 # #### Numerical Comparison between the Smoothing Splines regressor and NEU-Smoothing Splines regressor models:
 
-# In[ ]:
+# In[16]:
 
 
 #-----------------------#
@@ -403,7 +403,7 @@ print(reporter(NEU_Ssplines_y_hat_train,NEU_Ssplines_y_hat_test,data_y,data_y_te
 
 # ### NEU-Kernel Ridge Regression *(decoupled implementation)*
 
-# In[ ]:
+# In[17]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -434,7 +434,7 @@ NEU_KReg_y_hat_train, NEU_KReg_y_hat_test = build_NEU_Structure(n_folds = CV_fol
 
 # #### Visual Comaprison between the Kernel Ridge Regression and the NEU-Kernel Ridge Regression models:
 
-# In[ ]:
+# In[18]:
 
 
 # Initialize Plot #
@@ -472,7 +472,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[ ]:
+# In[19]:
 
 
 get_Error_distribution_plots(data_y_test,f_hat_kernel_ridge_test,NEU_KReg_y_hat_test,"Kernel_Ridge")
@@ -480,7 +480,7 @@ get_Error_distribution_plots(data_y_test,f_hat_kernel_ridge_test,NEU_KReg_y_hat_
 
 # #### Numerical Comparison between the Kernel Ridge regressor and NEU-Kernel Ridge regressor models:
 
-# In[ ]:
+# In[20]:
 
 
 #-----------------------#
@@ -498,7 +498,7 @@ print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 # ## Tree Model(s):
 # *Naturally, all of these have a decoupled implementation*.
 
-# In[ ]:
+# In[21]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -529,7 +529,7 @@ NEU_GBRF_y_hat_train, NEU_GBRF_y_hat_test = build_NEU_Structure(n_folds = CV_fol
 
 # #### Visual Comaprison between the GBRF and the NEU-GBRF models:
 
-# In[ ]:
+# In[22]:
 
 
 # Initialize Plot #
@@ -569,7 +569,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[ ]:
+# In[23]:
 
 
 get_Error_distribution_plots(data_y_test,GBRF_y_hat_test,NEU_GBRF_y_hat_test,"GBRF")
@@ -577,7 +577,7 @@ get_Error_distribution_plots(data_y_test,GBRF_y_hat_test,NEU_GBRF_y_hat_test,"GB
 
 # #### Numerical Comparison between the GBRF and NEU-GBRF models:
 
-# In[ ]:
+# In[24]:
 
 
 #---------------#
@@ -603,7 +603,7 @@ print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 # 
 # Here we only use reconfiguration networks to learn an appropriate readout map.
 
-# In[ ]:
+# In[25]:
 
 
 tf.random.set_seed(2020)
@@ -625,7 +625,7 @@ NEU_ffNN_y_hat_train, NEU_ffNN_y_hat_test = build_NEU_ffNN(n_folds = CV_folds,
 # #### B) $\pi\circ \rho(\hat{f}\circ \phi(\cdot),\cdot)$
 # Here we use reconfigurations to learn an appropriate structure map. 
 
-# In[103]:
+# In[26]:
 
 
 tf.random.set_seed(2020)
@@ -640,7 +640,7 @@ NEU_ffNN_y_hat_train_w_proj, NEU_ffNN_y_hat_test_w_proj = build_NEU_ffNN_w_proj(
 
 # #### Decoupled Implementation
 
-# In[ ]:
+# In[27]:
 
 
 tf.random.set_seed(2020)
@@ -690,7 +690,7 @@ print("NEU Statue: Trained")
 
 # ## Visualization
 
-# In[ ]:
+# In[28]:
 
 
 # Initialize Plot #
@@ -736,7 +736,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[ ]:
+# In[29]:
 
 
 get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test,"ffNN")
@@ -752,7 +752,7 @@ get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test,"ff
 
 # ## Generate Results Table(s):
 
-# In[ ]:
+# In[30]:
 
 
 #==========#
@@ -796,7 +796,7 @@ test__performance.to_latex("./outputs/tables/Test_performance.tex")
 
 # # Visualize Predictions
 
-# In[ ]:
+# In[31]:
 
 
 # Initialize Plot #
@@ -864,7 +864,7 @@ if is_visuallty_verbose == True:
 # - First, we print the comparison tables (so it can be viewed from the command-line if it is being run live on a grid/cluster/remotely).
 # - Second, we display the training and testing performances in clean dataframes.
 
-# In[ ]:
+# In[32]:
 
 
 #--------------------#
@@ -879,7 +879,7 @@ print("NEU-OLS-Performance:")
 print(reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test))
 
 
-# In[ ]:
+# In[33]:
 
 
 #-----------------------#
@@ -894,7 +894,7 @@ print("NEU-Kernel Ridge-Performance:")
 print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 
 
-# In[ ]:
+# In[34]:
 
 
 #---------------#
@@ -909,7 +909,7 @@ print("NEU-GBRF-Performance:")
 print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 
 
-# In[ ]:
+# In[35]:
 
 
 #-----------------------------------------------------#
@@ -924,7 +924,7 @@ print("LOESS Performance:")
 print(reporter(LOESS_prediction_train,LOESS_prediction_test,data_y,data_y_test))
 
 
-# In[ ]:
+# In[36]:
 
 
 #--------------#
@@ -947,7 +947,7 @@ print(reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_
 
 # ## Re-Summarize Learning Problem for easy recap :)
 
-# In[ ]:
+# In[37]:
 
 
 print("Simulation Confiugration Information:")
@@ -960,7 +960,7 @@ print(" ")
 
 # ## Train-Set Performance
 
-# In[ ]:
+# In[38]:
 
 
 train_performance
@@ -968,7 +968,7 @@ train_performance
 
 # ## Test-Set Performance
 
-# In[ ]:
+# In[39]:
 
 
 test__performance
