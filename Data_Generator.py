@@ -52,7 +52,7 @@ if Option_Function == "jumpdiscontinuity":
 if Option_Function == "the_nightmare":
     # For fun: The Nightmare
     def unknown_f(x):
-        unknown_out = np.minimum(np.exp(-1/(1+x)**2),x+np.cos(x)) + np.cos(np.exp(2+x)) * np.maximum(0,np.sign(x))
+        unknown_out = np.minimum(np.exp(-1/(1+x)**2),x+np.cos(x)) + np.cos(np.exp(2+x)) * np.maximum(0,np.sign(x)) + x
         return unknown_out
 
 

@@ -42,7 +42,7 @@ exec(open('Architecture_Builder.py').read())
 # Run External Notebooks #
 #------------------------#
 # Generate Data
-Option_Function = "jumpdiscontinuity"
+Option_Function = "the_nightmare"
 # %run Data_Generator.ipynb
 exec(open('Data_Generator.py').read())
 
@@ -133,8 +133,8 @@ if d<= 1:
     data_x_raw = data_x
     data_x_test_raw = data_x_test
     # Bump Dimension so Reconfiguration network properties hold
-    data_x = np.concatenate([data_x,data_x**2],axis=1)
-    data_x_test = np.concatenate([data_x_test,data_x_test**2],axis=1)
+    data_x = np.concatenate([data_x,data_x],axis=1)
+    data_x_test = np.concatenate([data_x_test,data_x_test],axis=1)
     d = d+1
 else:
     # Backup data
@@ -501,6 +501,13 @@ print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 # In[21]:
 
 
+# TEMP
+exec(open('HyperParameter_Grid.py').read())
+
+
+# In[22]:
+
+
 # 2) Perform Linear Regression on Feature-Space #
 #===============================================#
 NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test, GBRF_w_NEU_features = get_GBRF(X_train = data_x_featured_train,
@@ -517,7 +524,7 @@ data_x_NEU_train_GBRF = np.concatenate([data_x_featured_train,
 data_x_NEU_test_GBRF = np.concatenate([data_x_featured_test,
                                   NEU_GBRF_y_hat_test.reshape(data_x_featured_test.shape[0],D)],axis=1)
 # 3) Learn Structure Map #
-#========================#
+# ========================#
 NEU_GBRF_y_hat_train, NEU_GBRF_y_hat_test = build_NEU_Structure(n_folds = CV_folds, 
                                                                 n_jobs = n_jobs, 
                                                                 n_iter = n_iter, 
@@ -529,7 +536,7 @@ NEU_GBRF_y_hat_train, NEU_GBRF_y_hat_test = build_NEU_Structure(n_folds = CV_fol
 
 # #### Visual Comaprison between the GBRF and the NEU-GBRF models:
 
-# In[22]:
+# In[23]:
 
 
 # Initialize Plot #
@@ -569,7 +576,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[23]:
+# In[24]:
 
 
 get_Error_distribution_plots(data_y_test,GBRF_y_hat_test,NEU_GBRF_y_hat_test,"GBRF")
@@ -577,7 +584,7 @@ get_Error_distribution_plots(data_y_test,GBRF_y_hat_test,NEU_GBRF_y_hat_test,"GB
 
 # #### Numerical Comparison between the GBRF and NEU-GBRF models:
 
-# In[24]:
+# In[25]:
 
 
 #---------------#
@@ -603,7 +610,7 @@ print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 # 
 # Here we only use reconfiguration networks to learn an appropriate readout map.
 
-# In[25]:
+# In[26]:
 
 
 tf.random.set_seed(2020)
@@ -625,7 +632,7 @@ NEU_ffNN_y_hat_train, NEU_ffNN_y_hat_test = build_NEU_ffNN(n_folds = CV_folds,
 # #### B) $\pi\circ \rho(\hat{f}\circ \phi(\cdot),\cdot)$
 # Here we use reconfigurations to learn an appropriate structure map. 
 
-# In[26]:
+# In[27]:
 
 
 tf.random.set_seed(2020)
@@ -640,7 +647,7 @@ NEU_ffNN_y_hat_train_w_proj, NEU_ffNN_y_hat_test_w_proj = build_NEU_ffNN_w_proj(
 
 # #### Decoupled Implementation
 
-# In[27]:
+# In[28]:
 
 
 tf.random.set_seed(2020)
@@ -690,7 +697,7 @@ print("NEU Statue: Trained")
 
 # ## Visualization
 
-# In[28]:
+# In[29]:
 
 
 # Initialize Plot #
@@ -736,7 +743,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[29]:
+# In[30]:
 
 
 get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test,"ffNN")
@@ -752,7 +759,7 @@ get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test,"ff
 
 # ## Generate Results Table(s):
 
-# In[30]:
+# In[31]:
 
 
 #==========#
@@ -796,7 +803,7 @@ test__performance.to_latex("./outputs/tables/Test_performance.tex")
 
 # # Visualize Predictions
 
-# In[31]:
+# In[32]:
 
 
 # Initialize Plot #
@@ -864,7 +871,7 @@ if is_visuallty_verbose == True:
 # - First, we print the comparison tables (so it can be viewed from the command-line if it is being run live on a grid/cluster/remotely).
 # - Second, we display the training and testing performances in clean dataframes.
 
-# In[32]:
+# In[33]:
 
 
 #--------------------#
@@ -879,7 +886,7 @@ print("NEU-OLS-Performance:")
 print(reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test))
 
 
-# In[33]:
+# In[34]:
 
 
 #-----------------------#
@@ -894,7 +901,7 @@ print("NEU-Kernel Ridge-Performance:")
 print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 
 
-# In[34]:
+# In[35]:
 
 
 #---------------#
@@ -909,7 +916,7 @@ print("NEU-GBRF-Performance:")
 print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 
 
-# In[35]:
+# In[36]:
 
 
 #-----------------------------------------------------#
@@ -924,7 +931,7 @@ print("LOESS Performance:")
 print(reporter(LOESS_prediction_train,LOESS_prediction_test,data_y,data_y_test))
 
 
-# In[36]:
+# In[37]:
 
 
 #--------------#
@@ -947,7 +954,7 @@ print(reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_
 
 # ## Re-Summarize Learning Problem for easy recap :)
 
-# In[37]:
+# In[38]:
 
 
 print("Simulation Confiugration Information:")
@@ -960,7 +967,7 @@ print(" ")
 
 # ## Train-Set Performance
 
-# In[38]:
+# In[39]:
 
 
 train_performance
@@ -968,7 +975,7 @@ train_performance
 
 # ## Test-Set Performance
 
-# In[39]:
+# In[40]:
 
 
 test__performance

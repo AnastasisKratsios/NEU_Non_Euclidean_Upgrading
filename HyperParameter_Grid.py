@@ -65,29 +65,29 @@ if trial_run == True:
     
     # Model Parameters
     #------------------#
-    Epochs_dictionary = {'epochs': [10]}
-    NEU_Epochs_Feature_dictionary_coupled = {'epochs': [10],
-                                     'homotopy_parameter': [10000]}
-    NEU_Epochs_Feature_dictionary = {'epochs': [10],
-                                     'homotopy_parameter': [10000]}
+    Epochs_dictionary = {'epochs': [100]}
+    NEU_Epochs_Feature_dictionary_coupled = {'epochs': [100],
+                                     'homotopy_parameter': [0]}
+    NEU_Epochs_Feature_dictionary = {'epochs': [100],
+                                     'homotopy_parameter': [0]}
     
-    NEU_Epochs_dictionary = {'epochs': [10],
+    NEU_Epochs_dictionary = {'epochs': [100],
                             'homotopy_parameter': [0]}
     
-    Training_dictionary = {'batch_size': [8],
+    Training_dictionary = {'batch_size': [50],
                                'learning_rate': [0.0001],
                                'input_dim':[d],
                                'output_dim':[D]}
     
-    Vanilla_ffNN_dictionary = {'height': [5],
+    Vanilla_ffNN_dictionary = {'height': [20],
                                'depth': [1]}
 
     robustness_dictionary = {'robustness_parameter': [0.000001]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [5],
+    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
                                                'readout_map_height': [5]}
     
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [2],
+    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [5],
                                                'feature_map_height': [5]}
                                                
     
@@ -104,7 +104,7 @@ if trial_run == True:
     Rand_Forest_Grid = {'learning_rate': [0.01],
                         'max_depth': [6],
                         'min_samples_leaf': [3],
-                       'n_estimators': [100],
+                       'n_estimators': [200],
                        }
     
 else:

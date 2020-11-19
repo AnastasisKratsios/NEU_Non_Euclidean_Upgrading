@@ -541,8 +541,9 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
         #------------------------------------------------------------------------------------#
         self.location = self.add_weight(name='location',
                                     shape=(self.home_space_dim,),
+                                    trainable=True,
                                     initializer='random_normal',
-                                    trainable=True)
+                                    regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
         
         
         #------------------------------------------------------------------------------------#
@@ -562,16 +563,16 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
         self.sigma = self.add_weight(name='bump_threshfold',
                                         shape=[1],
                                         initializer=RandomUniform(minval=.5, maxval=1),
-                                        trainable=False,
+                                        trainable=True,
                                         constraint=tf.keras.constraints.NonNeg())
         self.a = self.add_weight(name='bump_scale',
                                         shape=[1],
                                         initializer='ones',
-                                        trainable=False)
+                                        trainable=True)
         self.b = self.add_weight(name='bump_location',
                                         shape=[1],
                                         initializer='zeros',
-                                        trainable=False)
+                                        trainable=True)
         
         #------------------------------------------------------------------------------------#
         # Exponential Decay
@@ -862,7 +863,6 @@ class rescaled_swish_trainable(tf.keras.layers.Layer):
                                          trainable=True,
                                          constraint=tf.keras.constraints.NonNeg(),
                                          regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
-#                                  constraint=tf.keras.constraints.MinMaxNorm(min_value=-0.5, max_value=0.5))
                                 
     def call(self,inputs):
         # Trainable Swish
