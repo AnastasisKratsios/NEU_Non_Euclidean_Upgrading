@@ -126,10 +126,16 @@ print('Complete NEU-Structure Building Procedure!!!')
 
 # Get NEU-OLS
 
+# In[1]:
+
+
+import numpy as np
+
+
 # In[ ]:
 
 
-def get_NEU_OLS(learning_rate, input_dim, output_dim, feature_map_depth, feature_map_height,robustness_parameter, homotopy_parameter):
+def get_NEU_OLS(learning_rate, input_dim, output_dim, feature_map_depth, feature_map_height,robustness_parameter, homotopy_parameter,implicit_dimension):
     #--------------------------------------------------#
     # Build Regular Arch.
     #--------------------------------------------------#
@@ -142,13 +148,20 @@ def get_NEU_OLS(learning_rate, input_dim, output_dim, feature_map_depth, feature
     #-###############-#
     # NEU Feature Map #
     #-###############-#
-    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = 1)(input_layer)
-#     deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(input_layer)
+    ##Random Embedding
+    ### Compute Required Dimension
+    embedding_dimension = 2*np.maximum(np.maximum(input_dim,output_dim),implicit_dimension)
+    ### Execute Random Embedding
+    deep_feature_map  = fullyConnected_Dense(embedding_dimension)(input_layer)
+    ## Homeomorphic Part
     for i_feature_depth in range(feature_map_depth):
-#        # First Layer
-        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = 1)(deep_feature_map)
-        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        # First Layer
+        ## Spacial-Dependent part of reconfiguration unit
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=embedding_dimension, homotopy_parameter = 1)(deep_feature_map)
+        ## Constant part of reconfiguration unit
 #         deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(deep_feature_map)
+        ## Non-linear part of reconfiguration unit
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
             
     
     
@@ -357,7 +370,7 @@ print('Deep Feature Builder - Ready')
 # In[ ]:
 
 
-def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter):
+def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter,implicit_dimension):
 
     #--------------------------------------------------#
     # Build Regular Arch.
@@ -371,11 +384,16 @@ def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_ma
     #-###############-#
     # NEU Feature Map #
     #-###############-#
-    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = homotopy_parameter)(input_layer)
-#     deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(input_layer)
+    ##Random Embedding
+    ### Compute Required Dimension
+    embedding_dimension = 2*np.maximum(np.maximum(input_dim,output_dim),implicit_dimension)
+    ### Execute Random Embedding
+    deep_feature_map  = fullyConnected_Dense(embedding_dimension)(input_layer)
+    ### Execute Random Embedding
     for i_feature_depth in range(feature_map_depth):
 #        # First Layer
-        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=embedding_dimension, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        deep_feature_map = fullyConnected_Dense_Invertible(embedding_dimension)(input_layer)
         deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
             
     
@@ -487,7 +505,7 @@ print('Complete NEU-ffNN Training Procedure!!!')
 # In[ ]:
 
 
-def get_NEU_ffNN_w_proj(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter):
+def get_NEU_ffNN_w_proj(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter,implicit_dimension):
 
     #--------------------------------------------------#
     # Build Regular Arch.
@@ -501,11 +519,18 @@ def get_NEU_ffNN_w_proj(height, depth, learning_rate, input_dim, output_dim, fea
     #-###############-#
     # NEU Feature Map #
     #-###############-#
-    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = homotopy_parameter)(input_layer)
-#     deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(input_layer)
+        #-###############-#
+    # NEU Feature Map #
+    #-###############-#
+    ##Random Embedding
+    ### Compute Required Dimension
+    embedding_dimension = 2*np.maximum(np.maximum(input_dim,output_dim),implicit_dimension)
+    ### Execute Random Embedding
+    deep_feature_map  = fullyConnected_Dense(embedding_dimension)(input_layer)
     for i_feature_depth in range(feature_map_depth):
 #        # First Layer
-        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=input_dim, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=embedding_dimension, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        deep_feature_map = fullyConnected_Dense_Invertible(embedding_dimension)(input_layer)
         deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
             
     
