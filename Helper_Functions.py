@@ -206,27 +206,6 @@ class fullyConnected_Dense(tf.keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 
 
-# ### Random Feed-Forward Layers
-
-# In[ ]:
-
-
-class RandomConnected_Dense(tf.keras.layers.Layer):
-
-    def __init__(self, units=16, input_dim=32):
-        super(fullyConnected_Dense, self).__init__()
-        self.units = units
-
-    def build(self, input_shape):
-        self.w = self.add_weight(name='Weights_ffNN',
-                                 shape=(input_shape[-1], self.units),
-                               initializer='random_normal',
-                               trainable=False)
-
-    def call(self, inputs):
-        return tf.matmul(inputs, self.w)
-
-
 # ### Homeomorphism Layers:
 # - Shift
 # - Euclidean Group
@@ -481,11 +460,11 @@ class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
                                    trainable=False)
         self.w = self.add_weight(name='Weights_ffNN',
                                  shape=(input_shape[-1], input_shape[-1]),
-                                 initializer='GlorotUniform',
+                                 initializer='zeros',
                                  trainable=True)
         self.b = self.add_weight(name='bias_ffNN',
                                  shape=(self.units,),
-                                 initializer='GlorotUniform',
+                                 initializer='zeros',
                                  trainable=True)
         # Numerical Stability Parameter(s)
         #----------------------------------#
@@ -609,19 +588,19 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
         #------------------------------------------------------------------------------------#
         self.m_w1 = self.add_weight(name='no_decay',
                                     shape=[1],
-                                    initializer='GlorotUniform',
+                                    initializer=RandomUniform(minval=.001, maxval=0.01),
                                     trainable=True,
                                     constraint=tf.keras.constraints.NonNeg(),
                                     regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
         self.m_w2 = self.add_weight(name='weight_exponential',
                                     shape=[1],
-                                    initializer='GlorotUniform',
+                                    initializer=RandomUniform(minval=.001, maxval=0.01),
                                     trainable=True,
                                     constraint=tf.keras.constraints.NonNeg(),
                                     regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
         self.m_w3 = self.add_weight(name='bump',
                                     shape=[1],
-                                    initializer='GlorotUniform',#RandomUniform(minval=.5, maxval=1),
+                                    initializer=RandomUniform(minval=.001, maxval=0.01),
                                     trainable=True,
                                     constraint=tf.keras.constraints.NonNeg(),
                                     regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
@@ -825,11 +804,11 @@ class fullyConnected_Dense_Invertible(tf.keras.layers.Layer):
                                    trainable=False)
         self.w = self.add_weight(name='Weights_ffNN',
                                  shape=(input_shape[-1], input_shape[-1]),
-                                 initializer='GlorotUniform',
+                                 initializer='zeros',
                                  trainable=True)
         self.b = self.add_weight(name='bias_ffNN',
                                  shape=(self.units,),
-                                 initializer='GlorotUniform',
+                                 initializer='zeros',
                                  trainable=True)
         # Numerical Stability Parameter(s)
         #----------------------------------#
@@ -880,7 +859,7 @@ class rescaled_swish_trainable(tf.keras.layers.Layer):
     def build(self, input_shape):
         self.relulevel = self.add_weight(name='relu_level',
                                          shape=[1],
-                                         initializer='ones',
+                                         initializer='zeros',
                                          trainable=True,
                                          constraint=tf.keras.constraints.NonNeg(),
                                          regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
@@ -901,10 +880,26 @@ class rescaled_swish_trainable(tf.keras.layers.Layer):
 # #### Projection Layers
 # This layer maps $(x,y)\mapsto y$.
 
-# In[12]:
+# In[60]:
 
 
 projection_layer = tf.keras.layers.Lambda(lambda x: x[:, -D:])
+
+
+# In[ ]:
+
+
+# class projection_layer(tf.keras.layers.Layer):
+
+#     def __init__(self, units=16, input_dim=32, product_dim=1, proj_dimension = 1):
+#         super(projection_layer, self).__init__()
+#         self.units = units
+#         self.proj_dimension = proj_dimension
+#         self.product_dim = product_dim
+
+#     def call(self, inputs):
+#         projector = tf.linalg.diag(np.concatenate([np.zeros(self.product_dim),np.ones(self.proj_dimension)]))
+#         return tf.matmul(inputs, projector) 
 
 
 # ---

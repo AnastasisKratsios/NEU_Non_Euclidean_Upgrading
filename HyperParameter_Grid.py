@@ -21,7 +21,7 @@ Extrapolation_size = .01 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
 N_data = 10**3 # (i.e.: N)
 # Noise Parameters
-noise_level = .1 # (i.e.: ε_i)
+noise_level = .01 # (i.e.: ε_i)
 Distortion = 0 # (i.e.: δ_i)
 
 
@@ -60,37 +60,40 @@ if trial_run == True:
     CV_folds = 2
     
     # JUST FOR TEST:
-    N_data = 10**4# (i.e.: N)
+    N_data = 10**2# (i.e.: N)
 
     
     # Model Parameters
     #------------------#
-    Epochs_dictionary = {'epochs': [100]}
+    ## General
+    Training_dictionary = {'batch_size': [16],
+                           'input_dim':[d],
+                           'output_dim':[D]}
+    
+
+    ## Vanilla
+    Training_Vanilla_dictionary = {'epochs': [50],
+                                  'learning_rate': [0.0001]}
+    Vanilla_ffNN_dictionary = {'height': [10],
+                               'depth': [3]}
+    
     ## NEU
     ### Readout
-    NEU_Epochs_dictionary = {'epochs': [100],
-                            'homotopy_parameter': [0]}
+    NEU_Readout_dictionary = {'epochs': [50],
+                              'learning_rate': [0.001],
+                              'homotopy_parameter': [0],
+                              'readout_map_depth': [2],
+                              'readout_map_height': [5],
+                              'robustness_parameter': [0.0001]}
+    
     ### Feature
-    NEU_Epochs_Feature_dictionary = {'epochs': [100],
-                                     'homotopy_parameter': [0],
-                                     'implicit_dimension': [100]}
-
-    ## GENERAL
-    Training_dictionary = {'batch_size': [16],
-                               'learning_rate': [0.01],
-                               'input_dim':[d],
-                               'output_dim':[D]}
-    
-    Vanilla_ffNN_dictionary = {'height': [200],
-                               'depth': [3]}
-
-    robustness_dictionary = {'robustness_parameter': [0.0001]}
-    
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [2],
-                                               'readout_map_height': [5]}
-    
-    param_grid_NEU_feature_extra_parameters = {'feature_map_depth': [2],
-                                               'feature_map_height': [5]}
+    NEU_Feature_dictionary = {'epochs': [100],
+                              'learning_rate': [0.001],
+                              'homotopy_parameter': [0],
+                              'implicit_dimension': [100],
+                              'feature_map_depth': [1],
+                              'feature_map_height': [5],
+                              'robustness_parameter': [0.0001]}
                                                
     
     # Kernel Ridge #
@@ -124,29 +127,35 @@ else:
     
     # Model Parameters
     #------------------#
-    Epochs_dictionary = {'epochs': [50,100,150,200, 400, 600, 800, 1000]}
-    NEU_Epochs_Feature_dictionary = {'epochs': [50,100,150,200, 300],
-                                     'homotopy_parameter': [0,0.00001,0.0001,0.001],
-                                     'implicit_dimension': [(d+D+1),5*(d+D+1),50, 100]}
+    ## General
+    Training_dictionary = {'batch_size': [16],
+                           'input_dim':[d],
+                           'output_dim':[D]}
     
-    NEU_Epochs_dictionary = {'epochs': [50,100,150,200,300],
-                            'homotopy_parameter': [0,0.00001,0.0001,0.001]}
-    
-    Training_dictionary = {'batch_size': [8,16,32],
-                               'learning_rate': [0.001,0.0005,0.00001],
-                               'input_dim':[d],
-                               'output_dim':[D]}
-    
-    Vanilla_ffNN_dictionary = {'height': [(d+D+1),5*(d+D+1),100, 200],
-                               'depth': [1,2,3,4]}
 
-    robustness_dictionary = {'robustness_parameter': [1000,100,25,1,0.01,0.001,0.0001]}
+    ## Vanilla
+    Training_Vanilla_dictionary = {'epochs': [50],
+                                  'learning_rate': [0.5]}
+    Vanilla_ffNN_dictionary = {'height': [10],
+                               'depth': [3]}
     
-    param_grid_NEU_readout_extra_parameters = {'readout_map_depth': [1,2,3,4],
-                                               'readout_map_height': [(2*(d+1)),(3*(d+1)),2*(d+D+2), 50]}
+    ## NEU
+    ### Readout
+    NEU_Readout_dictionary = {'epochs': [50],
+                              'learning_rate': [0.01],
+                              'homotopy_parameter': [0],
+                              'readout_map_depth': [2],
+                              'readout_map_height': [5],
+                              'robustness_parameter': [0.0001]}
     
-    param_grid_NEU_feature_extra_parameters={'feature_map_depth': [1,2,3,4],
-                                               'feature_map_height': [(2*(d+1)),(3*(d+1)),2*(d+D+2), 50]}
+    ### Feature
+    NEU_Feature_dictionary = {'epochs': [50],
+                              'learning_rate': [0.01],
+                              'homotopy_parameter': [0],
+                              'implicit_dimension': [10],
+                              'feature_map_depth': [3],
+                              'feature_map_height': [5],
+                              'robustness_parameter': [0.0001]}
     
     # Kernel Ridge #
     #--------------#
@@ -161,30 +170,27 @@ else:
                         'min_samples_leaf': [3,4, 5, 9, 17, 20,50],
                        'n_estimators': [5, 10, 25, 50, 100, 200, 400, 600]
                        }
-                       
+
+    
+    
 #==================================================================================#        
 ### Create NEU parameter disctionary by parameters joining model it is upgrading ###
 #==================================================================================#
 param_grid_Vanilla_Nets = {**Training_dictionary,
-                       **Vanilla_ffNN_dictionary,
-                       **Epochs_dictionary}
+                           **Training_Vanilla_dictionary,
+                           **Vanilla_ffNN_dictionary}
 
 param_grid_NEU_Nets = {**Training_dictionary,
-                       **robustness_dictionary,
                        **Vanilla_ffNN_dictionary,
-                       **param_grid_NEU_readout_extra_parameters,
-                       **param_grid_NEU_feature_extra_parameters,
-                       **NEU_Epochs_Feature_dictionary}
+                       **NEU_Readout_dictionary,
+                       **NEU_Feature_dictionary,
+                       **Training_Vanilla_dictionary}
 
 param_grid_NEU_Feature_Only_Nets = {**Training_dictionary,
-                                    **robustness_dictionary,
-                                    **param_grid_NEU_feature_extra_parameters,
-                                    **NEU_Epochs_Feature_dictionary}
+                                    **NEU_Feature_dictionary}
 
 NEU_Structure_Dictionary = {**Training_dictionary,
-                            **robustness_dictionary,
-                            **param_grid_NEU_readout_extra_parameters,
-                            **NEU_Epochs_dictionary}
+                            **NEU_Readout_dictionary}
 
 # Update User #
 #-------------#

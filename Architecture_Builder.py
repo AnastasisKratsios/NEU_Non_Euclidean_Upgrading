@@ -61,7 +61,7 @@ def get_Reconfiguration_Network_Readout(learning_rate, input_dim, output_dim, re
     return trainable_layers_model
 
 
-# In[ ]:
+# In[2]:
 
 
 def build_NEU_Structure(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
@@ -71,6 +71,107 @@ def build_NEU_Structure(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_trai
 
     # Deep Feature Network
     NEU_Structure_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_Reconfiguration_Network_Readout, 
+                                                                verbose=True)
+    
+    # Randomized CV
+    NEU_Structure_CV = RandomizedSearchCV(estimator=NEU_Structure_CV, 
+                                    n_jobs=n_jobs,
+                                    cv=KFold(n_folds, random_state=2020, shuffle=True),
+                                    param_distributions=param_grid_in,
+                                    n_iter=n_iter,
+                                    return_train_score=True,
+                                    random_state=2020,
+                                    verbose=10)
+    
+    # Pipe Standard Scaler 
+    NEU_Structure_CV_mmxscaler_piped = NEU_Structure_CV
+    #Pipeline([('scaler', MinMaxScaler()), ('model', NEU_Structure_CV)])
+    
+    # Fit Model #
+    #-----------#
+    NEU_Structure_CV_mmxscaler_piped.fit(X_train,y_train)
+
+    # Write Predictions #
+    #-------------------#
+    y_hat_train = NEU_Structure_CV_mmxscaler_piped.predict(X_train)
+    y_hat_test = NEU_Structure_CV_mmxscaler_piped.predict(X_test)
+    
+    # Counter number of parameters #
+    #------------------------------#
+    # Extract Best Model
+    best_model = NEU_Structure_CV.best_estimator_
+    # Count Number of Parameters
+    N_params_best_ffNN = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
+    print('NEU-Structure Map: Trained!')
+    
+    #-----------------#
+    # Save Full-Model #
+    #-----------------#
+    print('NEU-Structure Map: Saving')
+#     joblib.dump(best_model, './outputs/models/Benchmarks/ffNN_trained_CV.pkl', compress = 1)
+#     NEU_Structure_CV.best_params_['N_Trainable_Parameters'] = N_params_best_ffNN
+#     pd.DataFrame.from_dict(NEU_Structure_CV.best_params_,orient='index').to_latex("./outputs/models/NEU/Best_Parameters.tex")
+    print('NEU-Structure: Saved')
+    
+    # Return Values #
+    #---------------#
+    return y_hat_train, y_hat_test
+
+# Update User
+#-------------#
+print('Complete NEU-Structure Building Procedure!!!')
+
+
+# ## For Just Readout Version:
+# In the case where $D>1$ and $\mathcal{F}$ is a universal approximator.  
+
+# In[3]:
+
+
+def get_Reconfiguration_Network_Readout_no_project(learning_rate, input_dim, output_dim, readout_map_depth,readout_map_height,robustness_parameter,homotopy_parameter):
+    #--------------------------------------------------#
+    # Build Regular Arch.
+    #--------------------------------------------------#
+    #-###################-#
+    # Define Model Input -#
+    #-###################-#
+    input_layer = tf.keras.Input(shape=((input_dim),))
+    
+    
+    
+    #-###############-#
+    # NEU Readout Map #
+    #-###############-#
+    deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(input_dim), homotopy_parameter = homotopy_parameter)(input_layer)
+    for i_readout_depth in range(readout_map_depth):
+        deep_readout_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_readout_map)
+        deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(input_dim), homotopy_parameter = homotopy_parameter)(deep_readout_map)
+    
+    
+    # Define Input/Output Relationship (Arch.)
+    trainable_layers_model = tf.keras.Model(input_layer, deep_readout_map)
+    #--------------------------------------------------#
+    # Define Optimizer & Compile Archs.
+    #----------------------------------#
+    opt = Adam(lr=learning_rate)
+    if robustness_parameter == 0:
+        trainable_layers_model.compile(optimizer=opt, loss='mae', metrics=["mse", "mae", "mape"])
+    else:
+        trainable_layers_model.compile(optimizer=opt, loss=Robust_MSE(robustness_parameter), metrics=["mse", "mae", "mape"])
+
+    return trainable_layers_model
+
+
+# In[ ]:
+
+
+def build_NEU_Readout(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
+    # Update Dictionary
+    param_grid_in_internal = param_grid_in
+    param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
+
+    # Deep Feature Network
+    NEU_Structure_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_Reconfiguration_Network_Readout_no_project, 
                                                                 verbose=True)
     
     # Randomized CV
@@ -775,10 +876,128 @@ def build_NAIVE_NEU_ffNN(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_tra
 print('Complete NEU-ffNN Training Procedure!!!')
 
 
+# ## Fully Coupled NEU-Models
+
 # In[ ]:
 
 
+def get_NEU_OLS_FullyCoupled(learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter,implicit_dimension):
 
+    #--------------------------------------------------#
+    # Build Regular Arch.
+    #--------------------------------------------------#
+    #-###################-#
+    # Define Model Input -#
+    #-###################-#
+    input_layer = tf.keras.Input(shape=(input_dim,))
+    
+    
+    #-###############-#
+    # NEU Feature Map #
+    #-###############-#
+    ##Random Embedding
+    ### Compute Required Dimension
+    embedding_dimension = 2*np.maximum(np.maximum(input_dim,output_dim),implicit_dimension)
+    ### Execute Random Embedding
+    deep_feature_map  = fullyConnected_Dense(embedding_dimension)(input_layer)
+    ### Execute Random Embedding
+    for i_feature_depth in range(feature_map_depth):
+#        # First Layer
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=embedding_dimension, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        deep_feature_map = fullyConnected_Dense_Invertible(embedding_dimension)(input_layer)
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+            
+    
+    #------------------#
+    #  Readout Layers  #
+    #------------------# 
+    # Affine (Readout) Layer (Dense Fully Connected)
+    core_layers = fullyConnected_Dense(output_dim)(deep_feature_map)  
+    
+    deep_readout_map = tf.concat([input_layer, core_layers], axis=1)
+    
+    #-###############-#
+    # NEU Readout Map #
+    #-###############-#
+    deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(output_dim+input_dim), homotopy_parameter = homotopy_parameter)(deep_readout_map)
+    for i_readout_depth in range(readout_map_depth):
+        deep_readout_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_readout_map)
+        deep_readout_map  = Reconfiguration_unit(units=readout_map_height,home_space_dim=(output_dim+input_dim), homotopy_parameter = homotopy_parameter)(deep_readout_map)
+    
+    # Projection Layer
+    output_layer = projection_layer(deep_readout_map)
+    
+    
+    # Define Input/Output Relationship (Arch.)
+    trainable_layers_model = tf.keras.Model(input_layer, output_layer)
+    #--------------------------------------------------#
+    # Define Optimizer & Compile Archs.
+    #----------------------------------#
+    opt = Adam(lr=learning_rate)
+    if robustness_parameter == 0:
+        trainable_layers_model.compile(optimizer=opt, loss='mae', metrics=["mse", "mae", "mape"])
+    else:
+        trainable_layers_model.compile(optimizer=opt, loss=Robust_MSE(robustness_parameter), metrics=["mse", "mae", "mape"])
+
+    return trainable_layers_model
+
+
+# In[ ]:
+
+
+def build_NEU_OLS_FullyCoupled(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
+    # Update Dictionary
+    param_grid_in_internal = param_grid_in
+    param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
+    
+
+    # Deep Feature Network
+    NEU_ffNN_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_NEU_OLS_FullyCoupled, 
+                                                                verbose=True)
+    
+    # Randomized CV
+    NEU_ffNN_CV = RandomizedSearchCV(estimator=NEU_ffNN_CV, 
+                                    n_jobs=n_jobs,
+                                    cv=KFold(n_folds, random_state=2020, shuffle=True),
+                                    param_distributions=param_grid_in,
+                                    n_iter=n_iter,
+                                    return_train_score=True,
+                                    random_state=2020,
+                                    verbose=10)
+    
+    # Fit Model #
+    #-----------#
+    NEU_ffNN_CV.fit(X_train,y_train)
+
+    # Write Predictions #
+    #-------------------#
+    y_hat_train = NEU_ffNN_CV.predict(X_train)
+    y_hat_test = NEU_ffNN_CV.predict(X_test)
+    
+    # Counter number of parameters #
+    #------------------------------#
+    # Extract Best Model
+    best_model = NEU_ffNN_CV.best_estimator_
+    # Count Number of Parameters
+    N_params_best_ffNN = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
+    print('NEU-ffNN: Trained!')
+    
+    #-----------------#
+    # Save Full-Model #
+    #-----------------#
+    print('NEU-ffNN: Saving')
+#     joblib.dump(best_model, './outputs/models/Benchmarks/ffNN_trained_CV.pkl', compress = 1)
+    NEU_ffNN_CV.best_params_['N_Trainable_Parameters'] = N_params_best_ffNN
+    pd.DataFrame.from_dict(NEU_ffNN_CV.best_params_,orient='index').to_latex("./outputs/models/NEU/Best_Parameters.tex")
+    print('NEU-ffNN: Saved')
+    
+    # Return Values #
+    #---------------#
+    return y_hat_train, y_hat_test
+
+# Update User
+#-------------#
+print('Complete NEU-ffNN Training Procedure!!!')
 
 
 # ---

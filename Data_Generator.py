@@ -107,6 +107,15 @@ data_x_test = sc.transform(data_x_test)
 data_NEU = np.concatenate((data_x,data_y.reshape(-1,D)),axis = 1)
 
 
+# ## Get Backup of "Raw" data for easy calling later
+
+# In[ ]:
+
+
+data_x_raw = data_x
+data_x_test_raw = data_x_test
+
+
 # ## Plot Data vs. True Function
 
 # In[77]:
