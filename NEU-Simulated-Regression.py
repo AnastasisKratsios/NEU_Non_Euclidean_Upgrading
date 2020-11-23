@@ -16,7 +16,7 @@
 
 # # Generate Training Data
 
-# In[115]:
+# In[2]:
 
 
 # First Round Initializations (Global Level) #
@@ -38,14 +38,14 @@ exec(open('Architecture_Builder.py').read())
 # - For evaluating jump-type performance when faced with a discontinuity: "jumpdiscontinuity"
 # - For fun: "the_nightmare"
 
-# In[116]:
+# In[3]:
 
 
 #------------------------#
 # Run External Notebooks #
 #------------------------#
 # Generate Data
-Option_Function = "the_nightmare"
+Option_Function = "oscilatory"
 # %run Data_Generator.ipynb
 exec(open('Data_Generator.py').read())
 
@@ -66,84 +66,44 @@ exec(open('Data_Generator.py').read())
 # .
 # $$
 
-# In[117]:
+# In[4]:
 
 
 # GET STATISTICAL VARIANCE ESTIMATE
 var_estimate = np.sum(np.diff(data_y)**2)/(((data_y.shape[0])-1))
 var_estimate = np.float(round(var_estimate,3))
+factor = 1
 
-robustness_dictionary = {'robustness_parameter': [var_estimate,var_estimate*2,var_estimate*3]}
+robustness_dictionary = {'robustness_parameter': [var_estimate*factor,var_estimate*2*factor,var_estimate*3*factor]}
 #==================================================================================#        
 ### Create NEU parameter disctionary by parameters joining model it is upgrading ###
 #==================================================================================#
-param_grid_Vanilla_Nets = {**Training_dictionary,
-                       **Vanilla_ffNN_dictionary,
-                       **Epochs_dictionary}
+param_grid_NEU_Nets = {**param_grid_NEU_Nets,
+                       **robustness_dictionary}
 
-param_grid_NEU_Nets = {**Training_dictionary,
-                       **robustness_dictionary,
-                       **Vanilla_ffNN_dictionary,
-                       **param_grid_NEU_readout_extra_parameters,
-                       **param_grid_NEU_feature_extra_parameters,
-                       **NEU_Epochs_Feature_dictionary}
+param_grid_NEU_Feature_Only_Nets = {**param_grid_NEU_Feature_Only_Nets,
+                                    **robustness_dictionary}
 
-param_grid_NEU_Feature_Only_Nets = {**Training_dictionary,
-                                    **robustness_dictionary,
-                                    **param_grid_NEU_feature_extra_parameters,
-                                    **NEU_Epochs_Feature_dictionary}
+NEU_Structure_Dictionary = {**NEU_Structure_Dictionary,
+                            **robustness_dictionary}
 
-NEU_Structure_Dictionary = {**Training_dictionary,
-                            **robustness_dictionary,
-                            **param_grid_NEU_readout_extra_parameters,
-                            **NEU_Epochs_dictionary}
+# NEU OLS Keys
+param_grid_NEU_Reg_Nets = {**param_grid_NEU_Nets,
+                           **robustness_dictionary}
+param_grid_NEU_Reg_Nets.pop('height', None)
+param_grid_NEU_Reg_Nets.pop('depth', None)
+print(" ")
 
 
 # # Benchmark Models
 
 # Run univariate regression benchmarks file:
 
-# In[118]:
+# In[5]:
 
 
 # %run Univariate_Regression_Benchmark_Models.ipynb
 exec(open('Univariate_Regression_Benchmark_Models.py').read())
-
-
-# ## Initializations:
-# - Load Dependancies,
-# - Makes Paths if missing.
-
-# In[119]:
-
-
-# Second Round Re-Initializations (Global Level) #
-#================================================#
-# %run Helper_Functions.ipynb
-exec(open('Helper_Functions.py').read())
-# Load Models
-# %run Architecture_Builder.ipynb
-exec(open('Architecture_Builder.py').read())
-
-
-# #### Boost input dimension if $d=1$, so that reconfigurations can be universal.
-
-# In[120]:
-
-
-if False:#d<= 1:
-    # Backup data
-    data_x_raw = data_x
-    data_x_test_raw = data_x_test
-    # Bump Dimension so Reconfiguration network properties hold
-    data_x = np.concatenate([data_x,data_x],axis=1)
-    data_x_test = np.concatenate([data_x_test,data_x_test],axis=1)
-    d = d+1
-else:
-    # Backup data
-    data_x_raw = data_x
-    data_x_test_raw = data_x_test
-    print("Modified Input since Dimension is too low")
 
 
 # ---
@@ -152,7 +112,7 @@ else:
 
 # We train NEU's universal linearizing feature map.
 
-# In[84]:
+# In[ ]:
 
 
 tf.random.set_seed(2020)
@@ -191,7 +151,7 @@ data_x_NEU_test_feature_only = data_x_NEU_test[:,:d]
 
 # ### NEU-Linear *(decoupled implementation)*
 
-# In[89]:
+# In[ ]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -223,23 +183,7 @@ else: #Slow Version for real-deal
 NEU_lin_reg.fit(data_x_featured_train,data_y)
 
 
-# In[90]:
-
-
-# First Round Initializations (Global Level) #
-#============================================#
-# Load Dependances and makes path(s)
-exec(open('Initializations_Dump.py').read())
-# Load Hyper( and meta) parameter(s)
-exec(open('HyperParameter_Grid.py').read())
-# %run Helper_Functions.ipynb
-exec(open('Helper_Functions.py').read())
-# Load Models
-# %run Architecture_Builder.ipynb
-exec(open('Architecture_Builder.py').read())
-
-
-# In[91]:
+# In[ ]:
 
 
 # Pre-process Linearized Data #
@@ -265,9 +209,24 @@ NEU_OLS_y_hat_train, NEU_OLS_y_hat_test = build_NEU_Structure(n_folds = CV_folds
                                                            X_test = data_x_NEU_test)
 
 
+# ### Fully-Coupled Implementation: NEU-OLS
+
+# In[ ]:
+
+
+tf.random.set_seed(2020)
+NEU_ffNN_y_hat_train_FC, NEU_ffNN_y_hat_test_FC = build_NEU_OLS_FullyCoupled(n_folds = CV_folds, 
+                                                           n_jobs = n_jobs, 
+                                                           n_iter = n_iter, 
+                                                           param_grid_in = param_grid_NEU_Reg_Nets, 
+                                                           X_train = data_x, 
+                                                           y_train = data_y,
+                                                           X_test = data_x_test)
+
+
 # #### Visual Comaprison between the OLS and the NEU-OLS models:
 
-# In[92]:
+# In[ ]:
 
 
 # Initialize Plot #
@@ -291,8 +250,9 @@ plt.plot(np.array(data_x_test_raw).reshape(-1,),ENET_OLS_y_hat_test, color = 'do
 
 # Plot NEU-OLS
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_OLS_y_hat_test, color = 'c',label='NEU-Lin. Reg')
-# plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_OLS_y_hat_test_pre, color = 'red',label='NEU-Lin. Reg - Feature Only')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_OLS_y_hat_test_pre, color = 'red',label='NEU-Lin. Reg - Feature Only')
 plt.plot(np.array(data_x_test_raw).reshape(-1,),ffNN_y_hat_test, color = 'purple',linestyle="--",  label='DNN')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_FC, color = 'green',linestyle="--",  label='NEU-OLS - Fully-Coupled')
 
 # Format Plot #
 #-------------#
@@ -308,7 +268,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[93]:
+# In[ ]:
 
 
 get_Error_distribution_plots(data_y_test,ENET_OLS_y_hat_test,NEU_OLS_y_hat_test,"OLS")
@@ -316,7 +276,7 @@ get_Error_distribution_plots(data_y_test,ENET_OLS_y_hat_test,NEU_OLS_y_hat_test,
 
 # #### Comparison between Elastic-Net and NEU-ENET
 
-# In[94]:
+# In[ ]:
 
 
 #-----------------#
@@ -334,6 +294,10 @@ print(reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test))
 print("Benchmark: DNN (ffNN)")
 print(reporter(ffNN_y_hat_train,ffNN_y_hat_test,data_y,data_y_test))
 
+# ffNN
+print("Benchmark: NEU-OLS Coupled")
+print(reporter(NEU_ffNN_y_hat_train_FC,NEU_ffNN_y_hat_test_FC,data_y,data_y_test))
+
 
 # ---
 # # Non-Linear Models
@@ -341,7 +305,7 @@ print(reporter(ffNN_y_hat_train,ffNN_y_hat_test,data_y,data_y_test))
 
 # ### NEU-Smoothing Splines
 
-# In[95]:
+# In[ ]:
 
 
 # # 2) Perform Linear Regression on Feature-Space #
@@ -372,7 +336,7 @@ print(reporter(ffNN_y_hat_train,ffNN_y_hat_test,data_y,data_y_test))
 
 # #### Visual Comaprison between the Smoothing Splines and the NEU-Smoothing Splines models:
 
-# In[96]:
+# In[ ]:
 
 
 # Initialize Plot #
@@ -411,7 +375,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[97]:
+# In[ ]:
 
 
 # get_Error_distribution_plots(data_y_test,f_hat_smoothing_splines_test,NEU_Ssplines_y_hat_test,"Splines")
@@ -419,7 +383,7 @@ if is_visuallty_verbose == True:
 
 # #### Numerical Comparison between the Smoothing Splines regressor and NEU-Smoothing Splines regressor models:
 
-# In[99]:
+# In[ ]:
 
 
 # #-----------------------#
@@ -436,12 +400,12 @@ if is_visuallty_verbose == True:
 
 # ### NEU-Kernel Ridge Regression *(decoupled implementation)*
 
-# In[100]:
+# In[ ]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
 #===============================================#
-NEU_KReg_y_hat_train,NEU_KReg_y_hat_test, NEU_KReg_model = get_Kernel_Ridge_Regressor(data_x_in = data_x_featured_train,
+NEU_KReg_y_hat_train_pre,NEU_KReg_y_hat_test_pre, NEU_KReg_model = get_Kernel_Ridge_Regressor(data_x_in = data_x_featured_train,
                                                                                        data_x_test_in = data_x_featured_test,
                                                                                        data_y_in = data_y)
 
@@ -451,12 +415,12 @@ NEU_KReg_y_hat_train,NEU_KReg_y_hat_test, NEU_KReg_model = get_Kernel_Ridge_Regr
 #----------------------------#
 # Coerce data into form ready for NEU-Structure Map
 data_x_NEU_train_KReg = np.concatenate([data_x_raw,
-                                   NEU_KReg_y_hat_train.reshape(data_x_featured_train.shape[0],D)],axis=1)
+                                   NEU_KReg_y_hat_train_pre.reshape(data_x_featured_train.shape[0],D)],axis=1)
 data_x_NEU_test_KReg = np.concatenate([data_x_test_raw,
-                                  NEU_KReg_y_hat_test.reshape(data_x_featured_test.shape[0],D)],axis=1)
+                                  NEU_KReg_y_hat_test_pre.reshape(data_x_featured_test.shape[0],D)],axis=1)
 # 3) Learn Structure Map #
 #========================#
-NEU_KReg_y_hat_train, NEU_KReg_y_hat_test = build_NEU_Readout(n_folds = CV_folds, 
+NEU_KReg_y_hat_train, NEU_KReg_y_hat_test = build_NEU_Structure(n_folds = CV_folds, 
                                                                 n_jobs = n_jobs, 
                                                                 n_iter = n_iter, 
                                                                 param_grid_in = NEU_Structure_Dictionary, 
@@ -467,7 +431,7 @@ NEU_KReg_y_hat_train, NEU_KReg_y_hat_test = build_NEU_Readout(n_folds = CV_folds
 
 # #### Visual Comaprison between the Kernel Ridge Regression and the NEU-Kernel Ridge Regression models:
 
-# In[101]:
+# In[ ]:
 
 
 # Initialize Plot #
@@ -490,6 +454,7 @@ plt.scatter(np.array(data_x_test_raw).reshape(-1,),data_y_test,color='black',lab
 plt.plot(np.array(data_x_test_raw).reshape(-1,),f_hat_kernel_ridge_test,color='violet',linestyle="--",label='Kernel Ridge')
 # NEU-Kernel Ridge Regressor
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_KReg_y_hat_test,color='darkviolet',label='NEU-Kernel Ridge')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_KReg_y_hat_test_pre,color='green',label='NEU-Kernel Ridge - Feature Only')
 
 # Format Plot #
 #-------------#
@@ -505,7 +470,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[102]:
+# In[ ]:
 
 
 get_Error_distribution_plots(data_y_test,f_hat_kernel_ridge_test,NEU_KReg_y_hat_test,"Kernel_Ridge")
@@ -513,7 +478,7 @@ get_Error_distribution_plots(data_y_test,f_hat_kernel_ridge_test,NEU_KReg_y_hat_
 
 # #### Numerical Comparison between the Kernel Ridge regressor and NEU-Kernel Ridge regressor models:
 
-# In[103]:
+# In[ ]:
 
 
 #-----------------------#
@@ -531,12 +496,12 @@ print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 # ## Tree Model(s):
 # *Naturally, all of these have a decoupled implementation*.
 
-# In[104]:
+# In[ ]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
 #===============================================#
-NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test, GBRF_w_NEU_features = get_GBRF(X_train = data_x_featured_train,
+NEU_GBRF_y_hat_train_pre,NEU_GBRF_y_hat_test_pre, GBRF_w_NEU_features = get_GBRF(X_train = data_x_featured_train,
                                                                          X_test = data_x_featured_test,
                                                                          y_train = data_y)
 
@@ -545,13 +510,13 @@ NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test, GBRF_w_NEU_features = get_GBRF(X_train
 # Get Linearized Predictions #
 #----------------------------#
 # Coerce data into form ready for NEU-Structure Map
-# data_x_NEU_train_GBRF = np.concatenate([data_x_featured_train,
-#                                    NEU_GBRF_y_hat_train.reshape(data_x_featured_train.shape[0],D)],axis=1)
-# data_x_NEU_test_GBRF = np.concatenate([data_x_featured_test,
-#                                   NEU_GBRF_y_hat_test.reshape(data_x_featured_test.shape[0],D)],axis=1)
+data_x_NEU_train_GBRF = np.concatenate([data_x_featured_train,
+                                   NEU_GBRF_y_hat_train_pre.reshape(data_x_featured_train.shape[0],D)],axis=1)
+data_x_NEU_test_GBRF = np.concatenate([data_x_featured_test,
+                                  NEU_GBRF_y_hat_test_pre.reshape(data_x_featured_test.shape[0],D)],axis=1)
 # 3) Learn Structure Map #
 # ========================#
-NEU_GBRF_y_hat_train, NEU_GBRF_y_hat_test = build_NEU_Readout(n_folds = CV_folds, 
+NEU_GBRF_y_hat_train, NEU_GBRF_y_hat_test = build_NEU_Structure(n_folds = CV_folds, 
                                                                 n_jobs = n_jobs, 
                                                                 n_iter = n_iter, 
                                                                 param_grid_in = NEU_Structure_Dictionary, 
@@ -562,7 +527,7 @@ NEU_GBRF_y_hat_train, NEU_GBRF_y_hat_test = build_NEU_Readout(n_folds = CV_folds
 
 # #### Visual Comaprison between the GBRF and the NEU-GBRF models:
 
-# In[105]:
+# In[ ]:
 
 
 # Initialize Plot #
@@ -585,6 +550,7 @@ plt.scatter(np.array(data_x_test_raw).reshape(-1,),data_y_test,color='black',lab
 plt.plot(np.array(data_x_test_raw).reshape(-1,),GBRF_y_hat_test, linestyle="--", color = 'forestgreen', label='GBRF')
 # Plot NEU-GBRF:
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_GBRF_y_hat_test, color = 'forestgreen',label='NEU-GBRF')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_GBRF_y_hat_test_pre, color = 'pink',label='NEU-GBRF - Feature Only')
 
 
 # Format Plot #
@@ -602,7 +568,7 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[106]:
+# In[ ]:
 
 
 get_Error_distribution_plots(data_y_test,GBRF_y_hat_test,NEU_GBRF_y_hat_test,"GBRF")
@@ -610,7 +576,7 @@ get_Error_distribution_plots(data_y_test,GBRF_y_hat_test,NEU_GBRF_y_hat_test,"GB
 
 # #### Numerical Comparison between the GBRF and NEU-GBRF models:
 
-# In[107]:
+# In[ ]:
 
 
 #---------------#
@@ -636,17 +602,17 @@ print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 # 
 # Here we only use reconfiguration networks to learn an appropriate readout map.
 
-# In[114]:
+# In[ ]:
 
 
-tf.random.set_seed(2020)
-NEU_ffNN_y_hat_train, NEU_ffNN_y_hat_test = build_NEU_ffNN(n_folds = CV_folds, 
-                                                           n_jobs = n_jobs, 
-                                                           n_iter = n_iter, 
-                                                           param_grid_in = param_grid_NEU_Nets, 
-                                                           X_train = data_x, 
-                                                           y_train = data_y,
-                                                           X_test = data_x_test)
+# tf.random.set_seed(2020)
+# NEU_ffNN_y_hat_train, NEU_ffNN_y_hat_test = build_NEU_ffNN(n_folds = CV_folds, 
+#                                                            n_jobs = n_jobs, 
+#                                                            n_iter = n_iter, 
+#                                                            param_grid_in = param_grid_NEU_Nets, 
+#                                                            X_train = data_x, 
+#                                                            y_train = data_y,
+#                                                            X_test = data_x_test)
 
 
 # ---
@@ -658,7 +624,7 @@ NEU_ffNN_y_hat_train, NEU_ffNN_y_hat_test = build_NEU_ffNN(n_folds = CV_folds,
 # #### B) $\pi\circ \rho(\hat{f}\circ \phi(\cdot),\cdot)$
 # Here we use reconfigurations to learn an appropriate structure map. 
 
-# In[121]:
+# In[ ]:
 
 
 tf.random.set_seed(2020)
@@ -673,7 +639,7 @@ NEU_ffNN_y_hat_train_w_proj, NEU_ffNN_y_hat_test_w_proj = build_NEU_ffNN_w_proj(
 
 # #### Decoupled Implementation
 
-# In[122]:
+# In[ ]:
 
 
 tf.random.set_seed(2020)
@@ -684,7 +650,7 @@ print("Phase 1 Complete: Feature Map Trained/Loaded")
 
 # 2) Train ffNN #
 #===============#
-NEU_ffNN_y_hat_train_dcpld, NEU_ffNN_y_hat_test_dcpld = build_ffNN(n_folds = CV_folds, 
+NEU_ffNN_y_hat_train_dcpld_pre, NEU_ffNN_y_hat_test_dcpld_pre = build_ffNN(n_folds = CV_folds, 
                                                                    n_jobs = n_jobs, 
                                                                    n_iter = n_iter, 
                                                                    param_grid_in = param_grid_Vanilla_Nets,  
@@ -696,10 +662,10 @@ NEU_ffNN_y_hat_train_dcpld, NEU_ffNN_y_hat_test_dcpld = build_ffNN(n_folds = CV_
 # Get Linearized Predictions #
 #----------------------------#
 # Coerce data into form ready for NEU-Structure Map
-# data_x_NEU_train = np.concatenate([data_x_featured_train,
-#                                    NEU_ffNN_y_hat_train_dcpld.reshape(data_x_featured_train.shape[0],D)],axis=1)
-# data_x_NEU_test = np.concatenate([data_x_featured_test,
-#                                   NEU_ffNN_y_hat_test_dcpld.reshape(data_x_featured_test.shape[0],D)],axis=1)
+data_x_NEU_train = np.concatenate([data_x_featured_train,
+                                   NEU_ffNN_y_hat_train_dcpld_pre.reshape(data_x_featured_train.shape[0],D)],axis=1)
+data_x_NEU_test = np.concatenate([data_x_featured_test,
+                                  NEU_ffNN_y_hat_test_dcpld_pre.reshape(data_x_featured_test.shape[0],D)],axis=1)
 
 # Update User #
 #-------------#
@@ -707,13 +673,13 @@ print("Phase 2 Complete: Trained Vanilla Model")
 
 # 3) Learn Structure Map #
 #========================#
-NEU_ffNN_y_hat_train_Dcpld, NEU_ffNN_y_hat_test_Dcpld = build_NEU_Readout(n_folds = CV_folds, 
+NEU_ffNN_y_hat_train_Dcpld, NEU_ffNN_y_hat_test_Dcpld = build_NEU_Structure(n_folds = CV_folds, 
                                                            n_jobs = n_jobs, 
                                                            n_iter = n_iter, 
                                                            param_grid_in = NEU_Structure_Dictionary, 
-                                                           X_train = NEU_ffNN_y_hat_train_dcpld.reshape(-1,D), 
+                                                           X_train = data_x_NEU_train, 
                                                            y_train = data_y,
-                                                           X_test = NEU_ffNN_y_hat_test_dcpld.reshape(-1,D))
+                                                           X_test = data_x_NEU_test)
 
 # Update User #
 #-------------#
@@ -723,7 +689,7 @@ print("NEU Statue: Trained")
 
 # ## Visualization
 
-# In[123]:
+# In[ ]:
 
 
 # Initialize Plot #
@@ -750,9 +716,10 @@ plt.plot(np.array(data_x_test_raw).reshape(-1,),ffNN_y_hat_test, color = 'lightb
 # NEU-Model(s) #
 #--------------#
 # Plot NEU-ffNN (Training Variants)
-plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test, linestyle=":", color = 'b',label='DNN_NEU_coupled')
+# plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test, linestyle=":", color = 'b',label='DNN_NEU_coupled')
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_w_proj, color = 'mediumblue',linestyle='-.', label='DNN_NEU_coupled+UAEmbedding')
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_Dcpld, color = 'navy',label='DNN_NEU_decoupled')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_dcpld_pre, color = 'red',label='DNN_NEU_decoupled - Feature Only')
 
 
 # Format Plot #
@@ -769,10 +736,10 @@ if is_visuallty_verbose == True:
     plt.show(block=False)
 
 
-# In[124]:
+# In[ ]:
 
 
-get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test,"ffNN")
+get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test_Dcpld,"ffNN")
 
 
 # ---
@@ -785,7 +752,7 @@ get_Error_distribution_plots(data_y_test,ffNN_y_hat_test,NEU_ffNN_y_hat_test,"ff
 
 # ## Generate Results Table(s):
 
-# In[125]:
+# In[ ]:
 
 
 #==========#
@@ -801,7 +768,7 @@ train_performance  = pd.DataFrame({"Smoothin Splines": reporter(f_hat_smoothing_
                                    "GBRF": reporter(GBRF_y_hat_train,GBRF_y_hat_test,data_y,data_y_test).iloc[:,0],
                                    "NEU-GBRF": reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test).iloc[:,0],
                                    "ffNN": reporter(ffNN_y_hat_train,ffNN_y_hat_test,data_y,data_y_test).iloc[:,0],
-                                   "NEU-ffNN (Readout-Form)": reporter(NEU_ffNN_y_hat_train,NEU_ffNN_y_hat_test,data_y,data_y_test).iloc[:,0],
+#                                    "NEU-ffNN (Readout-Form)": reporter(NEU_ffNN_y_hat_train,NEU_ffNN_y_hat_test,data_y,data_y_test).iloc[:,0],
                                    "NEU-ffNN (Coupled)": reporter(NEU_ffNN_y_hat_train_w_proj,NEU_ffNN_y_hat_test_w_proj,data_y,data_y_test).iloc[:,0],#}).transpose()#,
                                    "NEU-ffNN (Decoupled)": reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_y_test).iloc[:,0]}).transpose()
 
@@ -820,7 +787,7 @@ test__performance  = pd.DataFrame({"Smoothin Splines": reporter(f_hat_smoothing_
                                    "GBRF": reporter(GBRF_y_hat_train,GBRF_y_hat_test,data_y,data_y_test).iloc[:,1],
                                    "NEU-GBRF": reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test).iloc[:,1],
                                    "ffNN": reporter(ffNN_y_hat_train,ffNN_y_hat_test,data_y,data_y_test).iloc[:,1],
-                                   "NEU-ffNN (Readout-Form)": reporter(NEU_ffNN_y_hat_train,NEU_ffNN_y_hat_test,data_y,data_y_test).iloc[:,1],
+#                                    "NEU-ffNN (Readout-Form)": reporter(NEU_ffNN_y_hat_train,NEU_ffNN_y_hat_test,data_y,data_y_test).iloc[:,1],
                                    "NEU-ffNN (Coupled)": reporter(NEU_ffNN_y_hat_train_w_proj,NEU_ffNN_y_hat_test_w_proj,data_y,data_y_test).iloc[:,1],#}).transpose()#,
                                    "NEU-ffNN (Decoupled)": reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_y_test).iloc[:,1]}).transpose()
 
@@ -829,7 +796,7 @@ test__performance.to_latex("./outputs/tables/Test_performance.tex")
 
 # # Visualize Predictions
 
-# In[126]:
+# In[ ]:
 
 
 # Initialize Plot #
@@ -872,9 +839,9 @@ plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_GBRF_y_hat_test, color = 'fo
 # NEU-Kernel Ridge Regressor
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_KReg_y_hat_test,color='darkviolet',label='NEU-Kernel Ridge')
 # Plot NEU-ffNN (Training Variants)
-plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test, linestyle=":", color = 'b',label='DNN_NEU_coupled')
+# plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test, linestyle=":", color = 'b',label='DNN_NEU_coupled')
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_w_proj, color = 'mediumblue',linestyle='-.', label='DNN_NEU_coupled+UAEmbedding')
-# plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_Dcpld, color = 'navy',label='DNN_NEU_decoupled')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_ffNN_y_hat_test_Dcpld, color = 'navy',label='DNN_NEU_decoupled')
 
 
 # Format Plot #
@@ -897,7 +864,7 @@ if is_visuallty_verbose == True:
 # - First, we print the comparison tables (so it can be viewed from the command-line if it is being run live on a grid/cluster/remotely).
 # - Second, we display the training and testing performances in clean dataframes.
 
-# In[127]:
+# In[ ]:
 
 
 #--------------------#
@@ -912,7 +879,7 @@ print("NEU-OLS-Performance:")
 print(reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test))
 
 
-# In[128]:
+# In[ ]:
 
 
 #-----------------------#
@@ -927,7 +894,7 @@ print("NEU-Kernel Ridge-Performance:")
 print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 
 
-# In[129]:
+# In[ ]:
 
 
 #---------------#
@@ -942,7 +909,7 @@ print("NEU-GBRF-Performance:")
 print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 
 
-# In[130]:
+# In[ ]:
 
 
 #-----------------------------------------------------#
@@ -957,7 +924,7 @@ print("LOESS Performance:")
 print(reporter(LOESS_prediction_train,LOESS_prediction_test,data_y,data_y_test))
 
 
-# In[131]:
+# In[ ]:
 
 
 #--------------#
@@ -968,8 +935,8 @@ print("ffNN-Performance:")
 print(reporter(ffNN_y_hat_train,ffNN_y_hat_test,data_y,data_y_test))
 
 # NEU-ffNN Performance
-print("NEU-ffNN (Coupled) Performance:")
-print(reporter(NEU_ffNN_y_hat_train,NEU_ffNN_y_hat_test,data_y,data_y_test))
+# print("NEU-ffNN (Coupled) Performance:") #Readout Form!
+# print(reporter(NEU_ffNN_y_hat_train,NEU_ffNN_y_hat_test,data_y,data_y_test))
 print("NEU-ffNN (Coupled+UAEmbedding) Performance:")
 print(reporter(NEU_ffNN_y_hat_train_w_proj,NEU_ffNN_y_hat_test_w_proj,data_y,data_y_test))
 print("NEU-ffNN (Decoupled) Performance:")
@@ -980,7 +947,7 @@ print(reporter(NEU_ffNN_y_hat_train_Dcpld,NEU_ffNN_y_hat_test_Dcpld,data_y,data_
 
 # ## Re-Summarize Learning Problem for easy recap :)
 
-# In[132]:
+# In[ ]:
 
 
 print("Simulation Confiugration Information:")
@@ -993,7 +960,7 @@ print(" ")
 
 # ## Train-Set Performance
 
-# In[133]:
+# In[ ]:
 
 
 train_performance
@@ -1001,7 +968,7 @@ train_performance
 
 # ## Test-Set Performance
 
-# In[134]:
+# In[ ]:
 
 
 test__performance

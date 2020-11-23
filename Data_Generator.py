@@ -5,7 +5,7 @@
 
 # #### Imports
 
-# In[2]:
+# In[1]:
 
 
 import numpy as np
@@ -14,6 +14,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 # For quick standardization
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 
 # ## Generate Data
@@ -26,7 +27,28 @@ from sklearn.preprocessing import StandardScaler
 #  
 #  ---
 
-# In[ ]:
+# In[102]:
+
+
+#Debugging Parameters:
+# Option_Function = "nonlocality"
+# N_data = 100
+# Train_step_proportion = .75
+# D=1
+# is_visuallty_verbose = True
+# Distortion = 0.5
+# noise_level = 0.01
+# Extrapolation_size = 0.001
+
+
+# In[103]:
+
+
+# Get Testing set proportion
+Test_set_proportion = np.abs(1-Train_step_proportion)
+
+
+# In[104]:
 
 
 if Option_Function == "nonlocality":
@@ -56,28 +78,40 @@ if Option_Function == "the_nightmare":
         return unknown_out
 
 
-# #### Generate Data
+# ### Generate Data
+# #### Generate Testing Dataset
 
-# In[ ]:
+# In[105]:
 
 
-# Test Data #
-#-----------#
-step_size = (1- (-1))/N_data
-data_x_test = np.arange((-1-Extrapolation_size),(1+Extrapolation_size),step_size)
-data_y_test = unknown_f(data_x_test)
+data_x_test = np.sort(np.random.uniform(low=-(1+Extrapolation_size),high=(1+Extrapolation_size),size=N_data))
+data_y_test = unknown_f(data_x_full)
 
-# Training Data #
-#---------------#
-data_x = np.sort(np.random.uniform(-1,1,round(N_data*Train_step_proportion)))
-data_y = unknown_f(data_x)*np.random.uniform((1-Distortion),(1+Distortion),len(data_x)) + np.random.normal(0,noise_level,len(data_x))
 
+# #### Generate Training Dataset
+
+# In[106]:
+
+
+# Generate Unaltered Training Data
+data_x = np.sort(np.random.uniform(low=-1,high=1,size=N_data))
+data_y = unknown_f(data_x_full)
+
+# Multiplicative Noise (Distoriton/Model Uncertainty)
+Mult_noise = np.random.uniform(low=(1-Distortion),high=(1+Distortion),size = data_y.shape[0])
+Add_noise = np.random.normal(loc=0,scale = noise_level,size = data_y.shape[0])
+
+# Generate Training Targets
+data_y = (data_y*Mult_noise) + Add_noise
+
+
+# #### Create Training and Testing Subsets
 
 # ### Preprocess
 # 
 # Coerce Data into proper shape.
 
-# In[74]:
+# In[107]:
 
 
 data_x = pd.DataFrame(data_x)
@@ -86,7 +120,7 @@ data_x_test = pd.DataFrame(data_x_test)
 
 # Rescale Data
 
-# In[ ]:
+# In[108]:
 
 
 # Initialize Scaler
@@ -101,7 +135,7 @@ data_x_test = sc.transform(data_x_test)
 
 # *NEU Format - InDeV*
 
-# In[76]:
+# In[109]:
 
 
 data_NEU = np.concatenate((data_x,data_y.reshape(-1,D)),axis = 1)
@@ -109,7 +143,7 @@ data_NEU = np.concatenate((data_x,data_y.reshape(-1,D)),axis = 1)
 
 # ## Get Backup of "Raw" data for easy calling later
 
-# In[ ]:
+# In[110]:
 
 
 data_x_raw = data_x
@@ -118,7 +152,7 @@ data_x_test_raw = data_x_test
 
 # ## Plot Data vs. True Function
 
-# In[77]:
+# In[111]:
 
 
 # Initialize Plot #
@@ -130,6 +164,7 @@ plt.figure(num=None, figsize=(12, 12), dpi=80, facecolor='w', edgecolor='k')
 
 # Plot Signal
 plt.plot(np.array(data_x_test).reshape(-1,),data_y_test,color='gray',label='f(x)',linestyle='--')
+
 # Plot Data
 plt.scatter(np.array(data_x).reshape(-1,),data_y,color='gray',label='train', marker = '2')
 plt.scatter(np.array(data_x_test).reshape(-1,),data_y_test,color='black',label='test', marker = '.')
@@ -145,13 +180,13 @@ if is_visuallty_verbose == True:
 
 # ## Report Simulation Configuration to User:
 
-# In[3]:
+# In[112]:
 
 
-the_facts = "We're plotting the function: " +str(Option_Function)+" with "+str(noise_level)+" additive noise, a distortion/model uncertainty level of"+      str(Distortion)+", and an out-of sample window on either side of the input space of:"+str(Extrapolation_size)+".  We train using "+      str(N_data)+" datapoints and have a test set conisting of "+str(Train_step_proportion)+"% percent of the total generated data."
+the_facts = "We're plotting the function: " +str(Option_Function)+" with "+str(noise_level)+" additive noise, a distortion/model uncertainty level of "+      str(Distortion)+", and an out-of sample window on either side of the input space of: "+str(Extrapolation_size)+".  We train using "+      str(N_data)+" datapoints and have a test set conisting of "+str(Train_step_proportion)+"% percent of the total generated data."
 
 
-# In[ ]:
+# In[113]:
 
 
 print("Simulation Confiugration Information:")

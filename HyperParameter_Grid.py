@@ -60,40 +60,40 @@ if trial_run == True:
     CV_folds = 2
     
     # JUST FOR TEST:
-    N_data = 10**2# (i.e.: N)
+    N_data = 10**4# (i.e.: N)
 
     
     # Model Parameters
     #------------------#
     ## General
-    Training_dictionary = {'batch_size': [16],
+    Training_dictionary = {'batch_size': [8],
                            'input_dim':[d],
                            'output_dim':[D]}
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [50],
-                                  'learning_rate': [0.0001]}
-    Vanilla_ffNN_dictionary = {'height': [10],
+    Training_Vanilla_dictionary = {'epochs': [100],
+                                  'learning_rate': [0.00001]}
+    Vanilla_ffNN_dictionary = {'height': [5],
                                'depth': [3]}
     
     ## NEU
     ### Readout
-    NEU_Readout_dictionary = {'epochs': [50],
-                              'learning_rate': [0.001],
+    NEU_Readout_dictionary = {'epochs': [100],
+                              'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
-                              'readout_map_depth': [2],
-                              'readout_map_height': [5],
+                              'readout_map_depth': [1],
+                              'readout_map_height': [2],
                               'robustness_parameter': [0.0001]}
     
     ### Feature
     NEU_Feature_dictionary = {'epochs': [100],
                               'learning_rate': [0.001],
                               'homotopy_parameter': [0],
-                              'implicit_dimension': [100],
-                              'feature_map_depth': [1],
-                              'feature_map_height': [5],
-                              'robustness_parameter': [0.0001]}
+                              'implicit_dimension': [3],
+                              'feature_map_depth': [2],
+                              'feature_map_height': [1],
+                              'robustness_parameter': [1]}
                                                
     
     # Kernel Ridge #
