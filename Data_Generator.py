@@ -5,7 +5,7 @@
 
 # #### Imports
 
-# In[1]:
+# In[6]:
 
 
 import numpy as np
@@ -27,11 +27,12 @@ from sklearn.model_selection import train_test_split
 #  
 #  ---
 
-# In[102]:
+# #### Debugging Parameters:
+
+# In[20]:
 
 
-#Debugging Parameters:
-# Option_Function = "nonlocality"
+# Option_Function = "the_nightmare"
 # N_data = 100
 # Train_step_proportion = .75
 # D=1
@@ -41,14 +42,17 @@ from sklearn.model_selection import train_test_split
 # Extrapolation_size = 0.001
 
 
-# In[103]:
+# #### Get Testing set proportion
+
+# In[21]:
 
 
-# Get Testing set proportion
 Test_set_proportion = np.abs(1-Train_step_proportion)
 
 
-# In[104]:
+# #### Load "Unknown" Function to Learn
+
+# In[49]:
 
 
 if Option_Function == "nonlocality":
@@ -74,28 +78,30 @@ if Option_Function == "jumpdiscontinuity":
 if Option_Function == "the_nightmare":
     # For fun: The Nightmare
     def unknown_f(x):
-        unknown_out = np.minimum(np.exp(-1/(1+x)**2),x+np.cos(x)) + np.cos(np.exp(2+x)) * np.maximum(0,np.sign(x)) + x
+        unknown_out = np.minimum(np.exp(-1/(1+x)**2),x+np.cos(x)) + np.cos(np.exp(2+x)) * np.maximum(0,np.sign(x)) + x**2
+        unknown_out += -np.maximum(0,np.sign(-x))*((x**2)-.5)*(.25+.5*np.sin(x))
+        unknown_out += -2*np.maximum(0,np.sign((x-.5)))
         return unknown_out
 
 
 # ### Generate Data
 # #### Generate Testing Dataset
 
-# In[105]:
+# In[50]:
 
 
 data_x_test = np.sort(np.random.uniform(low=-(1+Extrapolation_size),high=(1+Extrapolation_size),size=N_data))
-data_y_test = unknown_f(data_x_full)
+data_y_test = unknown_f(data_x_test)
 
 
 # #### Generate Training Dataset
 
-# In[106]:
+# In[51]:
 
 
 # Generate Unaltered Training Data
 data_x = np.sort(np.random.uniform(low=-1,high=1,size=N_data))
-data_y = unknown_f(data_x_full)
+data_y = unknown_f(data_x)
 
 # Multiplicative Noise (Distoriton/Model Uncertainty)
 Mult_noise = np.random.uniform(low=(1-Distortion),high=(1+Distortion),size = data_y.shape[0])
@@ -111,7 +117,7 @@ data_y = (data_y*Mult_noise) + Add_noise
 # 
 # Coerce Data into proper shape.
 
-# In[107]:
+# In[52]:
 
 
 data_x = pd.DataFrame(data_x)
@@ -120,7 +126,7 @@ data_x_test = pd.DataFrame(data_x_test)
 
 # Rescale Data
 
-# In[108]:
+# In[53]:
 
 
 # Initialize Scaler
@@ -135,7 +141,7 @@ data_x_test = sc.transform(data_x_test)
 
 # *NEU Format - InDeV*
 
-# In[109]:
+# In[54]:
 
 
 data_NEU = np.concatenate((data_x,data_y.reshape(-1,D)),axis = 1)
@@ -143,7 +149,7 @@ data_NEU = np.concatenate((data_x,data_y.reshape(-1,D)),axis = 1)
 
 # ## Get Backup of "Raw" data for easy calling later
 
-# In[110]:
+# In[55]:
 
 
 data_x_raw = data_x
@@ -152,7 +158,7 @@ data_x_test_raw = data_x_test
 
 # ## Plot Data vs. True Function
 
-# In[111]:
+# In[56]:
 
 
 # Initialize Plot #
@@ -180,13 +186,13 @@ if is_visuallty_verbose == True:
 
 # ## Report Simulation Configuration to User:
 
-# In[112]:
+# In[57]:
 
 
 the_facts = "We're plotting the function: " +str(Option_Function)+" with "+str(noise_level)+" additive noise, a distortion/model uncertainty level of "+      str(Distortion)+", and an out-of sample window on either side of the input space of: "+str(Extrapolation_size)+".  We train using "+      str(N_data)+" datapoints and have a test set conisting of "+str(Train_step_proportion)+"% percent of the total generated data."
 
 
-# In[113]:
+# In[58]:
 
 
 print("Simulation Confiugration Information:")

@@ -742,6 +742,134 @@ def build_NEU_ffNN_w_proj(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_tr
 print('Complete NEU-ffNN Training Procedure!!!')
 
 
+# #### Get NEU-ffNN (Only Feature Map)
+
+# In[ ]:
+
+
+def get_NEU_ffNN_w_feature_only(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter,implicit_dimension):
+
+    #--------------------------------------------------#
+    # Build Regular Arch.
+    #--------------------------------------------------#
+    #-###################-#
+    # Define Model Input -#
+    #-###################-#
+    input_layer = tf.keras.Input(shape=(input_dim,))
+    
+    
+    #-###############-#
+    # NEU Feature Map #
+    #-###############-#
+    ##Random Embedding
+    ### Compute Required Dimension
+    embedding_dimension = 2*np.maximum(np.maximum(input_dim,output_dim),implicit_dimension)
+    ### Execute Random Embedding
+    deep_feature_map  = fullyConnected_Dense(embedding_dimension)(input_layer)
+    for i_feature_depth in range(feature_map_depth):
+#        # First Layer
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=embedding_dimension, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        deep_feature_map = fullyConnected_Dense_Invertible(embedding_dimension)(input_layer)
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+            
+    
+    
+    #------------------#
+    #   Core Layers    #
+    #------------------#
+    core_layers = fullyConnected_Dense(height)(deep_feature_map)
+    # Activation
+    core_layers = tf.nn.swish(core_layers)
+    # Train additional Depth?
+    if depth>1:
+        # Add additional deep layer(s)
+        for depth_i in range(1,depth):
+            core_layers = fullyConnected_Dense(height)(core_layers)
+            # Activation
+            core_layers = tf.nn.swish(core_layers)
+    
+    #------------------#
+    #  Readout Layers  #
+    #------------------# 
+    # Affine (Readout) Layer (Dense Fully Connected)
+    output_layer = fullyConnected_Dense(output_dim)(core_layers)  
+    
+    
+    # Define Input/Output Relationship (Arch.)
+    trainable_layers_model = tf.keras.Model(input_layer, output_layer)
+    #--------------------------------------------------#
+    # Define Optimizer & Compile Archs.
+    #----------------------------------#
+    opt = Adam(lr=learning_rate)
+    if robustness_parameter == 0:
+        trainable_layers_model.compile(optimizer=opt, loss='mae', metrics=["mse", "mae", "mape"])
+    else:
+        trainable_layers_model.compile(optimizer=opt, loss=Robust_MSE(robustness_parameter), metrics=["mse", "mae", "mape"])
+
+    return trainable_layers_model
+
+
+# In[ ]:
+
+
+def build_NEU_ffNN_w_feature_only(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
+    # Update User
+    print("Training NEU-ffNN (Fully Coupled)")
+    
+    # Update Dictionary
+    param_grid_in_internal = param_grid_in
+    param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
+    
+
+    # Deep Feature Network
+    NEU_ffNN_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_NEU_ffNN_w_feature_only, 
+                                                                verbose=True)
+    
+    # Randomized CV
+    NEU_ffNN_CV = RandomizedSearchCV(estimator=NEU_ffNN_CV, 
+                                    n_jobs=n_jobs,
+                                    cv=KFold(n_folds, random_state=2020, shuffle=True),
+                                    param_distributions=param_grid_in,
+                                    n_iter=n_iter,
+                                    return_train_score=True,
+                                    random_state=2020,
+                                    verbose=10)
+    
+    # Fit Model #
+    #-----------#
+    NEU_ffNN_CV.fit(X_train,y_train)
+
+    # Write Predictions #
+    #-------------------#
+    y_hat_train = NEU_ffNN_CV.predict(X_train)
+    y_hat_test = NEU_ffNN_CV.predict(X_test)
+    
+    # Counter number of parameters #
+    #------------------------------#
+    # Extract Best Model
+    best_model = NEU_ffNN_CV.best_estimator_
+    # Count Number of Parameters
+    N_params_best_ffNN = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
+    print('NEU-ffNN (Fully Coupled): Trained!')
+    
+    #-----------------#
+    # Save Full-Model #
+    #-----------------#
+    print('NEU-ffNN (Fully Coupled): Saving')
+#     joblib.dump(best_model, './outputs/models/Benchmarks/ffNN_trained_CV.pkl', compress = 1)
+    NEU_ffNN_CV.best_params_['N_Trainable_Parameters'] = N_params_best_ffNN
+    pd.DataFrame.from_dict(NEU_ffNN_CV.best_params_,orient='index').to_latex("./outputs/models/NEU/Best_Parameters.tex")
+    print('NEU-ffNN (Fully Coupled): Saved')
+    
+    # Return Values #
+    #---------------#
+    return y_hat_train, y_hat_test
+
+# Update User
+#-------------#
+print('Complete NEU-ffNN (Fully Coupled) Training Procedure!!!')
+
+
 # ## Naive NEU-ffNN
 # Next we implement the NEU but without using reconfiguration networks for the feature and readout maps... Instead we use the (homeomorphic) feed-forward architecture with *sub-minimal width* feed-forward architecture introduced in: [Bilokopytov and Kratsios](https://arxiv.org/pdf/2006.02341.pdf).  
 

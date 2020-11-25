@@ -1025,9 +1025,9 @@ def get_Error_distribution_plots(test_set_data,
 
     # Generate Plots #
     #----------------#
-    N_bootstraped_Samples = 10**4
-    means = [np.mean(np.random.choice(Er,size=len(Er),replace=True)) for i in range(N_bootstraped_Samples)]
-    NEU_means = [np.mean(np.random.choice(NEU_Er,size=len(NEU_Er),replace=True)) for i in range(N_bootstraped_Samples)]
+    # generate 5000 resampled sample means  =>
+    means = [np.mean(np.random.choice(Er,size=len(Er),replace=True)) for i in range(5000)]
+    NEU_means = [np.mean(np.random.choice(NEU_Er,size=len(NEU_Er),replace=True)) for i in range(5000)]
     sns.distplot(means, color='r', kde=True, hist_kws=dict(edgecolor="r", linewidth=.675),label=model_name)
     sns.distplot(NEU_means, color='b', kde=True, hist_kws=dict(edgecolor="b", linewidth=.675),label=NEU_model_name)
     plt.xlabel("Initial Sample Mean: {}".format(xbar_init))

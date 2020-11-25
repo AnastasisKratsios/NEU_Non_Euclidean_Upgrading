@@ -4,26 +4,28 @@
 # In[ ]:
 
 # Verbosity Parameters
-is_visuallty_verbose = True
+is_visuallty_verbose = False
 
 #---------------------------------#
 # General Formatting Parameter(s) #
 #---------------------------------#
 d = 1 # Dimension of X
 D = 1 # Dimension of Y
+factor = 1
 
 #-------------------#
 # Data Parameter(s) #
 #-------------------#
 # Test-set meta-parameters
 Train_step_proportion = .75 # (i.e.: ratio of train to test-set sizes)
-Extrapolation_size = .01 # (i.e.: size of test-train set domain (diameter/2))
+Extrapolation_size = 0 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
 N_data = 10**3 # (i.e.: N)
 # Noise Parameters
-noise_level = .01 # (i.e.: ε_i)
-Distortion = 0 # (i.e.: δ_i)
-
+noise_level = 0.1 # (i.e.: ε_i)
+Distortion = 0.1 # (i.e.: δ_i)
+# Generate Data
+Option_Function = "jumpdiscontinuity"
 
 
 #!/usr/bin/env python
@@ -60,7 +62,7 @@ if trial_run == True:
     CV_folds = 2
     
     # JUST FOR TEST:
-    N_data = 10**4# (i.e.: N)
+    N_data = 10**3# (i.e.: N)
 
     
     # Model Parameters
@@ -72,28 +74,28 @@ if trial_run == True:
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [100],
-                                  'learning_rate': [0.00001]}
-    Vanilla_ffNN_dictionary = {'height': [5],
-                               'depth': [3]}
+    Training_Vanilla_dictionary = {'epochs': [2],
+                                  'learning_rate': [0.0001]}
+    Vanilla_ffNN_dictionary = {'height': [2],
+                               'depth': [1]}
     
     ## NEU
     ### Readout
-    NEU_Readout_dictionary = {'epochs': [100],
-                              'learning_rate': [0.00001],
+    NEU_Readout_dictionary = {'epochs': [2],
+                              'learning_rate': [0.0001],
                               'homotopy_parameter': [0],
                               'readout_map_depth': [1],
-                              'readout_map_height': [2],
+                              'readout_map_height': [1],
                               'robustness_parameter': [0.0001]}
     
     ### Feature
-    NEU_Feature_dictionary = {'epochs': [100],
-                              'learning_rate': [0.001],
+    NEU_Feature_dictionary = {'epochs': [2],
+                              'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
-                              'implicit_dimension': [3],
-                              'feature_map_depth': [2],
+                              'implicit_dimension': [1],
+                              'feature_map_depth': [1],
                               'feature_map_height': [1],
-                              'robustness_parameter': [1]}
+                              'robustness_parameter': [0.1]}
                                                
     
     # Kernel Ridge #
@@ -108,8 +110,8 @@ if trial_run == True:
     #--------------------#
     Rand_Forest_Grid = {'learning_rate': [0.01],
                         'max_depth': [6],
-                        'min_samples_leaf': [3],
-                       'n_estimators': [200],
+                        'min_samples_leaf': [5],
+                       'n_estimators': [400],
                        }
     
 else:
@@ -119,8 +121,8 @@ else:
     # Number of Jobs (Cores to use)
     n_jobs = 60
     # Number of Random CV Draws
-    n_iter = 10
-    n_iter_trees = 50
+    n_iter = 20
+    n_iter_trees = 20
     # Number of CV Folds
     CV_folds = 4
     
@@ -128,47 +130,47 @@ else:
     # Model Parameters
     #------------------#
     ## General
-    Training_dictionary = {'batch_size': [16],
+    Training_dictionary = {'batch_size': [8,16,32],
                            'input_dim':[d],
                            'output_dim':[D]}
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [50],
-                                  'learning_rate': [0.5]}
-    Vanilla_ffNN_dictionary = {'height': [10],
-                               'depth': [3]}
+    Training_Vanilla_dictionary = {'epochs': [50,100,150,200,400,600],
+								'learning_rate': [0.0005,0.0001,0.00005,0.00001]}
+    Vanilla_ffNN_dictionary = {'height': [20,50,100,150,200],
+                               'depth': [1,2,3,4]}
     
     ## NEU
     ### Readout
-    NEU_Readout_dictionary = {'epochs': [50],
-                              'learning_rate': [0.01],
+    NEU_Readout_dictionary = {'epochs': [50,100,150,200,400,600],
+                              'learning_rate': [0.0005,0.0001,0.00005,0.00001],
                               'homotopy_parameter': [0],
                               'readout_map_depth': [2],
                               'readout_map_height': [5],
-                              'robustness_parameter': [0.0001]}
+                              'robustness_parameter': [0.0001,0.0005,0.001,0.005]}
     
     ### Feature
-    NEU_Feature_dictionary = {'epochs': [50],
-                              'learning_rate': [0.01],
+    NEU_Feature_dictionary = {'epochs': [50,100,150,200,400,600],
+                              'learning_rate': [0.0005,0.0001,0.00005,0.00001],
                               'homotopy_parameter': [0],
-                              'implicit_dimension': [10],
-                              'feature_map_depth': [3],
-                              'feature_map_height': [5],
-                              'robustness_parameter': [0.0001]}
+                              'implicit_dimension': [10,25,50,75,100],
+                              'feature_map_depth': [1,2,3,4],
+                              'feature_map_height': [1,2,5],
+                              'robustness_parameter': [0.0001,0.0005,0.001,0.005]}
     
     # Kernel Ridge #
     #--------------#
     param_grid_kernel_Ridge={"alpha": [1e0, 0.1, 1e-2, 1e-3],
-                              "gamma": np.logspace(-2, 2, 5),
+                              "gamma": np.logspace(-2, 2, 10**2),
                         "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
                            
     # Random Forest Grid
     #--------------------#
-    Rand_Forest_Grid = {'learning_rate': [0.0001,0.0005,0.005, 0.01],
-                        'max_depth': [3,4,5,6, 7, 8,9, 10, 25, 50],
-                        'min_samples_leaf': [3,4, 5, 9, 17, 20,50],
-                       'n_estimators': [5, 10, 25, 50, 100, 200, 400, 600]
+    Rand_Forest_Grid = {'learning_rate': [0.0005,0.0001,0.00005,0.00001],
+                        'max_depth': [3,4,5,6, 7, 8,9, 10],
+                        'min_samples_leaf': [5, 9, 17, 20,50],
+                       'n_estimators': [1500]
                        }
 
     
