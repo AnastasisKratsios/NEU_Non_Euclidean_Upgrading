@@ -119,6 +119,13 @@ if trial_run == True:
                         'min_samples_leaf': [5],
                        'n_estimators': [400],
                        }
+                       
+                       
+     # Kernel PCA Grid 
+     #-----------------#
+     kPCA_grid = [{"gamma": np.linspace(0.03, 0.05, 10),
+        "kernel": ["rbf", "sigmoid", "linear", "poly"]}]
+
     
 else:
     
@@ -178,6 +185,11 @@ else:
                         'min_samples_leaf': [5, 9, 17, 20,50],
                        'n_estimators': [1500]
                        }
+                       
+     # Kernel PCA Grid 
+     #-----------------#
+     kPCA_grid = [{"gamma": np.linspace(0.03, 0.05, (10**3)),
+        "kernel": ["rbf", "sigmoid", "linear", "poly"]}]
 
     
     

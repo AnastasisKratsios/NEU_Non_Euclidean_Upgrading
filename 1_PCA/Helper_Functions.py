@@ -1134,6 +1134,17 @@ class PCA_Layer(tf.keras.layers.Layer):
         return SOrd_mat#tf.matmul(inputs, SOd_mat) + self.b
 
 
+# ## Absolute Reconstruction Error for Cross-Validation
+
+# In[ ]:
+
+
+def MAE_reconstruction_score(estimator, X, y=None):
+    X_reduced = estimator.transform(X)
+    X_preimage = estimator.inverse_transform(X_reduced)
+    return -1 * mean_absolute_error(X, X_preimage)
+
+
 # ---
 # # Fin
 # ---
