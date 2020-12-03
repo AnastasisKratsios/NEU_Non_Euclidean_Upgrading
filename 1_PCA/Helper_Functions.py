@@ -1079,11 +1079,66 @@ def reporter(y_train_hat_in,y_test_hat_in,y_train_in,y_test_in, N_bootstraps=(10
     return Performance_dataframe
 
 
+# The following variant is for multi-dimensional arrays such as in the MNIST example.
+
+# In[ ]:
+
+
+#-------------------------------#
+#=### Results & Summarizing ###=#
+#-------------------------------#
+def reporter_array(y_train_hat_in,y_test_hat_in,y_train_in,y_test_in, N_bootstraps=(10**4)):
+    # Initialize Errors
+    train_set_errors = np.array(np.mean(y_train_in-y_train_hat_in,axis=1))
+    test_set_errors = np.array(np.mean(y_test_in - y_test_hat_in,axis=1))
+
+    # Initalize and Compute: Bootstraped Confidence Intervals
+    train_boot = bootstrap(train_set_errors, n=N_bootstraps)
+    train_boot = np.asarray(train_boot(.95))
+    test_boot = bootstrap(test_set_errors, n=N_bootstraps)
+    test_boot = np.asarray(test_boot(.95))
+
+    # Training Performance
+    Training_performance = np.array([mean_absolute_error(y_train_hat_in,y_train_in),
+                                     mean_squared_error(y_train_hat_in,y_train_in)])
+    Training_performance = np.concatenate([train_boot,Training_performance])
+
+    # Testing Performance
+    Test_performance = np.array([mean_absolute_error(y_test_hat_in,y_test_in),
+                                 mean_squared_error(y_test_hat_in,y_test_in)])
+    Test_performance = np.concatenate([test_boot,Test_performance])
+
+    # Organize into Dataframe
+    Performance_dataframe = pd.DataFrame({'Train': Training_performance,'Test': Test_performance})
+    Performance_dataframe.index = ["Er. 95L","Er. Mean","Er. 95U","MAE","MSE"]
+    return Performance_dataframe
+
+
 # ---
-# # Specialized Layers
+# # Specialized Layers/Funtions
 # ---
 
 # ## For Principal Component Analysis
+
+# ## PCA Builder
+
+# In[1]:
+
+
+def get_PCAs(X_train_scaled,X_test_scaled,PCA_Rank):
+    mu = X_train_scaled.mean(axis=0)
+    U,s,V = np.linalg.svd(X_train_scaled - mu, full_matrices=False)
+    Zpca = np.dot(X_train_scaled - mu, V.transpose())
+    Zpca_test = np.dot(X_test_scaled - mu, V.transpose())
+
+    # Reconstruct Training Data
+    Rpca = np.dot(Zpca[:,:PCA_Rank], V[:PCA_Rank,:]) + mu    # reconstruction
+    # Reconstruct Testing Data
+    Rpca_test = np.dot(Zpca_test[:,:PCA_Rank], V[:PCA_Rank,:]) + mu    # reconstruction
+    
+    # Return PCA(s) and Reconstruction(s)
+    return Zpca,Zpca_test, Rpca, Rpca_test
+
 
 # ### PCA Layer
 # The following is the Special PCA Layer which implements the hyperplane model $f_{V,\mu}:\mathbb{R}^r \rightarrow \mathbb{R}^d$

@@ -1264,6 +1264,136 @@ def build_NEU_PCA(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_t
 print('Complete NEU-PCA Training Procedure!!!')
 
 
+# ## Autoencoder
+
+# In[ ]:
+
+
+def get_autoencoder(input_dim,learning_rate = 0.001,fading_rate = 16):
+    # Initialization(s) #
+    #-------------------#
+    # Report Dimensions
+    print('The following image dimensions are used in constructing the autoencoder')
+    print(image_dimensions)
+
+    # Get encoder depth
+    Encoder_depth = 6
+    print('We use a DNN of depth: '+str(Encoder_depth))
+    
+    #--------------------------------------------------#
+    # Build Regular Arch.
+    #--------------------------------------------------#
+    #-###################-#
+    # Define Model Input -#
+    #-###################-#
+    input_layer = tf.keras.Input(shape=(input_dim,))
+
+
+    #----------------------#
+    # Core Layers: Encoder #
+    #----------------------#
+    encoder = tf.nn.relu(input_layer)
+    # PCA Readout (Really this is the OLS model)
+    encoder = fullyConnected_Dense(512)(encoder)
+    encoder = tf.nn.relu(encoder)
+    encoder = fullyConnected_Dense(128)(encoder)
+    encoder = tf.nn.relu(encoder)
+    encoder = fullyConnected_Dense(PCA_Rank)(encoder)
+
+    #----------------------#
+    # Core Layers: Decoder #
+    #----------------------#
+    # PCA Readout (Really this is the OLS model)
+    decoder = fullyConnected_Dense(PCA_Rank)(encoder)
+    decoder = tf.nn.relu(decoder)
+    decoder = fullyConnected_Dense(128)(decoder)
+    decoder = tf.nn.relu(decoder)
+    decoder = fullyConnected_Dense(512)(decoder)
+    decoder = tf.nn.relu(decoder)
+    # Readout Layer #
+    #---------------#
+    decoder = fullyConnected_Dense(input_dim)(decoder)
+    decoder = tf.nn.sigmoid(decoder)
+
+
+    # Define Input/Output Relationship (Arch.)
+    autoencoder = tf.keras.Model(input_layer, decoder)
+    #--------------------------------------------------#
+    # Define Optimizer & Compile Archs.
+    #----------------------------------#
+    opt = Adam(lr=learning_rate)
+    autoencoder.compile(metrics=['accuracy'],loss='mean_squared_error',optimizer='Adam')
+    
+    # Give Auto-Encoder
+    return autoencoder
+
+
+# In[ ]:
+
+
+def build_autoencoder(n_folds, n_jobs, n_iter, X_train_scaled, X_train, X_test_scaled,PCA_rank):
+    print('Begin autoencoder Training')
+    # Update Dictionary
+    param_grid_in_internal = Autoencoder_dictionary
+    param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
+
+    # # Deep Feature Network
+    AE_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_autoencoder, verbose=True)
+
+    # Randomized CV
+    AE_CV = RandomizedSearchCV(estimator=AE_CV, 
+                               n_jobs=n_jobs,
+                               cv=KFold(n_folds, random_state=2020, shuffle=True),
+                               param_distributions=param_grid_in_internal,
+                               n_iter=n_iter,
+                               return_train_score=True,
+                               random_state=2020,
+                               verbose=10)
+
+    # Fit Model #
+    #-----------#
+    AE_CV.fit(X_train,X_train)
+
+    # Write Predictions #
+    # -------------------#
+    AE_Reconstructed_train = AE_CV.predict(X_train_scaled)
+    AE_Reconstructed_test = AE_CV.predict(X_test_scaled)
+
+    # Counter number of parameters #
+    #------------------------------#
+    # Extract Best Model
+    best_model = AE_CV.best_estimator_
+    # Count Number of Parameters
+    N_params_best_AE = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
+    print('Autoencoder: Trained!')
+
+    #-----------------#
+    # Save Full-Model #
+    #-----------------#
+    print('Autoencoder: Saving')
+    #     joblib.dump(best_model, './outputs/models/Benchmarks/ffNN_trained_CV.pkl', compress = 1)
+    AE_CV.best_params_['N_Trainable_Parameters'] = N_params_best_AE
+    Path('./outputs/models/Autoencoder/').mkdir(parents=True, exist_ok=True)
+    pd.DataFrame.from_dict(AE_CV.best_params_,orient='index').to_latex("./outputs/models/Autoencoder/Best_Parameters.tex")
+    print('Autoencoder: Saved')
+
+    # Update User
+    #-------------#
+    print('Complete Autoencoder Training Procedure!!!')
+
+    # Get Predictions #
+    # -----------------#
+    # Extract Auto-Encoder Layer
+    encoder_layer = Model(inputs=best_model.model.inputs, outputs=best_model.model.layers[Encoder_depth].output)
+    # Get Feature(s)
+    # ## Train
+    AE_Factors_train = np.array(encoder_layer.predict(X_train_scaled))
+
+    # Return Values #
+    #---------------#
+    return AE_Reconstructed_train, AE_Reconstructed_test, AE_Factors_train
+
+
 # ---
 # ---
 # ---

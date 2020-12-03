@@ -114,17 +114,18 @@ if trial_run == True:
     
     # Random Forest Grid
     #--------------------#
-    Rand_Forest_Grid = {'learning_rate': [0.01],
-                        'max_depth': [6],
-                        'min_samples_leaf': [5],
-                       'n_estimators': [400],
-                       }
-                       
-                       
-     # Kernel PCA Grid 
-     #-----------------#
-     kPCA_grid = [{"gamma": np.linspace(0.03, 0.05, 10),
-        "kernel": ["rbf", "sigmoid", "linear", "poly"]}]
+    Rand_Forest_Grid = {'learning_rate': [0.01],'max_depth': [6],'min_samples_leaf': [5],'n_estimators': [400]}
+                                          
+    # Kernel PCA Grid 
+    #-----------------#
+    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, 10),'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
+    
+    # Autoencoder Grid #
+    #------------------#
+    Autoencoder_dictionary = {'batch_size': [32],
+                          'epochs': [4],
+                          'learning_rate': [0.0001]
+                         }
 
     
 else:
@@ -183,13 +184,17 @@ else:
     Rand_Forest_Grid = {'learning_rate': [0.0005,0.0001,0.00005,0.00001],
                         'max_depth': [3,4,5,6, 7, 8,9, 10],
                         'min_samples_leaf': [5, 9, 17, 20,50],
-                       'n_estimators': [1500]
-                       }
+                       'n_estimators': [1500]}
                        
-     # Kernel PCA Grid 
-     #-----------------#
-     kPCA_grid = [{"gamma": np.linspace(0.03, 0.05, (10**3)),
-        "kernel": ["rbf", "sigmoid", "linear", "poly"]}]
+    # Kernel PCA Grid 
+    #-----------------#
+    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, (10**2)),'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
+    
+    # Autoencoder Grid #
+    #------------------#
+    Autoencoder_dictionary = {'batch_size': [8,32,64],
+                          'epochs': [1,2,3,4,5,6,7,8,9,10],
+                          'learning_rate': [0.001,0.005,0.0005,0.0001,0.00005,0.00001,0.000005,0.000001]}
 
     
     
