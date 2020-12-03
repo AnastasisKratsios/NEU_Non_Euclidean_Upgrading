@@ -1269,12 +1269,15 @@ print('Complete NEU-PCA Training Procedure!!!')
 # In[ ]:
 
 
-def get_autoencoder(input_dim,learning_rate = 0.001,fading_rate = 16):
+def get_autoencoder(input_dim,
+                    learning_rate,
+                    PCA_Rank):
+    
     # Initialization(s) #
     #-------------------#
     # Get encoder depth
-    Encoder_depth = 6
-    print('We use a DNN of depth: '+str(Encoder_depth))
+    Encoder_depth = 5
+    print('We use a DNN of depth: '+str(3+2*Encoder_depth))
     
     #--------------------------------------------------#
     # Build Regular Arch.
@@ -1288,9 +1291,7 @@ def get_autoencoder(input_dim,learning_rate = 0.001,fading_rate = 16):
     #----------------------#
     # Core Layers: Encoder #
     #----------------------#
-    encoder = tf.nn.relu(input_layer)
-    # PCA Readout (Really this is the OLS model)
-    encoder = fullyConnected_Dense(512)(encoder)
+    encoder = fullyConnected_Dense(512)(input_layer)
     encoder = tf.nn.relu(encoder)
     encoder = fullyConnected_Dense(128)(encoder)
     encoder = tf.nn.relu(encoder)
@@ -1309,7 +1310,7 @@ def get_autoencoder(input_dim,learning_rate = 0.001,fading_rate = 16):
     # Readout Layer #
     #---------------#
     decoder = fullyConnected_Dense(input_dim)(decoder)
-    decoder = tf.nn.sigmoid(decoder)
+#     decoder = tf.nn.sigmoid(decoder)
 
 
     # Define Input/Output Relationship (Arch.)
@@ -1327,12 +1328,20 @@ def get_autoencoder(input_dim,learning_rate = 0.001,fading_rate = 16):
 # In[ ]:
 
 
-def build_autoencoder(n_folds, n_jobs, n_iter, X_train_scaled, X_train, X_test_scaled,PCA_rank):
+def build_autoencoder(n_folds, 
+                      n_jobs, 
+                      n_iter, 
+                      X_train_scaled, 
+                      X_train, 
+                      X_test_scaled,
+                      PCA_Rank):
+    
     print('Begin autoencoder Training')
     # Update Dictionary
-    Encoder_depth = 6
+    Encoder_depth = 5
     param_grid_in_internal = Autoencoder_dictionary
-    param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
+    param_grid_in_internal['input_dim'] = [(X_train_scaled.shape[1])]
+    param_grid_in_internal['PCA_Rank'] = [int(PCA_Rank)]
 
     # # Deep Feature Network
     AE_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_autoencoder, verbose=True)
