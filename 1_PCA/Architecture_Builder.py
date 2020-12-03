@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Helper Functions Depot
+# # Architecture Builder
 # This little script contains all the architecutre builders used in benchmarking the NEU.
 
 # ---
@@ -1272,10 +1272,6 @@ print('Complete NEU-PCA Training Procedure!!!')
 def get_autoencoder(input_dim,learning_rate = 0.001,fading_rate = 16):
     # Initialization(s) #
     #-------------------#
-    # Report Dimensions
-    print('The following image dimensions are used in constructing the autoencoder')
-    print(image_dimensions)
-
     # Get encoder depth
     Encoder_depth = 6
     print('We use a DNN of depth: '+str(Encoder_depth))
@@ -1334,6 +1330,7 @@ def get_autoencoder(input_dim,learning_rate = 0.001,fading_rate = 16):
 def build_autoencoder(n_folds, n_jobs, n_iter, X_train_scaled, X_train, X_test_scaled,PCA_rank):
     print('Begin autoencoder Training')
     # Update Dictionary
+    Encoder_depth = 6
     param_grid_in_internal = Autoencoder_dictionary
     param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
 
@@ -1384,7 +1381,7 @@ def build_autoencoder(n_folds, n_jobs, n_iter, X_train_scaled, X_train, X_test_s
     # Get Predictions #
     # -----------------#
     # Extract Auto-Encoder Layer
-    encoder_layer = Model(inputs=best_model.model.inputs, outputs=best_model.model.layers[Encoder_depth].output)
+    encoder_layer = tf.keras.Model(inputs=best_model.model.inputs, outputs=best_model.model.layers[Encoder_depth].output)
     # Get Feature(s)
     # ## Train
     AE_Factors_train = np.array(encoder_layer.predict(X_train_scaled))

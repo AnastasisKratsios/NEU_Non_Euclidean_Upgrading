@@ -122,10 +122,9 @@ if trial_run == True:
     
     # Autoencoder Grid #
     #------------------#
-    Autoencoder_dictionary = {'batch_size': [32],
+    Autoencoder_dictionary = {'batch_size': [16],
                           'epochs': [4],
-                          'learning_rate': [0.0001]
-                         }
+                          'learning_rate': [0.0001]}
 
     
 else:
