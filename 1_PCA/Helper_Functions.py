@@ -1158,7 +1158,7 @@ def get_PCAs(X_train_scaled,X_test_scaled,PCA_Rank):
 
 class PCA_Layer(tf.keras.layers.Layer):
 
-    def __init__(self, units=16, input_dim=32,rank=1):
+    def __init__(self, input_dim=32,rank=1):
         super(PCA_Layer, self).__init__()
         self.rank = rank
 
