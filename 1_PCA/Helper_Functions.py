@@ -1153,7 +1153,7 @@ def get_PCAs(X_train_scaled,X_test_scaled,PCA_Rank):
 # $$
 # Where $(P_{r,d})_{i,j}=1$ iff $i=j\leq r$.  
 
-# In[1]:
+# In[2]:
 
 
 class PCA_Layer(tf.keras.layers.Layer):

@@ -114,17 +114,28 @@ if trial_run == True:
     
     # Random Forest Grid
     #--------------------#
-    Rand_Forest_Grid = {'learning_rate': [0.01],'max_depth': [6],'min_samples_leaf': [5],'n_estimators': [400]}
+    Rand_Forest_Grid = {'learning_rate': [0.01],
+                        'max_depth': [6],
+                        'min_samples_leaf': [5],
+                        'n_estimators': [400]}
                                           
     # Kernel PCA Grid 
     #-----------------#
-    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, 10),'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
+    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, 10),
+                 'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
     
     # Autoencoder Grid #
     #------------------#
-    Autoencoder_dictionary = {'batch_size': [16],
-                          'epochs': [2],
-                          'learning_rate': [0.0001]}
+    Autoencoder_dictionary = {'batch_size': [32],
+                          'epochs': [7],
+                          'learning_rate': [0.01]}
+    
+    NEU_PCA = {'implicit_dimension': [50],
+               'feature_map_depth': [3],
+               'feature_map_height': [1],
+               'homotopy_parameter':[0]}
+
+
 
     
 else:
@@ -175,31 +186,39 @@ else:
     # Kernel Ridge #
     #--------------#
     param_grid_kernel_Ridge={"alpha": [1e0, 0.1, 1e-2, 1e-3],
-                              "gamma": np.logspace(-2, 2, 10**2),
-                        "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
+                             "gamma": np.logspace(-2, 2, 10**2),
+                             "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
                            
     # Random Forest Grid
     #--------------------#
     Rand_Forest_Grid = {'learning_rate': [0.0005,0.0001,0.00005,0.00001],
                         'max_depth': [3,4,5,6, 7, 8,9, 10],
                         'min_samples_leaf': [5, 9, 17, 20,50],
-                       'n_estimators': [1500]}
+                        'n_estimators': [1500]}
                        
     # Kernel PCA Grid 
     #-----------------#
-    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, (10**2)),'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
+    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, (10**2)),
+                 'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
     
     # Autoencoder Grid #
     #------------------#
     Autoencoder_dictionary = {'batch_size': [8,16,32],
-                          'epochs': [5,7,9,11,15,20],
-                          'learning_rate': [0.005,0.001,0.0001,0.0005,0.00005]}
+                              'epochs': [5,7,9,11,15,20],
+                              'learning_rate': [0.005,0.001,0.0001,0.0005,0.00005]}
+    
+    NEU_PCA = {'implicit_dimension': [5,20,50,100],
+               'feature_map_depth': [1,2,5,7,10],
+               'feature_map_height': [1,2,3,5],
+               'homotopy_parameter':[0]}
+
 
     
     
 #==================================================================================#        
 ### Create NEU parameter disctionary by parameters joining model it is upgrading ###
 #==================================================================================#
+# Regression
 param_grid_Vanilla_Nets = {**Training_dictionary,
                            **Training_Vanilla_dictionary,
                            **Vanilla_ffNN_dictionary}
@@ -215,6 +234,10 @@ param_grid_NEU_Feature_Only_Nets = {**Training_dictionary,
 
 NEU_Structure_Dictionary = {**Training_dictionary,
                             **NEU_Readout_dictionary}
+
+# PCA
+param_grid_in = {**NEU_PCA,
+                 **Autoencoder_dictionary}
 
 # Update User #
 #-------------#

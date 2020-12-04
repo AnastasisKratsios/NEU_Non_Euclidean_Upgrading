@@ -162,7 +162,7 @@ def get_Reconfiguration_Network_Readout_no_project(learning_rate, input_dim, out
     return trainable_layers_model
 
 
-# In[ ]:
+# In[4]:
 
 
 def build_NEU_Readout(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
@@ -227,13 +227,13 @@ print('Complete NEU-Structure Building Procedure!!!')
 
 # Get NEU-OLS
 
-# In[1]:
+# In[5]:
 
 
 import numpy as np
 
 
-# In[ ]:
+# In[6]:
 
 
 def get_NEU_OLS(learning_rate, input_dim, output_dim, feature_map_depth, feature_map_height,robustness_parameter, homotopy_parameter,implicit_dimension):
@@ -260,7 +260,7 @@ def get_NEU_OLS(learning_rate, input_dim, output_dim, feature_map_depth, feature
     for i_feature_depth in range(feature_map_depth):
         # First Layer
         ## Spacial-Dependent part of reconfiguration unit
-        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=dimension_lifted, homotopy_parameter = 1)(deep_feature_map)
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=dimension_lifted, homotopy_parameter = homotopy_parameter)(deep_feature_map)
         ## Constant part of reconfiguration unit
 #         deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(deep_feature_map)
         ## Non-linear part of reconfiguration unit
@@ -292,7 +292,7 @@ def get_NEU_OLS(learning_rate, input_dim, output_dim, feature_map_depth, feature
 
 # Build NEU-OLS
 
-# In[ ]:
+# In[7]:
 
 
 def build_NEU_OLS(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
@@ -355,7 +355,7 @@ print('Complete NEU-ffNN Training Procedure!!!')
 
 # ## (Vanilla) Feed-forward neural network
 
-# In[ ]:
+# In[8]:
 
 
 #------------------------------------------------------------------------------------------------#
@@ -401,7 +401,7 @@ def get_ffNN(height, depth, learning_rate, input_dim, output_dim):
     return trainable_layers_model
 
 
-# In[21]:
+# In[9]:
 
 
 def build_ffNN(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train,X_test):
@@ -470,7 +470,7 @@ print('Deep Feature Builder - Ready')
 
 # #### Build and Train NEU-ffNN
 
-# In[ ]:
+# In[10]:
 
 
 def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter,implicit_dimension):
@@ -548,7 +548,7 @@ def get_NEU_ffNN(height, depth, learning_rate, input_dim, output_dim, feature_ma
     return trainable_layers_model
 
 
-# In[ ]:
+# In[11]:
 
 
 def build_NEU_ffNN(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
@@ -608,7 +608,7 @@ print('Complete NEU-ffNN Training Procedure!!!')
 
 # ## Alternative NEU-ffNN
 
-# In[ ]:
+# In[12]:
 
 
 def get_NEU_ffNN_w_proj(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter,implicit_dimension):
@@ -693,7 +693,7 @@ def get_NEU_ffNN_w_proj(height, depth, learning_rate, input_dim, output_dim, fea
     return trainable_layers_model
 
 
-# In[ ]:
+# In[13]:
 
 
 def build_NEU_ffNN_w_proj(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
@@ -753,7 +753,7 @@ print('Complete NEU-ffNN Training Procedure!!!')
 
 # #### Get NEU-ffNN (Only Feature Map)
 
-# In[ ]:
+# In[14]:
 
 
 def get_NEU_ffNN_w_feature_only(height, depth, learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter,implicit_dimension):
@@ -822,7 +822,7 @@ def get_NEU_ffNN_w_feature_only(height, depth, learning_rate, input_dim, output_
     return trainable_layers_model
 
 
-# In[ ]:
+# In[15]:
 
 
 def build_NEU_ffNN_w_feature_only(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
@@ -886,7 +886,7 @@ print('Complete NEU-ffNN (Fully Coupled) Training Procedure!!!')
 # ## Naive NEU-ffNN
 # Next we implement the NEU but without using reconfiguration networks for the feature and readout maps... Instead we use the (homeomorphic) feed-forward architecture with *sub-minimal width* feed-forward architecture introduced in: [Bilokopytov and Kratsios](https://arxiv.org/pdf/2006.02341.pdf).  
 
-# In[ ]:
+# In[16]:
 
 
 def get_NAIVE_NEU_ffNN(feature_map_depth, feature_map_height, ## NEU-Feature Map Hyper-Parameter(s)
@@ -963,7 +963,7 @@ def get_NAIVE_NEU_ffNN(feature_map_depth, feature_map_height, ## NEU-Feature Map
     return ffNN
 
 
-# In[ ]:
+# In[17]:
 
 
 def build_NAIVE_NEU_ffNN(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
@@ -1019,7 +1019,7 @@ print('Complete NEU-ffNN Training Procedure!!!')
 
 # ## Fully Coupled NEU-Models
 
-# In[ ]:
+# In[18]:
 
 
 def get_NEU_OLS_FullyCoupled(learning_rate, input_dim, output_dim, feature_map_depth, readout_map_depth, feature_map_height,readout_map_height,robustness_parameter,homotopy_parameter,implicit_dimension):
@@ -1086,7 +1086,7 @@ def get_NEU_OLS_FullyCoupled(learning_rate, input_dim, output_dim, feature_map_d
     return trainable_layers_model
 
 
-# In[ ]:
+# In[19]:
 
 
 def build_NEU_OLS_FullyCoupled(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test):
@@ -1150,123 +1150,157 @@ print('Complete NEU-ffNN Training Procedure!!!')
 
 # ## For Principal Component Analysis
 
-# In[ ]:
+# In[20]:
 
 
-def get_NEU_PCA(learning_rate, input_dim, output_dim, feature_map_depth, feature_map_height,robustness_parameter, homotopy_parameter,implicit_dimension):
+def get_NEU_PCA(input_dim,
+                learning_rate,
+                PCA_Rank,
+                implicit_dimension,
+                feature_map_depth,
+                feature_map_height,
+                homotopy_parameter):
     #--------------------------------------------------#
     # Build Regular Arch.
     #--------------------------------------------------#
     #-###################-#
     # Define Model Input -#
     #-###################-#
-    input_layer = tf.keras.Input(shape=(input_dim,))
-    
-    
+    input_layer = tf.keras.Input(shape=(PCA_Rank,))
+
+    #----------------------#
+    # Core Layers: PCA #
+    #----------------------#
+#     # PCA
+#     encoder = fullyConnected_Dense(PCA_Rank)(input_layer)
+    # Reconstructor
+
     #-###############-#
     # NEU Feature Map #
     #-###############-#
     ##Random Embedding
     ### Compute Required Dimension
-    embedding_dimension = 2*np.maximum(np.maximum(input_dim,output_dim),implicit_dimension)
+    embedding_dimension = 2*np.maximum(PCA_Rank,implicit_dimension)
     ### Execute Random Embedding
     deep_feature_map_prep = fullyConnected_Dense(embedding_dimension)(input_layer)
     deep_feature_map = tf.concat([input_layer, deep_feature_map_prep], axis=1)
     ## Homeomorphic Part
-    dimension_lifted = (input_dim + embedding_dimension)
+    dimension_lifted = (PCA_Rank + embedding_dimension)
     for i_feature_depth in range(feature_map_depth):
         # First Layer
         ## Spacial-Dependent part of reconfiguration unit
-        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=dimension_lifted, homotopy_parameter = 1)(deep_feature_map)
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=dimension_lifted, homotopy_parameter = homotopy_parameter)(deep_feature_map)
         ## Constant part of reconfiguration unit
-#         deep_feature_map = fullyConnected_Dense_Invertible(input_dim)(deep_feature_map)
-        ## Non-linear part of reconfiguration unit
         deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
-            
-    
-    
-    #------------------#
-    #   Core Layers    #
-    #------------------#
+
     # PCA Readout (Really this is the OLS model)
-    PCA_Layer_output = PCA_Layer(rank=PCA_rank)(deep_feature_map)
-    
-    
-    
+    decoder = fullyConnected_Dense(input_dim)(deep_feature_map)
+
+
     # Define Input/Output Relationship (Arch.)
-    trainable_layers_model = tf.keras.Model(input_layer, PCA_Layer_output)
+    NEU_PCA = tf.keras.Model(input_layer, decoder)
     #--------------------------------------------------#
     # Define Optimizer & Compile Archs.
     #----------------------------------#
     opt = Adam(lr=learning_rate)
-    if robustness_parameter == 0:
-        trainable_layers_model.compile(optimizer=opt, loss='mae', metrics=["mse", "mae", "mape"])
-    else:
-        trainable_layers_model.compile(optimizer=opt, loss=Robust_MSE(robustness_parameter), metrics=["mse", "mae", "mape"])
+    NEU_PCA.compile(metrics=['accuracy'],loss='mean_squared_error',optimizer='Adam')
 
-    return trainable_layers_model
+    # Return NEU PCA
+    return NEU_PCA
 
 
-# In[ ]:
+# In[21]:
 
 
-def build_NEU_PCA(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_test,PCA_rank):
+def build_NEU_PCA(n_folds, 
+                  n_jobs, 
+                  n_iter, 
+                  param_grid_in, 
+                  X_train_scaled,
+                  X_test_scaled, 
+                  X_train,
+                  PCA_Rank):
     # Update Dictionary
     param_grid_in_internal = param_grid_in
     param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
+    param_grid_in_internal['PCA_Rank'] = [PCA_Rank]
 
+    print('Performing PCA')
+    #----------------------#
+    # Core Layers: PCA     #
+    #----------------------#
+    # Get Low-Dimensional Representation
+    X_train_internal,X_test_internal, Rpca, Rpca_test = get_PCAs(X_train_scaled=X_train_scaled,
+                                                                 X_test_scaled=X_test_scaled,
+                                                                 PCA_Rank=PCA_Rank)
+    
+    X_train_internal = X_train_internal[:,:PCA_Rank]
+    X_test_internal = X_test_internal[:,:PCA_Rank]
+    #-------------------------------------------------#
+    print('Performing PCAs Computed')
+    
     # Deep Feature Network
     NEU_PCA_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_NEU_PCA, verbose=True)
-    
+
     # Randomized CV
     NEU_PCA_CV = RandomizedSearchCV(estimator=NEU_PCA_CV, 
                                     n_jobs=n_jobs,
-                                    cv=KFold(n_folds, random_state=2020, shuffle=True),
+                                    cv=KFold(n_folds, random_state=2020,shuffle=True),
                                     param_distributions=param_grid_in_internal,
                                     n_iter=n_iter,
                                     return_train_score=True,
                                     random_state=2020,
                                     verbose=10)
-    
+
     # Fit Model #
     #-----------#
-    NEU_PCA_CV.fit(X_train,y_train)
+    print('Training NEU-Feature Map!')
+    NEU_PCA_CV.fit(X_train_internal,X_train)
 
     # Write Predictions #
     #-------------------#
-    y_hat_train = NEU_PCA_CV.predict(X_train)
-    y_hat_test = NEU_PCA_CV.predict(X_test)
-    
+    NEU_PCA_Reconstruction_train = NEU_PCA_CV.predict(X_train_internal)
+    NEU_PCA_Reconstruction_test = NEU_PCA_CV.predict(X_test_internal)
+
     # Counter number of parameters #
     #------------------------------#
     # Extract Best Model
     best_model = NEU_PCA_CV.best_estimator_
     # Count Number of Parameters
-    N_params_best_ffNN = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
+    N_params_best_NEU_PCA = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
     print('NEU-PCA: Trained!')
-    
+
     #-----------------#
     # Save Full-Model #
     #-----------------#
     print('NEU-PCA: Saving')
-#     joblib.dump(best_model, './outputs/models/Benchmarks/ffNN_trained_CV.pkl', compress = 1)
-    NEU_PCA_CV.best_params_['N_Trainable_Parameters'] = N_params_best_ffNN
+    #     joblib.dump(best_model, './outputs/models/Benchmarks/ffNN_trained_CV.pkl', compress = 1)
+    NEU_PCA_CV.best_params_['N_Trainable_Parameters'] = N_params_best_NEU_PCA
     Path('./outputs/models/NEU/NEU_PCA/').mkdir(parents=True, exist_ok=True)
     pd.DataFrame.from_dict(NEU_PCA_CV.best_params_,orient='index').to_latex("./outputs/models/NEU/NEU_PCA/Best_Parameters.tex")
     print('NEU-PCA: Saved')
-    
-    # Return Values #
-    #---------------#
-    return y_hat_train, y_hat_test, best_model
 
-# Update User
-#-------------#
-print('Complete NEU-PCA Training Procedure!!!')
+    # Get Factor(s) #
+    # --------------#
+#     # Extract Auto-Encoder Layer
+#     encoder_layer = tf.keras.Model(inputs=best_model.model.inputs, outputs=best_model.model.layers[1].output)
+#     # Get Feature(s)
+#     # ## Train
+#     NEU_PCA_Factors_train = np.array(encoder_layer.predict(X_train_scaled))
+#     NEU_PCA_Factors_test = np.array(encoder_layer.predict(X_test_scaled))
+
+    # Update User
+    #-------------#
+    print('Complete NEU-PCA Training Procedure!!!')
+
+    # Return Values #
+    # ---------------#
+    return NEU_PCA_Reconstruction_train, NEU_PCA_Reconstruction_test, X_train_internal, X_test_internal
 
 
 # ## Autoencoder
 
-# In[ ]:
+# In[22]:
 
 
 def get_autoencoder(input_dim,
@@ -1325,7 +1359,7 @@ def get_autoencoder(input_dim,
     return autoencoder
 
 
-# In[ ]:
+# In[23]:
 
 
 def build_autoencoder(n_folds, 
@@ -1387,17 +1421,165 @@ def build_autoencoder(n_folds,
     #-------------#
     print('Complete Autoencoder Training Procedure!!!')
 
-    # Get Predictions #
-    # -----------------#
+    # Get Factor(s) #
+    # --------------#
     # Extract Auto-Encoder Layer
     encoder_layer = tf.keras.Model(inputs=best_model.model.inputs, outputs=best_model.model.layers[Encoder_depth].output)
     # Get Feature(s)
     # ## Train
     AE_Factors_train = np.array(encoder_layer.predict(X_train_scaled))
+    AE_Factors_test = np.array(encoder_layer.predict(X_test_scaled))
 
     # Return Values #
     #---------------#
-    return AE_Reconstructed_train, AE_Reconstructed_test, AE_Factors_train
+    return AE_Reconstructed_train, AE_Reconstructed_test, AE_Factors_train, AE_Factors_test
+
+
+# ## NEU Autoencoder
+
+# In[20]:
+
+
+def get_NEU_Autoencoder(input_dim,
+                        learning_rate,
+                        PCA_Rank,
+                        implicit_dimension,
+                        feature_map_depth,
+                        feature_map_height,
+                        homotopy_parameter):
+    #--------------------------------------------------#
+    # Build Regular Arch.
+    #--------------------------------------------------#
+    #-###################-#
+    # Define Model Input -#
+    #-###################-#
+    input_layer = tf.keras.Input(shape=(input_dim,))
+
+    #----------------------#
+    # Core Layers: PCA #
+    #----------------------#
+    # PCA
+    encoder = fullyConnected_Dense(PCA_Rank)(input_layer)
+    for i in range(feature_map_depth):
+        # Reconstructor
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,
+                                                 home_space_dim=PCA_Rank, 
+                                                 homotopy_parameter = homotopy_parameter)(encoder)
+        ## Constant part of reconfiguration unit
+        deep_feature_map_out = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+    
+    
+    #-###############-#
+    # NEU Feature Map #
+    #-###############-#
+    ##Random Embedding
+    ### Compute Required Dimension
+    embedding_dimension = 2*np.maximum(PCA_Rank,implicit_dimension)
+    ### Execute Random Embedding
+    deep_feature_map_prep = fullyConnected_Dense(embedding_dimension)(deep_feature_map_out)
+    deep_feature_map = tf.concat([deep_feature_map_out, deep_feature_map_prep], axis=1)
+    ## Homeomorphic Part
+    dimension_lifted = (PCA_Rank + embedding_dimension)
+    for i_feature_depth in range(feature_map_depth):
+        # First Layer
+        ## Spacial-Dependent part of reconfiguration unit
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,
+                                                 home_space_dim=dimension_lifted, 
+                                                 homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        ## Constant part of reconfiguration unit
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+
+    # PCA Readout (Really this is the OLS model)
+    decoder = fullyConnected_Dense(input_dim)(deep_feature_map)
+
+
+    # Define Input/Output Relationship (Arch.)
+    NEU_PCA = tf.keras.Model(input_layer, decoder)
+    #--------------------------------------------------#
+    # Define Optimizer & Compile Archs.
+    #----------------------------------#
+    opt = Adam(lr=learning_rate)
+    NEU_PCA.compile(metrics=['accuracy'],loss='mean_squared_error',optimizer='Adam')
+
+    # Return NEU PCA
+    return NEU_PCA
+
+
+# In[21]:
+
+
+def build_NEU_Autoencoder(n_folds, 
+                          n_jobs, 
+                          n_iter, 
+                          param_grid_in, 
+                          X_train_scaled,
+                          X_test_scaled, 
+                          X_train,
+                          PCA_Rank):
+    # Update Dictionary
+    param_grid_in_internal = param_grid_in
+    param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
+    param_grid_in_internal['PCA_Rank'] = [PCA_Rank]
+
+    print('Performing AE')
+    # Deep Feature Network
+    NEU_PCA_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_NEU_Autoencoder, verbose=True)
+
+    # Randomized CV
+    NEU_PCA_CV = RandomizedSearchCV(estimator=NEU_PCA_CV, 
+                                    n_jobs=n_jobs,
+                                    cv=KFold(n_folds, random_state=2020,shuffle=True),
+                                    param_distributions=param_grid_in_internal,
+                                    n_iter=n_iter,
+                                    return_train_score=True,
+                                    random_state=2020,
+                                    verbose=10)
+
+    # Fit Model #
+    #-----------#
+    print('Training NEU-Feature Map!')
+    NEU_PCA_CV.fit(X_train_scaled,X_train)
+
+    # Write Predictions #
+    #-------------------#
+    NEU_PCA_Reconstruction_train = NEU_PCA_CV.predict(X_train_scaled)
+    NEU_PCA_Reconstruction_test = NEU_PCA_CV.predict(X_test_scaled)
+
+    # Counter number of parameters #
+    #------------------------------#
+    # Extract Best Model
+    best_model = NEU_PCA_CV.best_estimator_
+    # Count Number of Parameters
+    N_params_best_NEU_PCA = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
+    print('NEU-AE: Trained!')
+
+    #-----------------#
+    # Save Full-Model #
+    #-----------------#
+    print('NEU-AE: Saving')
+    #     joblib.dump(best_model, './outputs/models/Benchmarks/ffNN_trained_CV.pkl', compress = 1)
+    NEU_PCA_CV.best_params_['N_Trainable_Parameters'] = N_params_best_NEU_PCA
+    Path('./outputs/models/NEU/NEU_PCA/').mkdir(parents=True, exist_ok=True)
+    pd.DataFrame.from_dict(NEU_PCA_CV.best_params_,orient='index').to_latex("./outputs/models/NEU/NEU_PCA/Best_Parameters.tex")
+    print('NEU-AE: Saved')
+
+    # Get Factor(s) #
+    # --------------#
+    # Extract Auto-Encoder Layer
+    Encoder_Depth = 1 + 2*NEU_PCA_CV.best_params_['feature_map_depth']
+    encoder_layer = tf.keras.Model(inputs=best_model.model.inputs, outputs=best_model.model.layers[Encoder_Depth].output)
+    # Get Feature(s)
+    # ## Train
+    NEU_PCA_Factors_train = np.array(encoder_layer.predict(X_train_scaled))
+    NEU_PCA_Factors_test = np.array(encoder_layer.predict(X_test_scaled))
+
+    # Update User
+    #-------------#
+    print('Complete NEU-AE Training Procedure!!!')
+
+    # Return Values #
+    # ---------------#
+    return NEU_PCA_Reconstruction_train, NEU_PCA_Reconstruction_test, NEU_PCA_Factors_train, NEU_PCA_Factors_test
 
 
 # ---
