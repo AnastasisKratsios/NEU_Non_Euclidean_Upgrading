@@ -73,14 +73,14 @@ if trial_run == True:
     # Model Parameters
     #------------------#
     ## General
-    Training_dictionary = {'batch_size': [8],
+    Training_dictionary = {'batch_size': [32],
                            'input_dim':[d],
                            'output_dim':[D]}
     
 
     ## Vanilla
     Training_Vanilla_dictionary = {'epochs': [50],
-                                  'learning_rate': [0.0001]}
+                                  'learning_rate': [0.00001]}
     
     Vanilla_ffNN_dictionary = {'height': [50],
                                'depth': [2]}
@@ -98,23 +98,26 @@ if trial_run == True:
     NEU_Feature_dictionary = {'epochs': [50],
                               'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
-                              'implicit_dimension': [5],
-                              'feature_map_depth': [1],
-                              'feature_map_height': [25],
-                              'robustness_parameter': [0.01]}
+                              'implicit_dimension': [20],
+                              'feature_map_depth': [2],
+                              'feature_map_height': [5],
+                              'robustness_parameter': [0.0001]}
                                                
     
     # Kernel Ridge #
     #--------------#
     param_grid_kernel_Ridge={"alpha": [1e0, 1e-3],
-                             "gamma": np.logspace(-2, 2, 2),
-                             "kernel": ["rbf", "laplacian"]}
+                             "gamma": np.logspace(-2, 2, 10),
+                             "kernel": ["rbf", "laplacian", "sigmoid"]}
     
     
     
     # Random Forest Grid
     #--------------------#
-    Rand_Forest_Grid = {'learning_rate': [0.01],'max_depth': [6],'min_samples_leaf': [5],'n_estimators': [400]}
+    Rand_Forest_Grid = {'learning_rate': [0.001],
+                        'max_depth': [8],
+                        'min_samples_leaf': [8],
+                        'n_estimators': [1000]}
                                           
      # Kernel PCA Grid 
      #-----------------#

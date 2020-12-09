@@ -786,6 +786,269 @@ class Reconfiguration_unit(tf.keras.layers.Layer):
         return x_out
 
 
+# #### Identity Initialized Variant:
+# Only use this for greedy "chaining procedure".
+
+# In[ ]:
+
+
+class Reconfiguration_unit_identity_initialization(tf.keras.layers.Layer):
+    
+    def __init__(self, units=16, input_dim=32, home_space_dim = d, homotopy_parameter = 0):
+        super(Reconfiguration_unit_identity_initialization, self).__init__()
+        self.units = units
+        self.home_space_dim = home_space_dim
+        self.homotopy_parameter = homotopy_parameter
+    
+    def build(self, input_shape):
+        #------------------------------------------------------------------------------------#
+        # Center
+        #------------------------------------------------------------------------------------#
+        self.location = self.add_weight(name='location',
+                                    shape=(self.home_space_dim,),
+                                    trainable=True,
+                                    initializer='zeros',
+                                    regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
+        
+        
+        #------------------------------------------------------------------------------------#
+        #====================================================================================#
+        #------------------------------------------------------------------------------------#
+        #====================================================================================#
+        #                                  Decay Rates                                       #
+        #====================================================================================#
+        #------------------------------------------------------------------------------------#
+        #====================================================================================#
+        #------------------------------------------------------------------------------------#
+        
+        
+        #------------------------------------------------------------------------------------#
+        # Bump Function
+        #------------------------------------------------------------------------------------#
+        self.sigma = self.add_weight(name='bump_threshfold',
+                                        shape=[1],
+                                        initializer=RandomUniform(minval=.5, maxval=1),
+                                        trainable=True,
+                                        constraint=tf.keras.constraints.NonNeg())
+        self.a = self.add_weight(name='bump_scale',
+                                        shape=[1],
+                                        initializer='ones',
+                                        trainable=True)
+        self.b = self.add_weight(name='bump_location',
+                                        shape=[1],
+                                        initializer='zeros',
+                                        trainable=True)
+        
+        #------------------------------------------------------------------------------------#
+        # Exponential Decay
+        #------------------------------------------------------------------------------------#
+        self.exponential_decay = self.add_weight(name='exponential_decay_rate',
+                                                 shape=[1],
+                                                 initializer=RandomUniform(minval=.5, maxval=10),
+                                                 trainable=True,
+                                                 constraint=tf.keras.constraints.NonNeg())
+        
+        #------------------------------------------------------------------------------------#
+        # Mixture
+        #------------------------------------------------------------------------------------#
+        self.m_w1 = self.add_weight(name='no_decay',
+                                    shape=[1],
+                                    initializer='zeros',
+                                    trainable=True,
+                                    constraint=tf.keras.constraints.NonNeg(),
+                                    regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
+        self.m_w2 = self.add_weight(name='weight_exponential',
+                                    shape=[1],
+                                    initializer='zeros',#RandomUniform(minval=.001, maxval=0.01),
+                                    trainable=True,
+                                    constraint=tf.keras.constraints.NonNeg(),
+                                    regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
+        self.m_w3 = self.add_weight(name='bump',
+                                    shape=[1],
+                                    initializer='zeros',#RandomUniform(minval=.001, maxval=0.01),
+                                    trainable=True,
+                                    constraint=tf.keras.constraints.NonNeg(),
+                                    regularizer=tf.keras.regularizers.L2(self.homotopy_parameter))
+        
+        #------------------------------------------------------------------------------------#
+        # Tangential Map
+        #------------------------------------------------------------------------------------#
+        self.Id = self.add_weight(name='Identity_Matrix',
+                                   shape=(self.home_space_dim,self.home_space_dim),
+                                   initializer='identity',
+                                   trainable=False)
+        # No Decay
+        self.Tw1 = self.add_weight(name='Tangential_Weights_1',
+                                   shape=(self.units,(self.home_space_dim**2)),
+                                   initializer='zeros',
+                                   trainable=True)        
+        self.Tw2 = self.add_weight(name='Tangential_Weights_2',
+                                   shape=((self.home_space_dim**2),self.units),
+                                   initializer='zeros',
+                                   trainable=True)
+        self.Tb1 = self.add_weight(name='Tangential_basies_1',
+                                   shape=((self.home_space_dim**2),1),
+                                   initializer='zeros',
+                                   trainable=True)
+        self.Tb2 = self.add_weight(name='Tangential_basies_1',
+                                   shape=(self.home_space_dim,self.home_space_dim),
+                                   initializer='zeros',
+                                   trainable=True)
+        # Exponential Decay
+        self.Tw1_b = self.add_weight(name='Tangential_Weights_1_b',
+                           shape=(self.units,(self.home_space_dim**2)),
+                           initializer='zeros',
+                           trainable=True)        
+        self.Tw2_b = self.add_weight(name='Tangential_Weights_2_b',
+                                   shape=((self.home_space_dim**2),self.units),
+                                   initializer='zeros',
+                                   trainable=True)
+        self.Tb1_b = self.add_weight(name='Tangential_basies_1_b',
+                                   shape=((self.home_space_dim**2),1),
+                                   initializer='zeros',
+                                   trainable=True)
+        self.Tb2_b = self.add_weight(name='Tangential_basies_1_b',
+                                   shape=(self.home_space_dim,self.home_space_dim),
+                                   initializer='zeros',
+                                   trainable=True)
+        # Bump
+        self.Tw1_c = self.add_weight(name='Tangential_Weights_1_c',
+                           shape=(self.units,(self.home_space_dim**2)),
+                           initializer='zeros',
+                           trainable=True)        
+        self.Tw2_c = self.add_weight(name='Tangential_Weights_2_c',
+                                   shape=((self.home_space_dim**2),self.units),
+                                   initializer='zeros',
+                                   trainable=True)
+        self.Tb1_c = self.add_weight(name='Tangential_basies_1_c',
+                                   shape=((self.home_space_dim**2),1),
+                                   initializer='zeros',
+                                   trainable=True)
+        self.Tb2_c = self.add_weight(name='Tangential_basies_1_c',
+                                   shape=(self.home_space_dim,self.home_space_dim),
+                                   initializer='zeros',
+                                   trainable=True)
+        
+        
+        # Numerical Stability Parameter(s)
+        #----------------------------------#
+        self.num_stab_param = self.add_weight(name='weight_exponential',
+                                         shape=[1],
+                                         initializer='ones',
+                                         trainable=False,
+                                         constraint=tf.keras.constraints.NonNeg())
+        
+        # Wrap things up!
+        super().build(input_shape)
+
+    # C^{\infty} bump function (numerically unstable...) #
+    #----------------------------------------------------#
+#     def bump_function(self, x):
+#         return tf.math.exp(-self.sigma / (self.sigma - x))
+    # C^1 bump function (numerically stable??) #
+    #----------------------------------------------------#
+    def bump_function(self, x):
+#         return tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
+        bump_out = tf.math.pow(x-self.sigma,2)*tf.math.pow(x+self.sigma,2)
+        bump_out = tf.math.pow(bump_out,(1/8))
+        return bump_out
+
+        
+    def call(self, input):
+        #------------------------------------------------------------------------------------#
+        # Initializations
+        #------------------------------------------------------------------------------------#
+        norm_inputs = tf.norm(input) #WLOG if norm is squared!
+        
+        #------------------------------------------------------------------------------------#
+        # Decay Rate Functions
+        #------------------------------------------------------------------------------------#
+        # Bump Function (Local Behaviour)
+        bump_input = self.a*norm_inputs + self.b
+        greater = tf.math.greater(bump_input, -self.sigma)
+        less = tf.math.less(bump_input, self.sigma)
+        condition = tf.logical_and(greater, less)
+
+        bump_decay = tf.where(
+            condition, 
+            self.bump_function(bump_input),
+            0.0)
+#         bump_decay = 1
+        
+        # Exponential Decay
+        exp_decay = tf.math.exp(-self.exponential_decay*norm_inputs)
+        
+        
+        
+        
+        #------------------------------------------------------------------------------------#
+        # Tangential Map
+        #------------------------------------------------------------------------------------#
+        # Build Radial, Tangent-Space Valued Function, i.e.: C(R^d,so_d) st. f(x)=f(y) if |x|=|y|
+        
+        
+        # Build Tangential Feed-Forward Network (Bonus)
+        #-----------------------------------------------#
+        # No Decay
+        tangential_ffNN = norm_inputs*self.Id
+        tangential_ffNN = tf.reshape(tangential_ffNN,[(self.home_space_dim**2),1])
+        tangential_ffNN = tangential_ffNN + self.Tb1
+        
+        tangential_ffNN = tf.linalg.matmul(self.Tw1,tangential_ffNN)         
+        tangential_ffNN = tf.nn.relu(tangential_ffNN)
+        tangential_ffNN = tf.linalg.matmul(self.Tw2,tangential_ffNN)
+        tangential_ffNN = tf.reshape(tangential_ffNN,[self.home_space_dim,self.home_space_dim])
+        tangential_ffNN = tangential_ffNN + self.Tb2
+        
+        # Exponential Decay
+        tangential_ffNN_b = norm_inputs*exp_decay*self.Id
+        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[(self.home_space_dim**2),1])
+        tangential_ffNN_b = tangential_ffNN_b + self.Tb1_b
+        
+        tangential_ffNN_b = tf.linalg.matmul(self.Tw1_b,tangential_ffNN_b)         
+        tangential_ffNN_b = tf.nn.relu(tangential_ffNN_b)
+        tangential_ffNN_b = tf.linalg.matmul(self.Tw2_b,tangential_ffNN_b)
+        tangential_ffNN_b = tf.reshape(tangential_ffNN_b,[self.home_space_dim,self.home_space_dim])
+        tangential_ffNN_b = tangential_ffNN_b + self.Tb2_b
+        
+        # Bump (Local Aspect)
+        tangential_ffNN_c = bump_decay*norm_inputs*self.Id
+        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[(self.home_space_dim**2),1])
+        tangential_ffNN_c = tangential_ffNN_c + self.Tb1_c
+        
+        tangential_ffNN_c = tf.linalg.matmul(self.Tw1_c,tangential_ffNN_c)         
+        tangential_ffNN_c = tf.nn.relu(tangential_ffNN_c)
+        tangential_ffNN_c = tf.linalg.matmul(self.Tw2_c,tangential_ffNN_c)
+        tangential_ffNN_c = tf.reshape(tangential_ffNN_c,[self.home_space_dim,self.home_space_dim])
+        tangential_ffNN_c = tangential_ffNN_c + self.Tb2_c
+    
+        # Map to Rotation-Matrix-Valued Function #
+        #----------------------------------------#
+        # No Decay
+        tangential_ffNN = (tf.transpose(tangential_ffNN) - tangential_ffNN) 
+        tangential_ffNN_b = (tf.transpose(tangential_ffNN_b) - tangential_ffNN_b) 
+        tangential_ffNN_c = (tf.transpose(tangential_ffNN_c) - tangential_ffNN_c) 
+        # Decay
+        tangential_ffNN = (self.m_w1*tangential_ffNN) + (self.m_w2*tangential_ffNN_b) + (self.m_w3*tangential_ffNN_c) 
+            
+            
+        # NUMERICAL STABILIZER
+        #----------------------#
+#         tangential_ffNN = tangential_ffNN + tf.eye(self.home_space_dim) *(self.num_stab_param*10**(-3))
+        tangential_ffNN = tf.math.maximum(tf.math.minimum(-tangential_ffNN,10**(15)),-(10**(15)))
+    
+        # Lie Parameterization:  
+        tangential_ffNN = tf.linalg.expm(tangential_ffNN)
+        
+        # Exponentiation and Action
+        #----------------------------#
+        x_out = tf.linalg.matvec(tangential_ffNN,input) + self.location
+#         x_out = tf.linalg.matvec(tangential_ffNN,input)
+        
+        # Return Output
+        return x_out
+
+
 # #### Fully-connected Feed-forward layer with $GL_{d}$-connections
 
 # In[ ]:
@@ -1077,6 +1340,217 @@ def reporter(y_train_hat_in,y_test_hat_in,y_train_in,y_test_in, N_bootstraps=(10
     Performance_dataframe = pd.DataFrame({'Train': Training_performance,'Test': Test_performance})
     Performance_dataframe.index = ["Er. 95L","Er. Mean","Er. 95U","MAE","MSE","MAPE"]
     return Performance_dataframe
+
+
+# The following variant is for multi-dimensional arrays such as in the MNIST example.
+
+# In[ ]:
+
+
+#-------------------------------#
+#=### Results & Summarizing ###=#
+#-------------------------------#
+def reporter_array(y_train_hat_in,y_test_hat_in,y_train_in,y_test_in, N_bootstraps=(10**4)):
+    # Initialize Errors
+    train_set_errors = np.array(np.mean(y_train_in-y_train_hat_in,axis=1))
+    test_set_errors = np.array(np.mean(y_test_in - y_test_hat_in,axis=1))
+
+    # Initalize and Compute: Bootstraped Confidence Intervals
+    train_boot = bootstrap(train_set_errors, n=N_bootstraps)
+    train_boot = np.asarray(train_boot(.95))
+    test_boot = bootstrap(test_set_errors, n=N_bootstraps)
+    test_boot = np.asarray(test_boot(.95))
+
+    # Training Performance
+    Training_performance = np.array([mean_absolute_error(y_train_hat_in,y_train_in),
+                                     mean_squared_error(y_train_hat_in,y_train_in)])
+    Training_performance = np.concatenate([train_boot,Training_performance])
+
+    # Testing Performance
+    Test_performance = np.array([mean_absolute_error(y_test_hat_in,y_test_in),
+                                 mean_squared_error(y_test_hat_in,y_test_in)])
+    Test_performance = np.concatenate([test_boot,Test_performance])
+
+    # Organize into Dataframe
+    Performance_dataframe = pd.DataFrame({'Train': Training_performance,'Test': Test_performance})
+    Performance_dataframe.index = ["Er. 95L","Er. Mean","Er. 95U","MAE","MSE"]
+    return Performance_dataframe
+
+
+# ---
+# # Specialized Layers/Funtions
+# ---
+
+# ## For Principal Component Analysis
+
+# ## PCA Builder
+
+# In[1]:
+
+
+def get_PCAs(X_train_scaled,X_test_scaled,PCA_Rank):
+    mu = X_train_scaled.mean(axis=0)
+    U,s,V = np.linalg.svd(X_train_scaled - mu, full_matrices=False)
+    Zpca = np.dot(X_train_scaled - mu, V.transpose())
+    Zpca_test = np.dot(X_test_scaled - mu, V.transpose())
+
+    # Reconstruct Training Data
+    Rpca = np.dot(Zpca[:,:PCA_Rank], V[:PCA_Rank,:]) + mu    # reconstruction
+    # Reconstruct Testing Data
+    Rpca_test = np.dot(Zpca_test[:,:PCA_Rank], V[:PCA_Rank,:]) + mu    # reconstruction
+    
+    # Return PCA(s) and Reconstruction(s)
+    return Zpca,Zpca_test, Rpca, Rpca_test
+
+
+# ### PCA Layer
+# The following is the Special PCA Layer which implements the hyperplane model $f_{V,\mu}:\mathbb{R}^r \rightarrow \mathbb{R}^d$
+# $$
+# z \mapsto Vz + \mu
+# ;
+# $$
+# where $V\in SO(d,r)$ is parameterized by $v \in \mathbb{R}^{r\times d}$ by
+# $$
+# V\triangleq \exp\left(Skw(v)\right)P_{r,d}
+# .
+# $$
+# Where $(P_{r,d})_{i,j}=1$ iff $i=j\leq r$.  
+
+# In[2]:
+
+
+class PCA_Layer(tf.keras.layers.Layer):
+
+    def __init__(self, input_dim=32,rank=1):
+        super(PCA_Layer, self).__init__()
+        self.rank = rank
+
+    def build(self, input_shape):
+        # Write Internal Parameters
+        self.skew_symmetric_weight = self.add_weight(name='Weights_ffNN',
+                                                     shape=(input_shape[-1],input_shape[-1]),
+                                                     initializer='random_normal',
+                                                     trainable=True)
+        self.b = self.add_weight(name='bias_ffNN',
+                                 shape=(input_shape[-1],),
+                                 initializer='zeros',
+                                 trainable=True)
+        # Get Projector
+        input_dimension = input_shape[-1]
+        kernel_dimension = np.maximum(input_dimension-self.rank,0)
+        digaonal_entries = tf.concat([tf.ones(self.rank),tf.zeros(kernel_dimension)],-1)
+        self.projector = tf.linalg.diag(digaonal_entries)
+
+    def call(self, inputs):
+        # Get Skew-Symmetric Matrix
+        skew_symmetric_matrix = self.skew_symmetric_weight - tf.linalg.matrix_transpose(self.skew_symmetric_weight)
+        # (Special) Orthogonalize
+        SOd_mat = tf.linalg.expm(skew_symmetric_matrix)
+        # Get Low-Rank Orthogonal of Skew-Symmetric Matrix
+        SOrd_mat = tf.linalg.matmul(self.projector,SOd_mat)
+        # Return output
+        return SOrd_mat#tf.matmul(inputs, SOd_mat) + self.b
+
+
+# ## Absolute Reconstruction Error for Cross-Validation
+
+# In[ ]:
+
+
+def MAE_reconstruction_score(estimator, X, y=None):
+    X_reduced = estimator.transform(X)
+    X_preimage = estimator.inverse_transform(X_reduced)
+    return -1 * mean_absolute_error(X, X_preimage)
+
+
+# # Chainer(s)
+# Chainer iteratively constructs NEU-feature maps!
+
+# In[ ]:
+
+
+def get_NEU_Feature_Chaining(learning_rate, 
+                             X_train_in,
+                             X_test_in,
+                             y_train_in,
+                             block_depth, 
+                             feature_map_height,
+                             robustness_parameter, 
+                             homotopy_parameter,
+                             N_epochs,
+                             batch_size,
+                             output_dim):
+    # Initialization(s) #
+    #-------------------#
+    home_dimension = X_train_in.shape[1]
+    
+    #--------------------------------------------------#
+    # Build Regular Arch.
+    #--------------------------------------------------#
+    #-###################-#
+    # Define Model Input -#
+    #-###################-#
+    input_layer = tf.keras.Input(shape=(home_dimension,))
+    
+    
+    #-###############-#
+    # NEU Feature Map #
+    #-###############-#
+    ##Random Embedding
+    for i_feature_depth in range(block_depth):
+        # First Layer
+        ## Spacial-Dependent part of reconfiguration unit
+        if i_feature_depth == 0:
+            deep_feature_map  = Reconfiguration_unit_identity_initialization(units=feature_map_height,
+                                                                             home_space_dim=home_dimension, 
+                                                                             homotopy_parameter = homotopy_parameter)(input_layer)
+        else:
+            deep_feature_map  = Reconfiguration_unit_identity_initialization(units=feature_map_height,
+                                                                             home_space_dim=home_dimension, 
+                                                                             homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        ## Constant part of reconfiguration unit
+        deep_feature_map = fullyConnected_Dense_Invertible(home_dimension)(deep_feature_map)
+        ## Non-linear part of reconfiguration unit
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+            
+    
+    
+    #------------------#
+    #   Core Layers    #
+    #------------------#
+    # Linear Readout (Really this is the OLS model)
+    OLS_Layer_output = fullyConnected_Dense(output_dim)(deep_feature_map)
+    
+    
+    
+    # Define Input/Output Relationship (Arch.)
+    trainable_layers_model = tf.keras.Model(input_layer, OLS_Layer_output)
+    #--------------------------------------------------#
+    # Define Optimizer & Compile Archs.
+    #----------------------------------#
+    opt = Adam(lr=learning_rate)
+    if robustness_parameter == 0:
+        trainable_layers_model.compile(optimizer=opt, loss='mae', metrics=["mse", "mae"])
+    else:
+        trainable_layers_model.compile(optimizer=opt, loss=Robust_MSE(robustness_parameter), metrics=["mse", "mae"])
+        
+    # Train #
+    #-------#
+    trainable_layers_model.fit(X_train_in,y_train_in,epochs = N_epochs,batch_size=batch_size)
+    
+    # Prepare Output(s) #
+    #-------------------#
+    # Extract Linearizing Feature Map
+    Linearizing_Feature_Map = extract_trained_feature_map(trainable_layers_model)
+
+    # Pre-process Linearized Data #
+    #========================b=====#
+    # Get Linearized Predictions #
+    #----------------------------#
+    data_x_featured_train = Linearizing_Feature_Map.predict(X_train_in)
+    data_x_featured_test = Linearizing_Feature_Map.predict(X_test_in)
+
+    return data_x_featured_train, data_x_featured_test, Linearizing_Feature_Map
 
 
 # ---
