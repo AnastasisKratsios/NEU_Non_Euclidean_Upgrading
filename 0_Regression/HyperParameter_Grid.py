@@ -22,8 +22,11 @@ Extrapolation_size = 0.001 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
 N_data = 10**4 # (i.e.: N)
 # Noise Parameters
-noise_level = 0.25 # (i.e.: ε_i)
-Distortion = 0.25 # (i.e.: δ_i)
+noise_level = 0.5 # (i.e.: ε_i)
+Distortion = 0.5 # (i.e.: δ_i)
+# How Many Chains should be performed?
+
+
 # Generate Data
 ## When generating data...you may use one of the following options:
 ### - For evaluating non-localy patterns: "nonlocality"
@@ -31,7 +34,7 @@ Distortion = 0.25 # (i.e.: δ_i)
 ### - For evaluating jump-type performance when faced with a discontinuity: "jumpdiscontinuity"
 ### - For a rough and noisy path: "rough"
 ### - For fun/debugging/sanity checking: "the_nightmare"
-Option_Function = "the_nightmare"
+Option_Function = "nonlocality"
 
 #!/usr/bin/env python
 # coding: utf-8
@@ -55,6 +58,8 @@ trial_run = True
 #------------------------------#
 if trial_run == True:
 
+    # NEU
+    N_chains = 20
     
     # Training Parameters
     #----------------------#
@@ -79,10 +84,10 @@ if trial_run == True:
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [50],
-                                  'learning_rate': [0.00001]}
+    Training_Vanilla_dictionary = {'epochs': [200],
+                                  'learning_rate': [0.001]}
     
-    Vanilla_ffNN_dictionary = {'height': [50],
+    Vanilla_ffNN_dictionary = {'height': [200],
                                'depth': [2]}
     
     ## NEU
@@ -126,12 +131,15 @@ if trial_run == True:
     
 else:
     
+    # NEU
+    N_chains = 50
+    
     # Training Parameters
     #----------------------#
     # Number of Jobs (Cores to use)
     n_jobs = 60
     # Number of Random CV Draws
-    n_iter = 40
+    n_iter = 20
     n_iter_trees = 40
     # Number of CV Folds
     CV_folds = 4
@@ -146,26 +154,27 @@ else:
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [50,100,150,200,400,600],
-								'learning_rate': [0.0005,0.0001,0.00005,0.00001]}
+    Training_Vanilla_dictionary = {'epochs': [50,100,150,200,300,400,500,600],
+                                   'learning_rate': [0.0005,0.0001,0.00005,0.00001,0.00005]}
+    
     Vanilla_ffNN_dictionary = {'height': [20,50,100,150,200],
                                'depth': [1,2,3,4]}
     
     ## NEU
     ### Readout
-    NEU_Readout_dictionary = {'epochs': [50,100,150,200,400,600],
-                              'learning_rate': [0.0005,0.0001,0.00005,0.00001],
+    NEU_Readout_dictionary = {'epochs': [50,100,150,200],
+                              'learning_rate': [0.0001,0.00005,0.00001,0.00005],
                               'homotopy_parameter': [0],
                               'readout_map_depth': [2],
                               'readout_map_height': [5],
                               'robustness_parameter': [0.0001,0.0005,0.001,0.005]}
     
     ### Feature
-    NEU_Feature_dictionary = {'epochs': [50,100,150,200,400,600],
-                              'learning_rate': [0.0005,0.0001,0.00005,0.00001],
+    NEU_Feature_dictionary = {'epochs': [50,100,150,200],
+                              'learning_rate': [0.0001,0.00005,0.00001,0.00005],
                               'homotopy_parameter': [0],
                               'implicit_dimension': [10,25,50,100,150,200,250,300,350,400],
-                              'feature_map_depth': [1,2],
+                              'feature_map_depth': [2,3],
                               'feature_map_height': [1,2],
                               'robustness_parameter': [0.0001,0.0005,0.001,0.005]}
     
