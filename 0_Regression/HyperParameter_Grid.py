@@ -31,7 +31,7 @@ Distortion = 0.25 # (i.e.: δ_i)
 ### - For evaluating jump-type performance when faced with a discontinuity: "jumpdiscontinuity"
 ### - For a rough and noisy path: "rough"
 ### - For fun/debugging/sanity checking: "the_nightmare"
-Option_Function = "rough"
+Option_Function = "the_nightmare"
 
 #!/usr/bin/env python
 # coding: utf-8
@@ -88,7 +88,7 @@ if trial_run == True:
     ## NEU
     ### Readout
     NEU_Readout_dictionary = {'epochs': [50],
-                              'learning_rate': [0.0001],
+                              'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
                               'readout_map_depth': [1],
                               'readout_map_height': [1],
