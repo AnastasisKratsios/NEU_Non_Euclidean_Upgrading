@@ -34,7 +34,8 @@ Distortion = 0.5 # (i.e.: δ_i)
 ### - For evaluating jump-type performance when faced with a discontinuity: "jumpdiscontinuity"
 ### - For a rough and noisy path: "rough"
 ### - For fun/debugging/sanity checking: "the_nightmare"
-Option_Function = "nonlocality"
+### - For S&P Dataset: "SnP"
+Option_Function = "SnP"
 
 #!/usr/bin/env python
 # coding: utf-8
