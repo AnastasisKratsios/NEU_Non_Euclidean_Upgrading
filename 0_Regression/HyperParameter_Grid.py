@@ -60,7 +60,7 @@ trial_run = True
 if trial_run == True:
 
     # NEU
-    N_chains = 20
+    N_chains = 1
     
     # Training Parameters
     #----------------------#
@@ -85,15 +85,15 @@ if trial_run == True:
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [200],
+    Training_Vanilla_dictionary = {'epochs': [10],
                                   'learning_rate': [0.001]}
     
-    Vanilla_ffNN_dictionary = {'height': [200],
+    Vanilla_ffNN_dictionary = {'height': [10],
                                'depth': [2]}
     
     ## NEU
     ### Readout
-    NEU_Readout_dictionary = {'epochs': [50],
+    NEU_Readout_dictionary = {'epochs': [10],
                               'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
                               'readout_map_depth': [1],
@@ -101,12 +101,12 @@ if trial_run == True:
                               'robustness_parameter': [0.0001]}
     
     ### Feature
-    NEU_Feature_dictionary = {'epochs': [50],
+    NEU_Feature_dictionary = {'epochs': [10],
                               'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
-                              'implicit_dimension': [20],
-                              'feature_map_depth': [2],
-                              'feature_map_height': [5],
+                              'implicit_dimension': [5],
+                              'feature_map_depth': [1],
+                              'feature_map_height': [2],
                               'robustness_parameter': [0.0001]}
                                                
     
@@ -123,11 +123,12 @@ if trial_run == True:
     Rand_Forest_Grid = {'learning_rate': [0.001],
                         'max_depth': [8],
                         'min_samples_leaf': [8],
-                        'n_estimators': [1000]}
+                        'n_estimators': [20]}
                                           
      # Kernel PCA Grid 
      #-----------------#
-    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, 10),'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
+    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, 10),
+                 'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
 
     
 else:

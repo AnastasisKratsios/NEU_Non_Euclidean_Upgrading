@@ -29,8 +29,13 @@ warnings.filterwarnings("ignore")
 # Elastic Net Version #
 #=====================#
 # Initialize Elastic Net Regularization Model
-Elastic_Net = ElasticNetCV(cv=5, random_state=0, alphas = np.linspace(0,(10**2),(10**2)),
-                           l1_ratio=np.linspace(0,1,(10**2)))
+if trial_run == True:
+    Elastic_Net = ElasticNetCV(cv=5, random_state=0, alphas = np.linspace(0,(10**2),(2)),
+                           l1_ratio=np.linspace(0,1,(2)))
+else:
+    Elastic_Net = ElasticNetCV(cv=5, random_state=0, alphas = np.linspace(0,(10**2),(10**2)),
+                               l1_ratio=np.linspace(0,1,(10**2)))
+
 # Fit Elastic Net Model
 Elastic_Net.fit(data_x,data_y)
 # Get Prediction(s)
@@ -85,7 +90,8 @@ def get_LOESS(data_x,data_x_test,data_y):
 # In[ ]:
 
 
-LOESS_prediction_train, LOESS_prediction_test = get_LOESS(data_x,data_x_test,data_y)
+if Option_Function != "SnP":
+    LOESS_prediction_train, LOESS_prediction_test = get_LOESS(data_x,data_x_test,data_y)
 
 
 # ## Smoothing Splines
@@ -132,7 +138,8 @@ def get_smooting_splines(data_x,data_x_test,data_y):
 # In[ ]:
 
 
-f_hat_smoothing_splines_train, f_hat_smoothing_splines_test = get_smooting_splines(data_x,data_x_test,data_y)
+if Option_Function != "SnP":
+    f_hat_smoothing_splines_train, f_hat_smoothing_splines_test = get_smooting_splines(data_x,data_x_test,data_y)
 
 
 # # Kernel Regression
