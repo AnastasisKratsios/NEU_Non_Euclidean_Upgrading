@@ -63,14 +63,14 @@ if trial_run == True:
     # NEU
     N_chains = 0
     # Default(s)
-    min_epochs = 10
+    min_epochs = 5
     
     # Training Parameters
     #----------------------#
     # Number of Jobs (Cores to use)
     n_jobs = 3
     # Number of Random CV Draws
-    n_iter = 1
+    n_iter = 10
     n_iter_trees = 1#20
     # Number of CV Folds
     CV_folds = 2
@@ -88,8 +88,8 @@ if trial_run == True:
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [200],
-                                  'learning_rate': [0.00001]}
+    Training_Vanilla_dictionary = {'epochs': [50],
+                                  'learning_rate': [0.001]}
     
     Vanilla_ffNN_dictionary = {'height': [100],
                                'depth': [3]}
@@ -104,19 +104,19 @@ if trial_run == True:
                               'robustness_parameter': [0.0001]}
     
     ### Feature
-    NEU_Feature_dictionary = {'epochs': [200],
-                              'learning_rate': [0.00001],
+    NEU_Feature_dictionary = {'epochs': [50],
+                              'learning_rate': [0.001],
                               'homotopy_parameter': [0],
-                              'implicit_dimension': [5],
+                              'implicit_dimension': [50],
                               'feature_map_depth': [3],
-                              'feature_map_height': [2],
+                              'feature_map_height': [5],
                               'robustness_parameter': [0.0001]}
                                                
     
     # Kernel Ridge #
     #--------------#
-    param_grid_kernel_Ridge={"alpha": [1e0, 0.1, 1e-2, 1e-3],
-                             "gamma": np.logspace(-2, 2, 10),
+    param_grid_kernel_Ridge={"alpha": np.linspace(1e0, 0.1, 10),
+                             "gamma": np.logspace(-2, 2, 50),
                              "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
     
     
@@ -130,7 +130,7 @@ if trial_run == True:
                                           
      # Kernel PCA Grid 
      #-----------------#
-    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, 10),
+    kPCA_grid = {'gamma': np.linspace(0.03, 0.05, 50),
                  'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
 
     
