@@ -37,6 +37,7 @@ Distortion = 0.5 # (i.e.: δ_i)
 ### - For S&P Dataset: "SnP"
 Option_Function = "SnP"
 
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -60,7 +61,9 @@ trial_run = True
 if trial_run == True:
 
     # NEU
-    N_chains = 1
+    N_chains = 0
+    # Default(s)
+    min_epochs = 10
     
     # Training Parameters
     #----------------------#
@@ -85,15 +88,15 @@ if trial_run == True:
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [10],
+    Training_Vanilla_dictionary = {'epochs': [50],
                                   'learning_rate': [0.001]}
     
-    Vanilla_ffNN_dictionary = {'height': [10],
+    Vanilla_ffNN_dictionary = {'height': [50],
                                'depth': [2]}
     
     ## NEU
     ### Readout
-    NEU_Readout_dictionary = {'epochs': [10],
+    NEU_Readout_dictionary = {'epochs': [50],
                               'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
                               'readout_map_depth': [1],
@@ -101,7 +104,7 @@ if trial_run == True:
                               'robustness_parameter': [0.0001]}
     
     ### Feature
-    NEU_Feature_dictionary = {'epochs': [10],
+    NEU_Feature_dictionary = {'epochs': [50],
                               'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
                               'implicit_dimension': [5],
@@ -113,7 +116,7 @@ if trial_run == True:
     # Kernel Ridge #
     #--------------#
     param_grid_kernel_Ridge={"alpha": [1e0, 1e-3],
-                             "gamma": np.logspace(-2, 2, 10),
+                             "gamma": np.logspace(-2, 2, 50),
                              "kernel": ["rbf", "laplacian", "sigmoid"]}
     
     
@@ -121,9 +124,9 @@ if trial_run == True:
     # Random Forest Grid
     #--------------------#
     Rand_Forest_Grid = {'learning_rate': [0.001],
-                        'max_depth': [8],
-                        'min_samples_leaf': [8],
-                        'n_estimators': [20]}
+                        'max_depth': [6],
+                        'min_samples_leaf': [4],
+                        'n_estimators': [200]}
                                           
      # Kernel PCA Grid 
      #-----------------#
@@ -135,6 +138,8 @@ else:
     
     # NEU
     N_chains = 50
+    # Default(s)
+    min_epochs = 25
     
     # Training Parameters
     #----------------------#

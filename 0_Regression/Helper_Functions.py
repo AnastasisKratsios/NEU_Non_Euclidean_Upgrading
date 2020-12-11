@@ -1377,6 +1377,16 @@ def reporter_array(y_train_hat_in,y_test_hat_in,y_train_in,y_test_in, N_bootstra
     return Performance_dataframe
 
 
+# ## Dataframe simplifier(s)
+
+# In[ ]:
+
+
+from math import log10, floor
+def round_to_3(x):
+    return round(x, 3 - int(np.floor(np.log10(abs(x)))))
+
+
 # ---
 # # Specialized Layers/Funtions
 # ---
