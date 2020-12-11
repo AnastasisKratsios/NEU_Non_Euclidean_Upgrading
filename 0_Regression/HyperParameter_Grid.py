@@ -88,11 +88,11 @@ if trial_run == True:
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [50],
-                                  'learning_rate': [0.001]}
+    Training_Vanilla_dictionary = {'epochs': [200],
+                                  'learning_rate': [0.00001]}
     
-    Vanilla_ffNN_dictionary = {'height': [50],
-                               'depth': [2]}
+    Vanilla_ffNN_dictionary = {'height': [100],
+                               'depth': [3]}
     
     ## NEU
     ### Readout
@@ -104,29 +104,29 @@ if trial_run == True:
                               'robustness_parameter': [0.0001]}
     
     ### Feature
-    NEU_Feature_dictionary = {'epochs': [50],
+    NEU_Feature_dictionary = {'epochs': [200],
                               'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
                               'implicit_dimension': [5],
-                              'feature_map_depth': [1],
+                              'feature_map_depth': [3],
                               'feature_map_height': [2],
                               'robustness_parameter': [0.0001]}
                                                
     
     # Kernel Ridge #
     #--------------#
-    param_grid_kernel_Ridge={"alpha": [1e0, 1e-3],
-                             "gamma": np.logspace(-2, 2, 50),
-                             "kernel": ["rbf", "laplacian", "sigmoid"]}
+    param_grid_kernel_Ridge={"alpha": [1e0, 0.1, 1e-2, 1e-3],
+                             "gamma": np.logspace(-2, 2, 10),
+                             "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
     
     
     
     # Random Forest Grid
     #--------------------#
-    Rand_Forest_Grid = {'learning_rate': [0.001],
-                        'max_depth': [6],
-                        'min_samples_leaf': [4],
-                        'n_estimators': [200]}
+    Rand_Forest_Grid = {'learning_rate': [0.01],
+                        'max_depth': [10],
+                        'min_samples_leaf': [3],
+                        'n_estimators': [500]}
                                           
      # Kernel PCA Grid 
      #-----------------#
