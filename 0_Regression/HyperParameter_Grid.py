@@ -110,7 +110,7 @@ if trial_run == True:
                               'implicit_dimension': [50],
                               'feature_map_depth': [3],
                               'feature_map_height': [5],
-                              'robustness_parameter': [0.0001]}
+                              'robustness_parameter': [0.001]}
                                                
     
     # Kernel Ridge #
