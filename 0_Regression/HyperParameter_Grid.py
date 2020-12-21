@@ -17,7 +17,7 @@ factor = 1
 # Data Parameter(s) #
 #-------------------#
 # Test-set meta-parameters
-Train_step_proportion = .75 # (i.e.: ratio of train to test-set sizes)
+Train_step_proportion = .95 # (i.e.: ratio of train to test-set sizes)
 Extrapolation_size = 0.001 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
 N_data = 10**4 # (i.e.: N)
@@ -35,7 +35,7 @@ Distortion = 0.5 # (i.e.: δ_i)
 ### - For a rough and noisy path: "rough"
 ### - For fun/debugging/sanity checking: "the_nightmare"
 ### - For S&P Dataset: "SnP"
-Option_Function = "SnP"
+Option_Function = "crypto"
 
 
 #!/usr/bin/env python

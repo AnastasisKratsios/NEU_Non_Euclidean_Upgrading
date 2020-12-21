@@ -41,17 +41,9 @@
 # 
 # All this is done on synthetic data generated from the following types of functions:
 
-# ### Functions from the paper:
-#  - 1) $\min\{\exp(\frac{-1}{(1+x)^2}),x+\cos(x)\}$. Reason: Evaluate performance for pasted functions and general badness.
-#  - 2) $\cos(\exp(-x))$.  Reason: Evaluate performance for non-periodic osculations.
-#  - 3) $I_{(-\infty,\frac1{2})}$.  Reason: Evaluation performance on a single jump.  
-#  - 4) Fractional Brownian Motion Realization
-#  
-#  ---
-
 # # Generate Training Data
 
-# In[38]:
+# In[1]:
 
 
 # First Round Initializations (Global Level) #
@@ -80,99 +72,32 @@ tf.random.set_seed(2020)
 random.seed(2020)
 
 
-# When generating data...you may use one of the following options:
+# ### Functions from the paper:
+#  - 1) $\min\{\exp(\frac{-1}{(1+x)^2}),x+\cos(x)\}$. Reason: Evaluate performance for pasted functions and general badness.
+#  - 2) $\cos(\exp(-x))$.  Reason: Evaluate performance for non-periodic osculations.
+#  - 3) $I_{(-\infty,\frac1{2})}$.  Reason: Evaluation performance on a single jump.  
+#  - 4) Fractional Brownian Motion Realization
+#  
+#  ---
+
+# When generating data...you may use one of the following options *(set within the hyperparameters.py file)*:
 # - For evaluating non-localy patterns: **"nonlocality"**
 # - For evaluating model performance when faced with non-stationary osculatory behaviour: **"oscilatory"**
 # - For evaluating jump-type performance when faced with a discontinuity: **"jumpdiscontinuity"**
 # - For pattern which looks like noise/highly fractal-like/low Hölder regularity: **"rough"**
 # - For fun/debugging/sanity checking: **"the_nightmare"**
+# 
+# - For real data choose "SnP"
 
 # In[3]:
 
 
-#------------------------#
-# Run External Notebooks #
-#------------------------#
-if Option_Function == "SnP":
-    #--------------#
-    # Get S&P Data #
-    #--------------#
-    #=# SnP Constituents #=#
-    # Load Data
-    snp_data = pd.read_csv('inputs/data/snp500_data/snp500-adjusted-close.csv')
-    # Format Data
-    ## Index by Time
-    snp_data['date'] = pd.to_datetime(snp_data['date'],infer_datetime_format=True)
-    #-------------------------------------------------------------------------------#
-
-    #=# SnP Index #=#
-    ## Read Regression Target
-    snp_index_target_data = pd.read_csv('inputs/data/snp500_data/GSPC.csv')
-    ## Get (Reference) Dates
-    dates_temp = pd.to_datetime(snp_data['date'],infer_datetime_format=True).tail(600)
-    ## Format Target
-    snp_index_target_data = pd.DataFrame({'SnP_Index': snp_index_target_data['Close'],'date':dates_temp.reset_index(drop=True)})
-    snp_index_target_data['date'] = pd.to_datetime(snp_index_target_data['date'],infer_datetime_format=True)
-    snp_index_target_data.set_index('date', drop=True, inplace=True)
-    snp_index_target_data.index.names = [None]
-    #-------------------------------------------------------------------------------#
-    
-    ## Get Rid of Rubbish
-    snp_data.set_index('date', drop=True, inplace=True)
-    snp_data.index.names = [None]
-    ## Get Rid of NAs and Expired Trends
-    snp_data = (snp_data.tail(600)).dropna(axis=1).fillna(0)
-    
-    # Apple
-    snp_index_target_data = snp_data[{'AAPL'}]
-    snp_data = snp_data[{'IBM','QCOM','MSFT','CSCO','ADI','MU','MCHP','NVR','NVDA','GOOGL','GOOG'}]
-    # Get Return(s)
-    snp_data_returns = snp_data.diff().iloc[1:]
-    snp_index_target_data_returns = snp_index_target_data.diff().iloc[1:]
-    #--------------------------------------------------------#
-    
-    #-------------#
-    # Subset Data #
-    #-------------#
-    # Get indices
-    N_train_step = int(round(snp_index_target_data_returns.shape[0]*Train_step_proportion,0))
-    N_test_set = int(snp_index_target_data_returns.shape[0] - round(snp_index_target_data_returns.shape[0]*Train_step_proportion,0))
-    # # Get Datasets
-    X_train = snp_data_returns[:N_train_step]
-    X_test = snp_data_returns[-N_test_set:]
-    ## Coerce into format used in benchmark model(s)
-    data_x = X_train
-    data_x_test = X_test
-    # Get Targets 
-    data_y = snp_index_target_data_returns[:N_train_step]
-    data_y_test = snp_index_target_data_returns[-N_test_set:]
-    
-    # Scale Data
-    scaler = StandardScaler()
-    data_x = scaler.fit_transform(data_x)
-    data_x_test = scaler.transform(data_x_test)
-
-    # # Update User
-    print('#================================================#')
-    print(' Training Datasize: '+str(X_train.shape[0])+' and test datasize: ' + str(X_test.shape[0]) + '.  ')
-    print('#================================================#')
-
-    # # Set First Run to Off
-    First_run = False
-
-    #-----------#
-    # Plot Data #
-    #-----------#
-    fig = snp_data_returns.plot(figsize=(16, 16))
-    fig.get_legend().remove()
-    plt.title("S&P Data Returns")
-
-    # SAVE Figure to .eps
-    plt.savefig('./outputs/plotsANDfigures/SNP_Data_returns.pdf', format='pdf')
-else:
-    # Simulate Data using the data-generator:
-    get_ipython().run_line_magic('run', 'Data_Generator.ipynb')
-    exec(open('Data_Generator.py').read())
+if Option_Function == 'SnP':
+    # Load SnP Dataset, Format, and Pre-Process
+    exec(open('Data_Preprocessor_Apple_Stock_Tracker.py').read())
+if Option_Function == 'crypto':
+    # Load SnP Dataset, Format, and Pre-Process
+    exec(open('Data_Preprocessor_Crypto_Market.py').read())
 
 
 # **TEMP:**
@@ -191,7 +116,7 @@ else:
 # .
 # $$
 
-# In[39]:
+# In[4]:
 
 
 # GET STATISTICAL VARIANCE ESTIMATE
@@ -290,7 +215,7 @@ NEU_OLS_test_nochain = NEU_lin_reg_nochain.predict(data_x_featured_test)
 
 # #### Get Best Parameters for Chaining
 
-# In[40]:
+# In[7]:
 
 
 if N_chains != 0:
@@ -304,7 +229,7 @@ else:
     Feature_block_depth = 1
 
 
-# In[41]:
+# In[8]:
 
 
 #----------------------#
@@ -425,7 +350,7 @@ NEU_Feature_Map_w_Chaining
 
 # ### NEU-Linear *(decoupled implementation)*
 
-# In[42]:
+# In[9]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -459,7 +384,7 @@ else: #Slow Version for real-deal
 NEU_lin_reg.fit(data_x_featured_train,data_y)
 
 
-# In[43]:
+# In[10]:
 
 
 # Pre-process Linearized Data #
@@ -478,7 +403,7 @@ end = time.time()
 
 # #### Visualization of Feature Space
 
-# In[44]:
+# In[11]:
 
 
 if Option_Function != 'SnP':
@@ -500,7 +425,7 @@ if Option_Function != 'SnP':
 
 # #### Visual Comaprison between the OLS and the NEU-OLS models:
 
-# In[45]:
+# In[12]:
 
 
 if Option_Function != 'SnP':
@@ -578,7 +503,7 @@ else:
 
 # #### Error Distribution NEU-OLS
 
-# In[46]:
+# In[13]:
 
 
 if Option_Function != 'SnP':
@@ -587,7 +512,7 @@ if Option_Function != 'SnP':
 
 # #### Comparison between Elastic-Net and NEU-ENET
 
-# In[47]:
+# In[14]:
 
 
 #-----------------#
@@ -647,7 +572,7 @@ print("#======================#")
 
 # ### NEU-Kernel Ridge Regression *(decoupled implementation)*
 
-# In[48]:
+# In[15]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -663,7 +588,7 @@ NEU_KReg_y_hat_test = NEU_KReg_y_hat_test_pre
 
 # #### Visual Comaprison between the Kernel Ridge Regression and the NEU-Kernel Ridge Regression models:
 
-# In[49]:
+# In[16]:
 
 
 if Option_Function != 'SnP':
@@ -733,7 +658,7 @@ else:
         plt.show(block=False)
 
 
-# In[50]:
+# In[17]:
 
 
 if Option_Function != 'SnP':
@@ -742,7 +667,7 @@ if Option_Function != 'SnP':
 
 # #### Numerical Comparison between the Kernel Ridge regressor and NEU-Kernel Ridge regressor models:
 
-# In[51]:
+# In[18]:
 
 
 #-----------------------#
@@ -767,7 +692,7 @@ else:
 # ## Tree Model(s):
 # *Naturally, all of these have a decoupled implementation*.
 
-# In[52]:
+# In[19]:
 
 
 # 2) Perform Linear Regression on Feature-Space #
@@ -782,7 +707,7 @@ NEU_GBRF_y_hat_test = NEU_GBRF_y_hat_test_pre
 
 # #### Visual Comaprison between the GBRF and the NEU-GBRF models:
 
-# In[53]:
+# In[20]:
 
 
 if Option_Function != 'SnP':
@@ -856,7 +781,7 @@ else:
         plt.show(block=False)
 
 
-# In[54]:
+# In[21]:
 
 
 if Option_Function != 'SnP':
@@ -865,7 +790,7 @@ if Option_Function != 'SnP':
 
 # #### Numerical Comparison between the GBRF and NEU-GBRF models:
 
-# In[55]:
+# In[22]:
 
 
 #---------------#
@@ -894,7 +819,7 @@ else:
 # #### A) Fully-Coupled Implementation
 # - Train feature-map + ffNN ($\hat{f}\circ \phi$) in one go.
 
-# In[56]:
+# In[23]:
 
 
 # tf.random.set_seed(2020)
@@ -909,7 +834,7 @@ else:
 
 # #### B) Decoupled NEU-ffNN
 
-# In[57]:
+# In[24]:
 
 
 tf.random.set_seed(2020)
@@ -930,7 +855,7 @@ NEU_ffNN_y_hat_train, NEU_ffNN_y_hat_test = build_ffNN(n_folds = CV_folds,
 
 # ## Visualization
 
-# In[58]:
+# In[25]:
 
 
 if Option_Function != 'SnP':
@@ -1014,7 +939,7 @@ else:
         plt.show(block=False)
 
 
-# In[59]:
+# In[26]:
 
 
 if Option_Function != 'SnP':
@@ -1031,7 +956,7 @@ if Option_Function != 'SnP':
 
 # ## Generate Results Table(s):
 
-# In[60]:
+# In[27]:
 
 
 if Option_Function != 'SnP':
@@ -1112,7 +1037,7 @@ else:
 
 # # Visualize Predictions
 
-# In[61]:
+# In[28]:
 
 
 if Option_Function != 'SnP':
@@ -1227,7 +1152,7 @@ else:
 # - First, we print the comparison tables (so it can be viewed from the command-line if it is being run live on a grid/cluster/remotely).
 # - Second, we display the training and testing performances in clean dataframes.
 
-# In[62]:
+# In[29]:
 
 
 #--------------------#
@@ -1244,7 +1169,7 @@ if Option_Function != 'SnP':
     print(reporter(NEU_OLS_y_hat_train,NEU_OLS_y_hat_test,data_y,data_y_test))
 
 
-# In[63]:
+# In[30]:
 
 
 #-----------------------#
@@ -1260,7 +1185,7 @@ if Option_Function != 'SnP':
     print(reporter(NEU_KReg_y_hat_train,NEU_KReg_y_hat_test,data_y,data_y_test))
 
 
-# In[64]:
+# In[31]:
 
 
 #---------------#
@@ -1276,7 +1201,7 @@ if Option_Function != 'SnP':
     print(reporter(NEU_GBRF_y_hat_train,NEU_GBRF_y_hat_test,data_y,data_y_test))
 
 
-# In[65]:
+# In[32]:
 
 
 #-----------------------------------------------------#
@@ -1292,7 +1217,7 @@ if Option_Function != 'SnP':
     print(reporter(LOESS_prediction_train,LOESS_prediction_test,data_y,data_y_test))
 
 
-# In[66]:
+# In[33]:
 
 
 #--------------#
@@ -1315,7 +1240,7 @@ if Option_Function != 'SnP':
 
 # ## Re-Summarize Learning Problem for easy recap :)
 
-# In[67]:
+# In[34]:
 
 
 if Option_Function != 'SnP':
@@ -1329,7 +1254,7 @@ if Option_Function != 'SnP':
 
 # ## Train-Set Performance
 
-# In[68]:
+# In[35]:
 
 
 train__performance.round(5)
@@ -1337,7 +1262,7 @@ train__performance.round(5)
 
 # ## Test-Set Performance
 
-# In[69]:
+# In[36]:
 
 
 test_performance.round(5)
@@ -1345,7 +1270,7 @@ test_performance.round(5)
 
 # ## About the NEU-Feature Map
 
-# In[70]:
+# In[37]:
 
 
 NEU_Feature_Map_w_Chaining
