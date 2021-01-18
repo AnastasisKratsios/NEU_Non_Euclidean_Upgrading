@@ -17,7 +17,7 @@ factor = 1
 # Data Parameter(s) #
 #-------------------#
 # Test-set meta-parameters
-Train_step_proportion = .75 # (i.e.: ratio of train to test-set sizes)
+Train_step_proportion = 1 # (i.e.: ratio of train to test-set sizes)
 Extrapolation_size = 0.001 # (i.e.: size of test-train set domain (diameter/2))
 # Train Data meta-parameters
 N_data = 10**4 # (i.e.: N)
@@ -80,14 +80,14 @@ if trial_run == True:
 
     ## Vanilla
     Training_Vanilla_dictionary = {'epochs': [50],
-                                  'learning_rate': [0.0001]}
+                                  'learning_rate': [0.0005]}
     
-    Vanilla_ffNN_dictionary = {'height': [50],
-                               'depth': [2]}
+    Vanilla_ffNN_dictionary = {'height': [100],
+                               'depth': [5]}
     
     ## NEU
     ### Readout
-    NEU_Readout_dictionary = {'epochs': [50],
+    NEU_Readout_dictionary = {'epochs': [5],
                               'learning_rate': [0.0001],
                               'homotopy_parameter': [0],
                               'readout_map_depth': [1],
@@ -95,7 +95,7 @@ if trial_run == True:
                               'robustness_parameter': [0.0001]}
     
     ### Feature
-    NEU_Feature_dictionary = {'epochs': [50],
+    NEU_Feature_dictionary = {'epochs': [100],
                               'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
                               'implicit_dimension': [5],
@@ -127,12 +127,12 @@ if trial_run == True:
     # Autoencoder Grid #
     #------------------#
     Autoencoder_dictionary = {'batch_size': [32],
-                          'epochs': [7],
-                          'learning_rate': [0.01]}
+                          'epochs': [100],
+                          'learning_rate': [0.0005]}
     
-    NEU_PCA = {'implicit_dimension': [50],
-               'feature_map_depth': [3],
-               'feature_map_height': [1],
+    NEU_PCA = {'implicit_dimension': [100],
+               'feature_map_depth': [10],
+               'feature_map_height': [5],
                'homotopy_parameter':[0]}
 
 
@@ -161,7 +161,7 @@ else:
 
     ## Vanilla
     Training_Vanilla_dictionary = {'epochs': [50,100,150,200,400,600],
-								'learning_rate': [0.0005,0.0001,0.00005,0.00001]}
+                                   'learning_rate': [0.0005,0.0001,0.00005,0.00001]}
     Vanilla_ffNN_dictionary = {'height': [20,50,100,150,200],
                                'depth': [1,2,3,4]}
     
