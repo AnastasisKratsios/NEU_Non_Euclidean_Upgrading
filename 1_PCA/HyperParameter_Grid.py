@@ -131,8 +131,8 @@ if trial_run == True:
                           'learning_rate': [0.0005]}
     
     NEU_PCA = {'implicit_dimension': [100],
-               'feature_map_depth': [10],
-               'feature_map_height': [5],
+               'feature_map_depth': [20],
+               'feature_map_height': [1],
                'homotopy_parameter':[0]}
 
 

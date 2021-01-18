@@ -1,7 +1,9 @@
 \begin{tabular}{lrr}
 \toprule
-{} &      MAE &        MSE \\
+{} &       MAE &        MSE \\
 \midrule
-PCA &  2.93338 &  13.557278 \\
+PCA     &  2.933380 &  13.557278 \\
+AE      &  2.933380 &  13.557278 \\
+NEU-PCA &  2.933544 &  13.558015 \\
 \bottomrule
 \end{tabular}
