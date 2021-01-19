@@ -79,11 +79,11 @@ if trial_run == True:
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [50],
+    Training_Vanilla_dictionary = {'epochs': [100],
                                   'learning_rate': [0.0005]}
     
     Vanilla_ffNN_dictionary = {'height': [100],
-                               'depth': [5]}
+                               'depth': [2]}
     
     ## NEU
     ### Readout
@@ -130,8 +130,8 @@ if trial_run == True:
                           'epochs': [100],
                           'learning_rate': [0.0005]}
     
-    NEU_PCA = {'implicit_dimension': [100],
-               'feature_map_depth': [20],
+    NEU_PCA = {'implicit_dimension': [218],
+               'feature_map_depth': [2],
                'feature_map_height': [1],
                'homotopy_parameter':[0]}
 

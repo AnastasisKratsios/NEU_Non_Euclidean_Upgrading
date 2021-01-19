@@ -342,7 +342,7 @@ def build_NEU_OLS(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train, X_t
     
     # Return Values #
     #---------------#
-    return y_hat_train, y_hat_test, best_model
+    return y_hat_train, y_hat_test, best_model, NEU_OLS_CV.best_params_
 
 # Update User
 #-------------#
@@ -1172,7 +1172,7 @@ def get_NEU_PCA(input_dim,
     # Core Layers: PCA #
     #----------------------#
 #     # PCA
-#     encoder = fullyConnected_Dense(PCA_Rank)(input_layer)
+    encoder = fullyConnected_Dense(PCA_Rank)(input_layer)
     # Reconstructor
 
     #-###############-#
@@ -1182,7 +1182,7 @@ def get_NEU_PCA(input_dim,
     ### Compute Required Dimension
     embedding_dimension = 2*np.maximum(PCA_Rank,implicit_dimension)
     ### Execute Random Embedding
-    deep_feature_map_prep = fullyConnected_Dense(embedding_dimension)(input_layer)
+    deep_feature_map_prep = fullyConnected_Dense(embedding_dimension)(encoder)
     deep_feature_map = tf.concat([input_layer, deep_feature_map_prep], axis=1)
     ## Homeomorphic Part
     dimension_lifted = (PCA_Rank + embedding_dimension)
@@ -1437,7 +1437,7 @@ def build_autoencoder(n_folds,
 
 # ## NEU Autoencoder
 
-# In[20]:
+# In[24]:
 
 
 def get_NEU_Autoencoder(input_dim,
@@ -1450,62 +1450,122 @@ def get_NEU_Autoencoder(input_dim,
     #--------------------------------------------------#
     # Build Regular Arch.
     #--------------------------------------------------#
+    # Get encoder depth
+    Encoder_depth = 5
+    print('We use a DNN of depth: '+str(3+2*Encoder_depth))
+    
+    #--------------------------------------------------#
+    # Build Regular Arch.
+    #--------------------------------------------------#
     #-###################-#
     # Define Model Input -#
     #-###################-#
     input_layer = tf.keras.Input(shape=(input_dim,))
 
-    #----------------------#
-    # Core Layers: PCA #
-    #----------------------#
-    # PCA
-    encoder = fullyConnected_Dense(PCA_Rank)(input_layer)
-    for i in range(feature_map_depth):
-        # Reconstructor
-        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,
-                                                 home_space_dim=PCA_Rank, 
-                                                 homotopy_parameter = homotopy_parameter)(encoder)
-        ## Constant part of reconfiguration unit
-        deep_feature_map_out = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
-    
-    
     #-###############-#
     # NEU Feature Map #
     #-###############-#
     ##Random Embedding
     ### Compute Required Dimension
-    embedding_dimension = 2*np.maximum(PCA_Rank,implicit_dimension)
+    embedding_dimension = np.minimum(2*np.maximum(input_dim,implicit_dimension),518)
     ### Execute Random Embedding
-    deep_feature_map_prep = fullyConnected_Dense(embedding_dimension)(deep_feature_map_out)
-    deep_feature_map = tf.concat([deep_feature_map_out, deep_feature_map_prep], axis=1)
+    deep_feature_map = fullyConnected_Dense(embedding_dimension)(input_layer)
     ## Homeomorphic Part
-    dimension_lifted = (PCA_Rank + embedding_dimension)
+    dimension_lifted = embedding_dimension#(PCA_Rank + embedding_dimension)
     for i_feature_depth in range(feature_map_depth):
         # First Layer
         ## Spacial-Dependent part of reconfiguration unit
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=dimension_lifted, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        ## Constant part of reconfiguration unit
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+    
+    # Force injectivity
+    deep_feature_map = tf.concat([input_layer, deep_feature_map], axis=1)
+    #----------------------#
+    # Core Layers: Encoder #
+    #----------------------#
+    encoder = fullyConnected_Dense(512)(deep_feature_map)
+    encoder = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(encoder)
+    encoder = fullyConnected_Dense(128)(encoder)
+    encoder = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(encoder)
+    #===========#
+    # PCA Layer #
+    #===========#
+    encoder = fullyConnected_Dense(PCA_Rank)(encoder)
+    
+    
+    #===================#
+    # Feature Map Layer #
+    #===================#
+    ## Constant part of reconfiguration unit
+    deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(encoder)
+    
+    ##Random Embedding
+    ### Compute Required Dimension
+    ### Execute Random Embedding
+    deep_feature_map_prep = fullyConnected_Dense((218-PCA_Rank))(input_layer)
+    deep_feature_map = tf.concat([deep_feature_map, deep_feature_map_prep], axis=1)
+    ## Homeomorphic Part
+    dimension_lifted = (PCA_Rank + (218-PCA_Rank))
+    #
+    for i_feature_depth in range(feature_map_depth):
+        # First Layer
+        # Spacial-Dependent part of reconfiguration unit
         deep_feature_map  = Reconfiguration_unit(units=feature_map_height,
                                                  home_space_dim=dimension_lifted, 
                                                  homotopy_parameter = homotopy_parameter)(deep_feature_map)
         ## Constant part of reconfiguration unit
         deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+    
 
-    # PCA Readout (Really this is the OLS model)
+#     #----------------------#
+#     # Core Layers: PCA #
+#     #----------------------#
+    deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+    #=============#
+    # First Layer #
+    #=============#
+    deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+    ## Spacial-Dependent part of reconfiguration unit
+    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,
+                                             home_space_dim=dimension_lifted,
+                                             homotopy_parameter = homotopy_parameter)(deep_feature_map)
+    ## Constant part of reconfiguration unit
+    deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+    #==============#
+    # Second Layer #
+    #==============#
+    deep_feature_map_prep = fullyConnected_Dense((512-dimension_lifted))(deep_feature_map)
+    deep_feature_map = tf.concat([deep_feature_map, deep_feature_map_prep], axis=1)
+    ## Spacial-Dependent part of reconfiguration unit
+    deep_feature_map  = Reconfiguration_unit(units=feature_map_height,
+                                             home_space_dim=(512), 
+                                             homotopy_parameter = homotopy_parameter)(deep_feature_map)
+    ## Constant part of reconfiguration unit
+    deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+    
+        
+    # Readout Layer #
+    #---------------#
     decoder = fullyConnected_Dense(input_dim)(deep_feature_map)
+#     decoder = tf.nn.sigmoid(decoder)
 
 
     # Define Input/Output Relationship (Arch.)
-    NEU_PCA = tf.keras.Model(input_layer, decoder)
+    NEU_autoencoder = tf.keras.Model(input_layer, decoder)
+    
+
     #--------------------------------------------------#
     # Define Optimizer & Compile Archs.
     #----------------------------------#
     opt = Adam(lr=learning_rate)
-    NEU_PCA.compile(metrics=['accuracy'],loss='mean_squared_error',optimizer='Adam')
+    NEU_autoencoder.compile(metrics=['accuracy'],loss='mean_squared_error',optimizer='Adam')
 
     # Return NEU PCA
-    return NEU_PCA
+    return NEU_autoencoder
 
 
-# In[21]:
+# In[25]:
 
 
 def build_NEU_Autoencoder(n_folds, 
