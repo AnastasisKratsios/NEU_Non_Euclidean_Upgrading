@@ -79,7 +79,7 @@ if trial_run == True:
     
 
     ## Vanilla
-    Training_Vanilla_dictionary = {'epochs': [100],
+    Training_Vanilla_dictionary = {'epochs': [20],
                                   'learning_rate': [0.0005]}
     
     Vanilla_ffNN_dictionary = {'height': [100],
@@ -95,12 +95,12 @@ if trial_run == True:
                               'robustness_parameter': [0.0001]}
     
     ### Feature
-    NEU_Feature_dictionary = {'epochs': [100],
+    NEU_Feature_dictionary = {'epochs': [25],
                               'learning_rate': [0.00001],
                               'homotopy_parameter': [0],
                               'implicit_dimension': [5],
-                              'feature_map_depth': [1],
-                              'feature_map_height': [25],
+                              'feature_map_depth': [2],
+                              'feature_map_height': [1],
                               'robustness_parameter': [0.01]}
                                                
     
@@ -127,11 +127,11 @@ if trial_run == True:
     # Autoencoder Grid #
     #------------------#
     Autoencoder_dictionary = {'batch_size': [32],
-                          'epochs': [100],
+                          'epochs': [25],
                           'learning_rate': [0.0005]}
     
     NEU_PCA = {'implicit_dimension': [218],
-               'feature_map_depth': [2],
+               'feature_map_depth': [10],
                'feature_map_height': [1],
                'homotopy_parameter':[0]}
 

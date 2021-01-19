@@ -1220,6 +1220,7 @@ def build_NEU_PCA(n_folds,
                   X_test_scaled, 
                   X_train,
                   PCA_Rank):
+    
     # Update Dictionary
     param_grid_in_internal = param_grid_in
     param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
@@ -1640,6 +1641,183 @@ def build_NEU_Autoencoder(n_folds,
     # Return Values #
     # ---------------#
     return NEU_PCA_Reconstruction_train, NEU_PCA_Reconstruction_test, NEU_PCA_Factors_train, NEU_PCA_Factors_test
+
+
+# ## NN Implementation of Vanilla PCA
+
+# In[ ]:
+
+
+def get_NEU_PCA_2(learning_rate, 
+                  input_dim, 
+                  output_dim, 
+                  feature_map_depth, 
+                  feature_map_height,
+                  robustness_parameter, 
+                  homotopy_parameter,
+                  implicit_dimension,
+                  PCA_Rank):
+    
+    # Initialization(s) #
+    #-------------------#
+    # Get encoder depth
+    Encoder_depth = 5
+    print('We use a DNN of depth: '+str(3+2*Encoder_depth))
+    
+    #--------------------------------------------------#
+    # Build Regular Arch.
+    #--------------------------------------------------#
+    #-###################-#
+    # Define Model Input -#
+    #-###################-#
+    input_layer = tf.keras.Input(shape=(input_dim,))
+
+
+    #-###############-#
+    # NEU Feature Map #
+    #-###############-#
+    ##Random Embedding
+    ### Compute Required Dimension
+    if input_dim<=implicit_dimension:
+        embedding_dimension = np.maximum(input_dim,implicit_dimension)
+        ### Execute Random Embedding
+        deep_feature_map_prep = fullyConnected_Dense(embedding_dimension)(input_layer)
+        deep_feature_map = tf.concat([input_layer, deep_feature_map_prep], axis=1)
+        ## Homeomorphic Part
+        dimension_lifted = (input_dim + embedding_dimension)
+    else: # Philosophical thoughts: Don't lift if its uneeded (why increase the dimension for nothing?)
+        dimension_lifted = input_dim
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,
+                                                 home_space_dim=dimension_lifted, 
+                                                 homotopy_parameter = homotopy_parameter)(input_layer)
+    
+    for i_feature_depth in range(feature_map_depth):
+        # First Layer
+        ## Spacial-Dependent part of reconfiguration unit
+        deep_feature_map  = Reconfiguration_unit(units=feature_map_height,home_space_dim=dimension_lifted, homotopy_parameter = homotopy_parameter)(deep_feature_map)
+        ## Non-linear part of reconfiguration unit
+        deep_feature_map = rescaled_swish_trainable(homotopy_parameter = homotopy_parameter)(deep_feature_map)
+            
+    
+    #----------------------#
+    # Core Layers: Encoder #
+    #----------------------#
+    encoder = fullyConnected_Dense(PCA_Rank)(deep_feature_map)
+
+    #----------------------#
+    # Core Layers: Decoder #
+    #----------------------#
+    decoder = fullyConnected_Dense(input_dim)(encoder)
+
+    # Define Input/Output Relationship (Arch.)
+    autoencoder = tf.keras.Model(input_layer, decoder)
+    #--------------------------------------------------#
+    # Define Optimizer & Compile Archs.
+    #----------------------------------#
+    opt = Adam(lr=learning_rate)
+    autoencoder.compile(metrics=['accuracy'],loss='mean_squared_error',optimizer='Adam')
+    
+    # Give Auto-Encoder
+    return autoencoder
+
+
+# In[ ]:
+
+
+def build_NEU_PCA_2(n_folds, 
+                  n_jobs, 
+                  n_iter, 
+                  param_grid_in, 
+                  X_train_scaled,
+                  X_test_scaled, 
+                  X_train,
+                  PCA_Rank):
+    
+    # Update Dictionary
+    param_grid_in_internal = param_grid_in
+    param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
+    param_grid_in_internal['PCA_Rank'] = [PCA_Rank]
+
+    print('Performing PCA')
+    #----------------------#
+    # Core Layers: PCA     #
+    #----------------------#
+    # Get Low-Dimensional Representation
+    
+    # Deep Feature Network
+    # Deep Feature Network
+    NEU_PCA_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_NEU_PCA_2, verbose=True)
+
+    # Randomized CV
+    NEU_PCA_CV = RandomizedSearchCV(estimator=NEU_PCA_CV, 
+                                    n_jobs=n_jobs,
+                                    cv=KFold(n_folds, random_state=2020,shuffle=True),
+                                    param_distributions=param_grid_in_internal,
+                                    n_iter=n_iter,
+                                    return_train_score=True,
+                                    random_state=2020,
+                                    verbose=10)
+
+    # Fit Model #
+    #-----------#
+    print('Training NEU-Feature Map!')
+    NEU_PCA_CV.fit(X_train_scaled,X_train)
+
+    # Write Predictions #
+    #-------------------#
+    NEU_PCA_Reconstruction_train = NEU_PCA_CV.predict(X_train_scaled)
+    NEU_PCA_Reconstruction_test = NEU_PCA_CV.predict(X_test_scaled)
+
+    # Counter number of parameters #
+    #------------------------------#
+    # Extract Best Model
+    best_model = NEU_PCA_CV.best_estimator_
+    # Count Number of Parameters
+    N_params_best_NEU_PCA = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
+    print('NEU-PCA: Trained!')
+
+    #-----------------#
+    # Save Full-Model #
+    #-----------------#
+    print('NEU-PCA: Saving')
+    #     joblib.dump(best_model, './outputs/models/Benchmarks/ffNN_trained_CV.pkl', compress = 1)
+    NEU_PCA_CV.best_params_['N_Trainable_Parameters'] = N_params_best_NEU_PCA
+    Path('./outputs/models/NEU/NEU_PCA/').mkdir(parents=True, exist_ok=True)
+    pd.DataFrame.from_dict(NEU_PCA_CV.best_params_,orient='index').to_latex("./outputs/models/NEU/NEU_PCA/Best_Parameters.tex")
+    print('NEU-PCA: Saved')
+
+    # Update User
+    #-------------#
+    print('Complete NEU-PCA Training Procedure!!!')
+
+    # Return Values #
+    # ---------------#
+    return NEU_PCA_Reconstruction_train, NEU_PCA_Reconstruction_test, best_model, NEU_PCA_CV.best_params_
+
+
+# ### Feature Extractor:
+# This little function pops the final **two**-layers of a tensorflow model and replaces it with the identity.  When we apply it the the NEU-OLS we obtain only the trained linearizing feature map. 
+
+# In[ ]:
+
+
+def extract_trained_feature_map_PCA(model):
+
+    # Dissasemble Network
+    layers = [l for l in model.layers]
+
+    # Define new reconfiguration unit to be added
+    output_layer_new  = tf.identity(layers[len(layers)-3].output)
+
+    for i in range(len(layers)-1):
+        layers[i].trainable = False
+
+
+    # build model
+    new_model = tf.keras.Model(inputs=[layers[0].input], outputs=output_layer_new)
+    
+    # Return Output
+    return new_model
 
 
 # ---
