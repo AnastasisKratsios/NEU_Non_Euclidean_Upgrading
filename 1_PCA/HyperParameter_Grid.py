@@ -124,6 +124,11 @@ if trial_run == True:
     kPCA_grid = {'gamma': np.linspace(0.03, 0.05, 10),
                  'kernel': ['rbf', 'sigmoid', 'linear', 'poly']}
     
+    # Sparse PCA Grid
+    #-----------------#
+    sPCA_grid = {'alpha': np.linspace(0.001, 1, 10),
+                 'ridge_alpha': np.linspace(0.001,1,10)}
+    
     # Autoencoder Grid #
     #------------------#
     Autoencoder_dictionary = {'batch_size': [32],

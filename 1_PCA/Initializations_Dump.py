@@ -16,9 +16,10 @@ from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.linear_model import ElasticNetCV
 
-# (Semi-)Classical Dimension Reducers
-from sklearn.decomposition import PCA
-
+# Dimension Reduction
+from sklearn.decomposition import SparsePCA
+from sklearn.decomposition import KernelPCA
+from sklearn.metrics import mean_squared_error
 
 # Grid-Search and CV
 from sklearn.model_selection import RandomizedSearchCV, KFold
@@ -31,8 +32,6 @@ import os
 from pathlib import Path
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, RepeatedStratifiedKFold
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_error
 
 
 # Data Structuring
@@ -89,9 +88,7 @@ import datetime as DT
 # Visualization
 import matplotlib
 from matplotlib.pyplot import figure
-import matplotlib.pyplot as plt
 import seaborn as sns
-import seaborn as sns; sns.set()
 
 # z_Misc
 import math

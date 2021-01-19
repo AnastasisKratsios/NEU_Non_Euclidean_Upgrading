@@ -16,6 +16,10 @@ from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.linear_model import ElasticNetCV
 
+# Dimension Reduction
+from sklearn.decomposition import SparsePCA
+from sklearn.decomposition import KernelPCA
+from sklearn.metrics import mean_squared_error
 
 # Grid-Search and CV
 from sklearn.model_selection import RandomizedSearchCV, KFold
