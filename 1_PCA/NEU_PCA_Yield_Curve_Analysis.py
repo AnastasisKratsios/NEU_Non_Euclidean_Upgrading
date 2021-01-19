@@ -290,7 +290,7 @@ plt.savefig('outputs/plotsANDfigures/Data_Visualization_Annual_Yield_Curves.pdf'
 # # Benchmark(s)
 # ---
 
-# ## Get PCAs
+# ## Principal Component Analysis - *(PCA)*
 
 # In[15]:
 
@@ -352,7 +352,7 @@ Performance_Results_train.to_latex('outputs/tables/Fin_Performance_train.txt')
 Performance_Results_test.to_latex('outputs/tables/Fin_Performance_test.txt')
 
 
-# ## Get (ReLU) Auto-Encoder
+# ## Auto-Encoder - *(AE)*
 
 # In[17]:
 
@@ -403,11 +403,11 @@ AE_Reconstruction_test_results_MAE = np.mean(test_results_MAE_vect)
 
 # Formatting
 ## Train
-AE_Reconstruction_Results_train = pd.DataFrame([{'MAE':PCA_Reconstruction_train_results_MAE,
-                                                 'MSE':PCA_Reconstruction_train_results_MSE}],index=['AE'])
+AE_Reconstruction_Results_train = pd.DataFrame([{'MAE':AE_Reconstruction_train_results_MAE,
+                                                 'MSE':AE_Reconstruction_train_results_MSE}],index=['AE'])
 ## Test
-AE_Reconstruction_Results_test = pd.DataFrame([{'MAE':PCA_Reconstruction_train_results_MAE,
-                                                'MSE':PCA_Reconstruction_train_results_MSE}],index=['AE'])
+AE_Reconstruction_Results_test = pd.DataFrame([{'MAE':AE_Reconstruction_test_results_MAE,
+                                                'MSE':AE_Reconstruction_test_results_MSE}],index=['AE'])
 
 
 # Update
@@ -421,195 +421,83 @@ Performance_Results_train.to_latex('outputs/tables/Fin_Performance_train.txt')
 Performance_Results_test.to_latex('outputs/tables/Fin_Performance_test.txt')
 
 
-# # NEU - Depricated
+# ## Kernel Principal Component Analysis - *(kPCA)*
+
+# In[92]:
+
+
+print("kPCA: Training")
+kPCA_Features, kPCA_Reconstruction = get_kPCAs(X_train_scaled.T)
+
+print("kPCAs: Completed!")
+
+
+# #### Get Reconstruction Result(s)
+
+# In[93]:
+
+
+# Get Results #
+#-------------#
+# Errors (Train): 
+A = pd.DataFrame(kPCA_Reconstruction)
+B = pd.DataFrame(X_train.T)
+train_results = B.to_numpy()-A.to_numpy()
+### MSE
+train_results_MSE = train_results**2
+train_results_MSE_vect = np.mean(train_results_MSE,axis=1)
+kPCA_Reconstruction_train_results_MSE = np.mean(train_results_MSE_vect)
+### MAE
+train_results_MAE = np.abs(train_results)
+train_results_MAE_vect = np.mean(train_results_MAE,axis=1)
+kPCA_Reconstruction_train_results_MAE = np.mean(train_results_MAE_vect)
+
+
+# Errors (Test): One step ahead prediction errors
+A = pd.DataFrame(kPCA_Reconstruction).iloc[1:]
+B = pd.DataFrame(X_train.T).iloc[:-1]
+test_results = B.to_numpy()-A.to_numpy()
+### MSE
+test_results_MSE = test_results**2
+test_results_MSE_vect = np.mean(test_results_MSE,axis=1)
+kPCA_Reconstruction_test_results_MSE = np.mean(test_results_MSE_vect)
+### MAE
+test_results_MAE = np.abs(test_results)
+test_results_MAE_vect = np.mean(test_results_MAE,axis=1)
+kPCA_Reconstruction_test_results_MAE = np.mean(test_results_MAE_vect)
+
+
+# Formatting
+## Train
+kPCA_Reconstruction_Results_train = pd.DataFrame([{'MAE':kPCA_Reconstruction_train_results_MAE,
+                                                 'MSE':kPCA_Reconstruction_train_results_MSE}],index=['kPCA'])
+## Test
+kPCA_Reconstruction_Results_test = pd.DataFrame([{'MAE':kPCA_Reconstruction_test_results_MAE,
+                                                'MSE':kPCA_Reconstruction_test_results_MSE}],index=['kPCA'])
+
+
+# Update
+Performance_Results_train = pd.concat([Performance_Results_train,kPCA_Reconstruction_Results_train],axis=0)
+Performance_Results_test = pd.concat([Performance_Results_test,kPCA_Reconstruction_Results_test],axis=0)
+
+
+# Save Results #
+#--------------#
+Performance_Results_train.to_latex('outputs/tables/Fin_Performance_train.txt')
+Performance_Results_test.to_latex('outputs/tables/Fin_Performance_test.txt')
+
+
+# ---
+# ---
+# ---
+# # NEU
+# ---
+# ---
+# ---
+
+# ## Feature Map Generation
 
 # In[19]:
-
-
-# print('NEU-PCA: Computing...')
-# NEU_PCA_Reconstruction_train, NEU_PCA_Reconstruction_test, NEU_PCA_Factors_train, NEU_PCA_Factors_test =  build_NEU_PCA(CV_folds, 
-#                                                                                                                         n_jobs, 
-#                                                                                                                         n_iter, 
-#                                                                                                                         param_grid_in, 
-#                                                                                                                         X_train_scaled.T,
-#                                                                                                                         X_train.T, 
-#                                                                                                                         X_train_scaled.T,
-#                                                                                                                         PCA_Rank)
-
-# print('NEU-PCA: Complete!')
-
-
-# #### Get Reconstruction Result(s) - Depricated
-
-# In[20]:
-
-
-# # Get Results #
-# #-------------#
-# # Errors (Train): 
-# A = pd.DataFrame(NEU_PCA_Reconstruction_train)
-# B = pd.DataFrame(X_train.T)
-# train_results = B.to_numpy()-A.to_numpy()
-# ### MSE
-# train_results_MSE = train_results**2
-# train_results_MSE_vect = np.mean(train_results_MSE,axis=1)
-# NEU_PCA_Reconstruction_train_results_MSE = np.mean(train_results_MSE_vect)
-# ### MAE
-# train_results_MAE = np.abs(train_results)
-# train_results_MAE_vect = np.mean(train_results_MAE,axis=1)
-# NEU_PCA_Reconstruction_train_results_MAE = np.mean(train_results_MAE_vect)
-
-
-# # Errors (Test): One step ahead prediction errors
-# A = pd.DataFrame(NEU_PCA_Reconstruction_train).iloc[1:]
-# B = pd.DataFrame(X_train.T).iloc[:-1]
-# test_results = B.to_numpy()-A.to_numpy()
-# ### MSE
-# test_results_MSE = test_results**2
-# test_results_MSE_vect = np.mean(test_results_MSE,axis=1)
-# NEU_PCA_Reconstruction_test_results_MSE = np.mean(test_results_MSE_vect)
-# ### MAE
-# test_results_MAE = np.abs(test_results)
-# test_results_MAE_vect = np.mean(test_results_MAE,axis=1)
-# NEU_PCA_Reconstruction_test_results_MAE = np.mean(test_results_MAE_vect)
-
-
-# # Formatting
-# ## Train
-# NEU_Reconstruction_Results_train = pd.DataFrame([{'MAE':NEU_PCA_Reconstruction_train_results_MAE,
-#                                                  'MSE':NEU_PCA_Reconstruction_train_results_MSE}],index=['NEU-PCA'])
-# ## Test
-# NEU_Reconstruction_Results_test = pd.DataFrame([{'MAE':NEU_PCA_Reconstruction_test_results_MAE,
-#                                                 'MSE':NEU_PCA_Reconstruction_test_results_MSE}],index=['NEU-PCA'])
-
-
-# # Update
-# Performance_Results_train = pd.concat([Performance_Results_train,NEU_Reconstruction_Results_train],axis=0)
-# Performance_Results_test = pd.concat([Performance_Results_test,NEU_Reconstruction_Results_test],axis=0)
-
-
-# # Save Results #
-# #--------------#
-# Performance_Results_train.to_latex('outputs/tables/Fin_Performance_train.txt')
-# Performance_Results_test.to_latex('outputs/tables/Fin_Performance_test.txt')
-
-
-# ### NEU-Autoencoder - Depricated
-
-# In[21]:
-
-
-# print('NEU-Autoencoder: Computing...')
-# NEU_AE_Reconstruction_train, NEU_AE_Reconstruction_test, NEU_AE_Factors_train, NEU_AE_Factors_test = build_NEU_Autoencoder(CV_folds, 
-#                                                                                                                                n_jobs, 
-#                                                                                                                                n_iter, 
-#                                                                                                                                param_grid_in, 
-#                                                                                                                                X_train_scaled.T,
-#                                                                                                                                X_train.T, 
-#                                                                                                                                X_train_scaled.T,
-#                                                                                                                                PCA_Rank)
-
-# print('NEU-Autoencoder: Complete!')
-
-
-# #### Get Reconstruction Result(s) - Depricated
-
-# In[22]:
-
-
-# # Get Results #
-# #-------------#
-# # Errors (Train): 
-# A = pd.DataFrame(NEU_AE_Reconstruction_train)
-# B = pd.DataFrame(X_train.T)
-# train_results = B.to_numpy()-A.to_numpy()
-# ### MSE
-# train_results_MSE = train_results**2
-# train_results_MSE_vect = np.mean(train_results_MSE,axis=1)
-# NEU_AE_Reconstruction_train_results_MSE = np.mean(train_results_MSE_vect)
-# ### MAE
-# train_results_MAE = np.abs(train_results)
-# train_results_MAE_vect = np.mean(train_results_MAE,axis=1)
-# NEU_AE_Reconstruction_train_results_MAE = np.mean(train_results_MAE_vect)
-
-
-# # Errors (Test): One step ahead prediction errors
-# A = pd.DataFrame(NEU_AE_Reconstruction_train).iloc[1:]
-# B = pd.DataFrame(X_train.T).iloc[:-1]
-# test_results = B.to_numpy()-A.to_numpy()
-# ### MSE
-# test_results_MSE = test_results**2
-# test_results_MSE_vect = np.mean(test_results_MSE,axis=1)
-# NEU_AE_Reconstruction_test_results_MSE = np.mean(test_results_MSE_vect)
-# ### MAE
-# test_results_MAE = np.abs(test_results)
-# test_results_MAE_vect = np.mean(test_results_MAE,axis=1)
-# NEU_AE_Reconstruction_test_results_MAE = np.mean(test_results_MAE_vect)
-
-
-# # Formatting
-# ## Train
-# NEU_Reconstruction_Results_train = pd.DataFrame([{'MAE':NEU_AE_Reconstruction_train_results_MAE,
-#                                                  'MSE':NEU_AE_Reconstruction_train_results_MSE}],index=['NEU-AE'])
-# ## Test
-# NEU_Reconstruction_Results_test = pd.DataFrame([{'MAE':NEU_AE_Reconstruction_test_results_MAE,
-#                                                 'MSE':NEU_AE_Reconstruction_test_results_MSE}],index=['NEU-AE'])
-
-
-# # Update
-# Performance_Results_train = pd.concat([Performance_Results_train,NEU_Reconstruction_Results_train],axis=0)
-# Performance_Results_test = pd.concat([Performance_Results_test,NEU_Reconstruction_Results_test],axis=0)
-
-
-# # Save Results #
-# #--------------#
-# Performance_Results_train.to_latex('outputs/tables/Fin_Performance_train.txt')
-# Performance_Results_test.to_latex('outputs/tables/Fin_Performance_test.txt')
-
-
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# ---
-# 
-# ---
-# 
-
-# # NEU
-
-# ## NEU: Feature Map Generation
-
-# In[ ]:
 
 
 # Perform NEU PCA
@@ -641,7 +529,7 @@ print('Average absolute change of PCA Dataset: ' + str(np.mean(np.abs(data_x_fea
 
 # #### Identify optimal Parameters for NEU PCA
 
-# In[ ]:
+# In[20]:
 
 
 if N_chains != 0:
@@ -655,9 +543,9 @@ else:
     Feature_block_depth = 1
 
 
-# ## NEU-PCA
+# ## Non-Euclidean Upgraded Principal Component Analysis - *(NEU-PCA)*
 
-# In[ ]:
+# In[21]:
 
 
 #----------------------#
@@ -683,7 +571,7 @@ best_n_chains = 0
 
 # #### Register NEU-PCA Result(s)
 
-# In[ ]:
+# In[22]:
 
 
 # Get Results #
@@ -721,8 +609,8 @@ NEU_PCA_Reconstruction_test_results_MAE = np.mean(test_results_MAE_vect)
 NEU_PCA_Reconstruction_Results_train = pd.DataFrame([{'MAE':NEU_PCA_Reconstruction_train_results_MAE,
                                                  'MSE':NEU_PCA_Reconstruction_train_results_MSE}],index=['NEU-PCA'])
 ## Test
-NEU_PCA_Reconstruction_Results_test = pd.DataFrame([{'MAE':NEU_PCA_Reconstruction_train_results_MAE,
-                                                'MSE':NEU_PCA_Reconstruction_train_results_MSE}],index=['NEU-PCA'])
+NEU_PCA_Reconstruction_Results_test = pd.DataFrame([{'MAE':NEU_PCA_Reconstruction_test_results_MAE,
+                                                'MSE':NEU_PCA_Reconstruction_test_results_MSE}],index=['NEU-PCA'])
 
 
 # Update
@@ -736,9 +624,9 @@ Performance_Results_train.to_latex('outputs/tables/Fin_Performance_train.txt')
 Performance_Results_test.to_latex('outputs/tables/Fin_Performance_test.txt')
 
 
-# ## NEU-Autoencoder
+# ## Non-Euclidean Upgraded Auto-Encoder *(NEU-AE)*
 
-# In[ ]:
+# In[23]:
 
 
 print("Training NEU-Autoencoder: Begin!")
@@ -754,7 +642,7 @@ print("Training NEU-Autoencoder: Completed!")
 
 # ### Register Result(s)
 
-# In[ ]:
+# In[24]:
 
 
 # Get Results #
@@ -792,13 +680,79 @@ NEU_AE_Reconstruction_test_results_MAE = np.mean(test_results_MAE_vect)
 NEU_AE_Reconstruction_Results_train = pd.DataFrame([{'MAE':NEU_AE_Reconstruction_train_results_MAE,
                                                  'MSE':NEU_AE_Reconstruction_train_results_MSE}],index=['NEU-AE'])
 ## Test
-NEU_AE_Reconstruction_Results_test = pd.DataFrame([{'MAE':NEU_AE_Reconstruction_train_results_MAE,
-                                                'MSE':NEU_AE_Reconstruction_train_results_MSE}],index=['NEU-AE'])
+NEU_AE_Reconstruction_Results_test = pd.DataFrame([{'MAE':NEU_AE_Reconstruction_test_results_MAE,
+                                                'MSE':NEU_AE_Reconstruction_test_results_MSE}],index=['NEU-AE'])
 
 
 # Update
 Performance_Results_train = pd.concat([Performance_Results_train,NEU_AE_Reconstruction_Results_train],axis=0)
 Performance_Results_test = pd.concat([Performance_Results_test,NEU_AE_Reconstruction_Results_test],axis=0)
+
+
+# Save Results #
+#--------------#
+Performance_Results_train.to_latex('outputs/tables/Fin_Performance_train.txt')
+Performance_Results_test.to_latex('outputs/tables/Fin_Performance_test.txt')
+
+
+# ## Non-Euclidean Upgraded Kernel Principal Component Analysis - *(NEU-kPCA)*
+
+# In[96]:
+
+
+print("kPCA: Training")
+NEU_kPCA_Features, NEU_kPCA_Reconstruction = get_kPCAs(best_data_x_featured_train.T)
+
+print("kPCAs: Completed!")
+
+
+# #### Get Reconstruction Result(s)
+
+# In[102]:
+
+
+# Get Results #
+#-------------#
+# Errors (Train): 
+A = pd.DataFrame(NEU_kPCA_Reconstruction)
+B = pd.DataFrame(X_train.T)
+train_results = B.to_numpy()-A.to_numpy()
+### MSE
+train_results_MSE = train_results**2
+train_results_MSE_vect = np.mean(train_results_MSE,axis=1)
+NEU_kPCA_Reconstruction_train_results_MSE = np.mean(train_results_MSE_vect)
+### MAE
+train_results_MAE = np.abs(train_results)
+train_results_MAE_vect = np.mean(train_results_MAE,axis=1)
+NEU_kPCA_Reconstruction_train_results_MAE = np.mean(train_results_MAE_vect)
+
+
+# Errors (Test): One step ahead prediction errors
+A = pd.DataFrame(NEU_kPCA_Reconstruction).iloc[1:]
+B = pd.DataFrame(X_train.T).iloc[:-1]
+test_results = B.to_numpy()-A.to_numpy()
+### MSE
+test_results_MSE = test_results**2
+test_results_MSE_vect = np.mean(test_results_MSE,axis=1)
+NEU_kPCA_Reconstruction_test_results_MSE = np.mean(test_results_MSE_vect)
+### MAE
+test_results_MAE = np.abs(test_results)
+test_results_MAE_vect = np.mean(test_results_MAE,axis=1)
+NEU_kPCA_Reconstruction_test_results_MAE = np.mean(test_results_MAE_vect)
+
+
+# Formatting
+## Train
+NEU_kPCA_Reconstruction_Results_train = pd.DataFrame([{'MAE':NEU_kPCA_Reconstruction_train_results_MAE,
+                                                 'MSE':NEU_kPCA_Reconstruction_train_results_MSE}],index=['NEU-kPCA'])
+## Test
+NEU_kPCA_Reconstruction_Results_test = pd.DataFrame([{'MAE':NEU_kPCA_Reconstruction_test_results_MAE,
+                                                'MSE':NEU_kPCA_Reconstruction_test_results_MSE}],index=['NEU-kPCA'])
+
+
+# Update
+Performance_Results_train = pd.concat([Performance_Results_train,NEU_kPCA_Reconstruction_Results_train],axis=0)
+Performance_Results_test = pd.concat([Performance_Results_test,NEU_kPCA_Reconstruction_Results_test],axis=0)
 
 
 # Save Results #
@@ -815,7 +769,7 @@ Performance_Results_test.to_latex('outputs/tables/Fin_Performance_test.txt')
 
 # ### Factors
 
-# In[ ]:
+# In[25]:
 
 
 plt.plot(AE_Factors_train)
@@ -825,7 +779,7 @@ plt.plot(AE_Factors_train)
 
 # #### Testing Results
 
-# In[ ]:
+# In[103]:
 
 
 print(np.round(Performance_Results_test,4))
@@ -834,7 +788,7 @@ Performance_Results_test
 
 # #### Training Results
 
-# In[ ]:
+# In[104]:
 
 
 print(np.round(Performance_Results_train,4))
