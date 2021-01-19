@@ -3,6 +3,5 @@
 {} &      MAE &        MSE \\
 \midrule
 PCA &  2.93338 &  13.557278 \\
-AE  &  2.93338 &  13.557278 \\
 \bottomrule
 \end{tabular}
