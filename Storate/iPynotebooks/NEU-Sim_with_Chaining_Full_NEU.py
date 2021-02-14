@@ -1,46 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # NEU-Regressors
-
-# ---
-# ## Outline of NEU:
-# 
-# ---
-# 
-# Get Training and Validation Sets: $\{x_n\}_{n\leq N} \to \{x_{n,t}\}_{n\leq N_1}, \{x_{n,v}\}_{n\leq N_2}$
-# 
-# 1. Learn Feature Map:
-#  For $i\leq \#$ of segment do:
-#   - Train new feature map segment: $ \hat{\phi} \in \operatorname{argmin}_{\phi \in \operatorname{NN}_{\star:d;J} }
-#    \sum_{n\leq N} w_n^{\star,\lambda}\,
-#    L\left(f(x_n),A\phi\circ \hat{\phi}_i(x_n)+b,x_n\right) + P(A\phi\circ \hat{\phi}_i+b)$,
-#   - Update feature map: $\phi_{i+1} = \hat{\phi}\circ \hat{\phi}_i$,
-#   - Learn on Affine Model on partial training data: with current feature map: $\hat{A}_i,\hat{b}_i \in \operatorname{argmin}_{A,b}
-#    \sum_{n\leq N} w_n^{\star,\lambda}\,
-#    L\left(f(x_n),A\hat{\phi}_i(x_n)+b,x_n\right) + P(A\hat{\phi}_i+b)$, 
-# 2. Cross-Validate Feature Map Depth:  
-#   - Pick Depth $\hat{I}$ with best validation-error
-#   
-# 3. Get full Model with NEU-Feature Map:
-# 
-#   - $ \hat{f}^{NEU} \in \operatorname{argmin}_{\hat{f} \in \mathcal{F}}
-#    \sum_{n\leq N} w_n^{\star,\lambda}\,
-#    L\left(f(x_n),\hat{f}\circ \hat{\phi}_{\hat{I}}(x_n)+b,x_n\right) + P(\hat{f}\circ \hat{\phi}_{\hat{I}})$.
-#    
-# **Return:** $\hat{f}^{NEU}$.
-# 
-# ---
-# ---
-# ---
-
-# # What this script does?
-# - Train NEU using different common regression models
-# - Evaluate against benchmarks
-# 
-# 
-# All this is done on synthetic data generated from the following types of functions:
-
 # ### Functions from the paper:
 #  - 1) $\min\{\exp(\frac{-1}{(1+x)^2}),x+\cos(x)\}$. Reason: Evaluate performance for pasted functions and general badness.
 #  - 2) $\cos(\exp(-x))$.  Reason: Evaluate performance for non-periodic osculations.
@@ -81,11 +41,10 @@ random.seed(2020)
 
 
 # When generating data...you may use one of the following options:
-# - For evaluating non-localy patterns: **"nonlocality"**
-# - For evaluating model performance when faced with non-stationary osculatory behaviour: **"oscilatory"**
-# - For evaluating jump-type performance when faced with a discontinuity: **"jumpdiscontinuity"**
-# - For pattern which looks like noise/highly fractal-like/low Hölder regularity: **"rough"**
-# - For fun/debugging/sanity checking: **"the_nightmare"**
+# - For evaluating non-localy patterns: "nonlocality"
+# - For evaluating model performance when faced with non-stationary osculatory behaviour: "oscilatory"
+# - For evaluating jump-type performance when faced with a discontinuity: "jumpdiscontinuity"
+# - For fun/debugging/sanity checking: "the_nightmare"
 
 # In[3]:
 
@@ -214,13 +173,13 @@ NEU_OLS_test_nochain = NEU_lin_reg_nochain.predict(data_x_featured_test)
 
 Chaining_internalheight_per_block = NEU_best_params['feature_map_height']
 Chaining_epochs_per_block = int(np.maximum(25,NEU_best_params['epochs']/N_chains))
-Chaining_learning_rate_per_block = np.minimum(np.maximum(NEU_best_params['learning_rate']/N_chains,(10**(-8))),10**(-5))
+Chaining_learning_rate_per_block = np.maximum(NEU_best_params['learning_rate']/N_chains,(10**(-6)))
 Chaining_batchsize_per_block = NEU_best_params['batch_size']
 Chaining_output_dimension = NEU_best_params['output_dim']
 Feature_block_depth = int(np.maximum(5,NEU_best_params['feature_map_depth']))
 
 
-# In[8]:
+# In[39]:
 
 
 #----------------------#
@@ -298,7 +257,7 @@ for i_current_chain in range(N_chains):
     print("=======================================================================")
     print("Completed " +str(i_current_chain)+"^th Feature Map Construction Step!")
     print("=======================================================================")
-    print("Proportion of chains remaining: " +str(np.round(1-(i_current_chain+1)/N_chains,4)) + "...")
+    print("Proportion of chains remaining: " +str(1-(i_current_chain+1)/N_chains) + "...")
     print("=======================================================================")
 
 # Update Feature Map with "Best"
@@ -845,7 +804,7 @@ plt.plot(np.array(data_x_test_raw).reshape(-1,),ffNN_y_hat_test, color = 'blue',
 # NEU-Model(s) #
 #--------------#
 # Plot NEU-OLS
-plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_OLS_y_hat_test_FC, color = 'c',label='NEU_OLS')
+plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_OLS_y_hat_test, color = 'c',label='NEU_OLS')
 # Plot NEU-GBRF:
 plt.plot(np.array(data_x_test_raw).reshape(-1,),NEU_GBRF_y_hat_test, color = 'forestgreen',label='NEU-GBRF')
 # NEU-Kernel Ridge Regressor
@@ -985,7 +944,7 @@ test_performance
 
 # ## About the NEU-Feature Map
 
-# In[38]:
+# In[40]:
 
 
 NEU_Feature_Map_w_Chaining
