@@ -11,6 +11,17 @@ Volume: 22
 Available online at:
 https://arxiv.org/pdf/1809.00082.pdf
 
+Cite:
+@article{kratsios2021neu,
+  title={NEU: A Meta-Algorithm for Universal UAP-Invariant Feature Representation},
+  author={Kratsios, Anastasis and Hyndman, Cody},
+  journal={Journal of Machine Learning Research},
+  volume={22},
+  pages={1-51},
+  year={2021}
+}
+
+
 
 
 ## What does the code do?
