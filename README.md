@@ -5,6 +5,9 @@ NEU: A Meta-Algorithm for Universal UAP-Invariant Feature Representation
 
 by: A. Kratsios and C. Hyndman
 
+Published: Journal of Machine Learning Research (2021)
+Volume: 22
+
 Available online at:
 https://arxiv.org/pdf/1809.00082.pdf
 
