@@ -7,20 +7,23 @@ by: A. Kratsios and C. Hyndman
 
 Published: Journal of Machine Learning Research (2021)
 Volume: 22
+Pages: 1-52
 
 Available online at:
-https://arxiv.org/pdf/1809.00082.pdf
+https://jmlr.org/papers/v22/18-803.html
 
 # Cite as:
 
-    @article{kratsios2021neu,
-             title={NEU: A Meta-Algorithm for Universal UAP-Invariant Feature Representation},
-             author={Kratsios, Anastasis and Hyndman, Cody},
-             journal={Journal of Machine Learning Research},
-             volume={22},
-             pages={1-51},
-             year={2021},
-             }
+    @article{JMLR:v22:18-803,
+             author  = {Anastasis Kratsios and Cody Hyndman},
+             title   = {NEU: A Meta-Algorithm for Universal UAP-Invariant Feature Representation},
+             journal = {Journal of Machine Learning Research},
+             year    = {2021},
+             volume  = {22},
+             number  = {92},
+             pages   = {1-51},
+             url     = {http://jmlr.org/papers/v22/18-803.html}
+            }
 
 
 
